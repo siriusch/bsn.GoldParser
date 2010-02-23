@@ -302,15 +302,15 @@ namespace bsn.GoldParser {
 					elementPosition = ElementPosition.End;
 					return true;
 				case ElementPosition.End:
-					while (stack.Count > 0) {
+					if (stack.Count > 0) {
 						KeyValuePair<Token, int> pair = stack.Pop();
 						current = pair.Key;
 						if (pair.Value < (current.Children.Length-1)) {
 							current = current.Children[pair.Value+1];
 							stack.Push(new KeyValuePair<Token, int>(pair.Key, pair.Value+1));
 							elementPosition = ElementPosition.Start;
-							return true;
 						}
+						return true;
 					}
 					readState = ReadState.EndOfFile;
 					break;
