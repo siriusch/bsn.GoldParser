@@ -249,7 +249,10 @@ namespace bsn.GoldParser {
 		}
 
 		public override bool MoveToNextAttribute() {
-			if (activeAttribute == ActiveAttribute.Line) {
+			switch (activeAttribute) {
+			case ActiveAttribute.None:
+				return MoveToFirstAttribute();
+			case ActiveAttribute.Line:
 				activeAttribute = ActiveAttribute.Column;
 				onAttributeValue = false;
 				return true;
