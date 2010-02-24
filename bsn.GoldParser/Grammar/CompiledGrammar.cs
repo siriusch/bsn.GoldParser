@@ -2,9 +2,6 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Text;
-using System.Text.RegularExpressions;
-
-using bsn.GoldParser.Parser;
 
 namespace bsn.GoldParser.Grammar {
 	/// <summary>
@@ -55,8 +52,6 @@ namespace bsn.GoldParser.Grammar {
 		/// Identifies Gold parser grammar file.
 		/// </summary>
 		public const string FileHeader = "GOLD Parser Tables/v1.0";
-
-		private static readonly Regex rxNonTerminal = new Regex(@"(?<=^\<)[^\>]+(?=\>$)", RegexOptions.CultureInvariant|RegexOptions.ExplicitCapture);
 
 		public static bool CanContinueParsing(ParseMessage message) {
 			switch (message) {
@@ -111,7 +106,7 @@ namespace bsn.GoldParser.Grammar {
 				return Load(stream);
 			}
 		}
-		
+
 		private readonly BinaryReader reader; // Source of the grammar    
 
 		// Grammar header information

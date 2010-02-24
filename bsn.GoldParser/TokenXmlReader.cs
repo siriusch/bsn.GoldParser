@@ -32,7 +32,9 @@ namespace bsn.GoldParser {
 			lineAttribute = this.nametable.Add("line");
 			columnAttribute = this.nametable.Add("column");
 			readState = ReadState.Initial;
-			current = root;
+			if ((root != null) && (root.ParentSymbol != null)) {
+				current = root;
+			}
 		}
 
 		public override XmlNodeType NodeType {
