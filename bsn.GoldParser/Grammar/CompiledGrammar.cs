@@ -1,4 +1,3 @@
-// (C) 2010 Arsène von Wyss / bsn
 using System;
 using System.IO;
 using System.Reflection;
@@ -296,12 +295,12 @@ namespace bsn.GoldParser.Grammar {
 			foreach (Symbol symbol in symbolTable) {
 				if (symbolName == symbol.Name) {
 					switch (symbol.Kind) {
-					case SymbolKind.Terminal:
+					case SymbolType.Terminal:
 						if (terminal) {
 							return symbol;
 						}
 						break;
-					case SymbolKind.NonTerminal:
+					case SymbolType.NonTerminal:
 						if (!terminal) {
 							return symbol;
 						}
@@ -646,14 +645,14 @@ namespace bsn.GoldParser.Grammar {
 		private void ReadSymbols() {
 			int index = ReadInt16Entry();
 			string name = ReadStringEntry();
-			SymbolKind symbolKind = (SymbolKind)ReadInt16Entry();
-			Symbol symbol = new Symbol(this, index, name, symbolKind);
-			switch (symbolKind) {
-			case SymbolKind.Error:
+			SymbolType symbolType = (SymbolType)ReadInt16Entry();
+			Symbol symbol = new Symbol(this, index, name, symbolType);
+			switch (symbolType) {
+			case SymbolType.Error:
 				errorSymbol = symbol;
 				break;
 
-			case SymbolKind.End:
+			case SymbolType.End:
 				endSymbol = symbol;
 				break;
 			}
