@@ -85,9 +85,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Parser\ITokenizer.cs" />
-    <Compile Include="Parser\Tokenizer.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs">
+    <Compile Include="AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Parser\CharBuffer.cs" />
@@ -116,7 +114,7 @@
     <Compile Include="Grammar\ParseMessage.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Parser\LalrProcessor.cs">
+    <Compile Include="Parser\GrammarParser.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Parser\LineInfo.cs" />

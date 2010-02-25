@@ -173,7 +173,7 @@ namespace bsn.GoldParser.Grammar {
 			}
 			this.head = head;
 			this.symbols = symbols;
-			isOneNonTerminal = (symbols.Length == 1) && (symbols[0].Kind == SymbolType.NonTerminal);
+			isOneNonTerminal = (symbols.Length == 1) && (symbols[0].Kind == SymbolKind.NonTerminal);
 		}
 	}
 }

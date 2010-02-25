@@ -40,7 +40,6 @@ namespace bsn.GoldParser.Xml {
 		/// The XML namespace used for nonterminal symbol token elements.
 		/// </summary>
 		public const string NonterminalNS = "urn:nonterminal";
-
 		/// <summary>
 		/// The XML namespace used for terminal symbol token elements.
 		/// </summary>

@@ -1,6 +1,7 @@
 // (C) 2010 Arsène von Wyss / bsn
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 
@@ -144,26 +145,18 @@ namespace bsn.GoldParser.Parser {
 		/// <summary>
 		/// Gets array of expected token symbols.
 		/// </summary>
-		public Symbol[] GetExpectedTokens() {
-#warning implement on-demand getting
-			/*
-			//=== Syntax Error! Fill Expected Tokens
-			expectedTokens = new Symbol[lrState.ActionCount];
+		public ReadOnlyCollection<Symbol> GetExpectedTokens() {
+			List<Symbol> expectedTokens = new List<Symbol>(currentLalrState.ActionCount);
 			int length = 0;
-			for (int i = 0; i < lrState.ActionCount; i++) {
-				switch (lrState.GetAction(i).Symbol.SymbolType) {
-				case SymbolType.Terminal:
-				case SymbolType.End:
-					expectedTokens[length++] = lrState.GetAction(i).Symbol;
+			for (int i = 0; i < currentLalrState.ActionCount; i++) {
+				switch (currentLalrState.GetAction(i).Symbol.Kind) {
+				case SymbolKind.Terminal:
+				case SymbolKind.End:
+					expectedTokens.Add(currentLalrState.GetAction(i).Symbol);
 					break;
 				}
 			}
-			if (length < expectedTokens.Length) {
-				Symbol[] newArray = new Symbol[length];
-				Array.Copy(expectedTokens, newArray, length);
-				expectedTokens = newArray;
-			} */
-			return new Symbol[0];
+			return expectedTokens.AsReadOnly();
 		}
 
 		/// <summary>
@@ -175,27 +168,23 @@ namespace bsn.GoldParser.Parser {
 				TextToken inputToken;
 				if (currentToken == null) {
 					//We must read a token
-					inputToken = RetrieveToken();
-					//					Debug.WriteLine(string.Format("State: {0} Line: {1}, Column: {2}, Parse Value: {3}, Token Type: {4}", currentLalrState.Index, inputToken.LineNumber, inputToken.LinePosition, inputToken.Text, inputToken.ParentSymbol.Name), "Token Read");
-					switch (inputToken.ParentSymbol.Kind) {
-					case SymbolType.Error:
-						return ParseMessage.LexicalError;
-					case SymbolType.End:
-						break;
-					default:
+					ParseMessage message;
+					inputToken = RetrieveToken(out message);
+					//					Debug.WriteLine(string.Format("State: {0} Line: {1}, Column: {2}, Parse Value: {3}, Token Type: {4}", currentLalrState.Index, inputToken.Line, inputToken.LinePosition, inputToken.Text, inputToken.ParentSymbol.Name), "Token Read");
+					if (inputToken.ParentSymbol.Kind != SymbolKind.End) {
 						currentToken = inputToken;
-						return ParseMessage.TokenRead;
+						return message;
 					}
 				} else {
 					inputToken = currentToken;
 				}
 				switch (inputToken.ParentSymbol.Kind) {
-				case SymbolType.WhiteSpace:
-				case SymbolType.CommentStart:
-				case SymbolType.CommentLine:
+				case SymbolKind.WhiteSpace:
+				case SymbolKind.CommentStart:
+				case SymbolKind.CommentLine:
 					currentToken = null;
 					break;
-				case SymbolType.Error:
+				case SymbolKind.Error:
 					return ParseMessage.LexicalError;
 				default:
 					LalrAction action = currentLalrState.GetActionBySymbol(inputToken.ParentSymbol);
@@ -227,9 +216,10 @@ namespace bsn.GoldParser.Parser {
 		/// Reads next token from the input stream.
 		/// </summary>
 		/// <returns>Token symbol which was read.</returns>
-		private TextToken RetrieveToken() {
+		private TextToken RetrieveToken(out ParseMessage message) {
 			using (CharBuffer.Mark mark = buffer.CreateMark()) {
 				using (CharBuffer.Mark acceptMark = buffer.CreateMark()) {
+					LineInfo tokenPosition = new LineInfo(lineNumber, linePosition);
 					List<int> lineBreakPositions = null;
 					Symbol tokenSymbol = null;
 					DfaState dfaState = grammar.DfaInitialState;
@@ -274,34 +264,40 @@ namespace bsn.GoldParser.Parser {
 						tokenSymbol = grammar.EndSymbol;
 					}
 					switch (tokenSymbol.Kind) {
-					case SymbolType.CommentLine:
+					case SymbolKind.CommentLine:
 						while (buffer.TryReadChar(out ch) && (ch != '\r') && (ch != '\n')) {}
 						if ((ch == '\r') || (ch == '\n')) {
 							buffer.StepBack(1);
 						}
+						message = ParseMessage.CommentLineRead;
 						break;
-					case SymbolType.CommentStart:
-						SymbolType kind;
+					case SymbolKind.CommentStart:
+						SymbolKind kind;
 						do {
-							kind = RetrieveToken().ParentSymbol.Kind;
-						} while ((kind != SymbolType.End) && (kind != SymbolType.Error) && (kind != SymbolType.CommentEnd));
+							kind = RetrieveToken(out message).ParentSymbol.Kind;
+						} while ((kind != SymbolKind.End) && (kind != SymbolKind.Error) && (kind != SymbolKind.CommentEnd));
+						message = (kind == SymbolKind.CommentEnd) ? ParseMessage.CommentBlockRead : ParseMessage.CommentError;
+						break;
+					case SymbolKind.Error:
+						message = ParseMessage.LexicalError;
 						break;
 					default:
 						buffer.MoveToMark(acceptMark);
+						message = ParseMessage.TokenRead;
 						break;
 					}
-					LineInfo tokenPosition = new LineInfo(lineNumber, linePosition);
 					bool updateLine = true;
 					if (lineBreakPositions != null) {
 						foreach (int lineBreakPosition in lineBreakPositions) {
 							if (lineBreakPosition <= buffer.Position) {
 								lineNumber++;
-								linePosition = buffer.Position-lineBreakPosition+1;
+								linePosition = (buffer.Position-lineBreakPosition)+1;
 								updateLine = false;
 							}
 						}
 					}
 					if (updateLine) {
+						// no linebreak was encountered, so we need to move the column
 						linePosition += mark.Distance;
 					}
 					return new TextToken(tokenSymbol, mark.Text, tokenPosition);
