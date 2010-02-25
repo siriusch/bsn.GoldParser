@@ -1,4 +1,5 @@
-﻿using System;
+﻿// (C) 2010 Arsène von Wyss / bsn
+using System;
 using System.Collections.Generic;
 using System.Xml;
 
@@ -37,25 +38,51 @@ namespace bsn.GoldParser {
 			}
 		}
 
-		public override XmlNodeType NodeType {
+		public override int AttributeCount {
 			get {
-				if (onAttributeValue) {
-					return XmlNodeType.Text;
-				}
-				if (activeAttribute != ActiveAttribute.None) {
-					return XmlNodeType.Attribute;
-				}
+				return IsTerminal ? 2 : 0;
+			}
+		}
+
+		public override string BaseURI {
+			get {
+				return string.Empty;
+			}
+		}
+
+		public override int Depth {
+			get {
+				int result = stack.Count;
 				if (current != null) {
-					switch (elementPosition) {
-					case ElementPosition.Start:
-						return XmlNodeType.Element;
-					case ElementPosition.Text:
-						return XmlNodeType.Text;
-					case ElementPosition.End:
-						return XmlNodeType.EndElement;
+					result++;
+					if (activeAttribute != ActiveAttribute.None) {
+						result++;
+						if (onAttributeValue) {
+							result++;
+						}
+					} else if (elementPosition == ElementPosition.Text) {
+						result++;
 					}
 				}
-				return XmlNodeType.None;
+				return result;
+			}
+		}
+
+		public override bool EOF {
+			get {
+				return (ReadState == ReadState.EndOfFile);
+			}
+		}
+
+		public override bool HasValue {
+			get {
+				return (activeAttribute != ActiveAttribute.None) || IsTerminal;
+			}
+		}
+
+		public override bool IsEmptyElement {
+			get {
+				return false;
 			}
 		}
 
@@ -91,6 +118,34 @@ namespace bsn.GoldParser {
 			}
 		}
 
+		public override XmlNameTable NameTable {
+			get {
+				return nametable;
+			}
+		}
+
+		public override XmlNodeType NodeType {
+			get {
+				if (onAttributeValue) {
+					return XmlNodeType.Text;
+				}
+				if (activeAttribute != ActiveAttribute.None) {
+					return XmlNodeType.Attribute;
+				}
+				if (current != null) {
+					switch (elementPosition) {
+					case ElementPosition.Start:
+						return XmlNodeType.Element;
+					case ElementPosition.Text:
+						return XmlNodeType.Text;
+					case ElementPosition.End:
+						return XmlNodeType.EndElement;
+					}
+				}
+				return XmlNodeType.None;
+			}
+		}
+
 		public override string Prefix {
 			get {
 				if ((activeAttribute == ActiveAttribute.None) && (current != null) && (elementPosition != ElementPosition.Text)) {
@@ -100,9 +155,9 @@ namespace bsn.GoldParser {
 			}
 		}
 
-		public override bool HasValue {
+		public override ReadState ReadState {
 			get {
-				return (activeAttribute != ActiveAttribute.None) || IsTerminal;
+				return readState;
 			}
 		}
 
@@ -123,63 +178,9 @@ namespace bsn.GoldParser {
 			}
 		}
 
-		public override int Depth {
-			get {
-				int result = stack.Count;
-				if (current != null) {
-					result++;
-					if (activeAttribute != ActiveAttribute.None) {
-						result++;
-						if (onAttributeValue) {
-							result++;
-						}
-					} else if (elementPosition == ElementPosition.Text) {
-						result++;
-					}
-				}
-				return result;
-			}
-		}
-
-		public override string BaseURI {
-			get {
-				return string.Empty;
-			}
-		}
-
-		public override bool IsEmptyElement {
-			get {
-				return false;
-			}
-		}
-
 		private bool IsTerminal {
 			get {
 				return current is TextToken;
-			}
-		}
-
-		public override int AttributeCount {
-			get {
-				return IsTerminal ? 2 : 0;
-			}
-		}
-
-		public override bool EOF {
-			get {
-				return (ReadState == ReadState.EndOfFile);
-			}
-		}
-
-		public override ReadState ReadState {
-			get {
-				return readState;
-			}
-		}
-
-		public override XmlNameTable NameTable {
-			get {
-				return nametable;
 			}
 		}
 
