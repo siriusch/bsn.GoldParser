@@ -13,11 +13,11 @@ namespace bsn.GoldParser.Grammar {
 	/// tokens - such as identifiers) or nonterminals (which represent 
 	/// the rules and structures of the grammar).  Terminal symbols fall 
 	/// into several categories for use by the GOLD Parser Engine 
-	/// which are enumerated in <c>SymbolType</c> enumeration.
+	/// which are enumerated in <c>SymbolKind</c> enumeration.
 	/// </remarks>
 	public class Symbol: GrammarObject {
 		private const string QuotedChars = "|-+*?()[]{}<>!";
-		private static readonly Regex rxXml = new Regex(@"\W+");
+		private static readonly Regex rxXml = new Regex(@"(^[^:_a-z]|(?<!^)[^:_a-z0-9\-\.])+", RegexOptions.CultureInvariant|RegexOptions.IgnoreCase|RegexOptions.ExplicitCapture);
 
 		private static string FormatTerminalSymbol(string source) {
 			StringBuilder result = new StringBuilder();
@@ -38,7 +38,7 @@ namespace bsn.GoldParser.Grammar {
 			return (QuotedChars.IndexOf(value) >= 0);
 		}
 
-		private readonly SymbolType kind; // type of the symbol
+		private readonly SymbolKind kind; // type of the symbol
 		private readonly string name; // name of the symbol
 		private string text; // printable representation of symbol
 		private string xmlName;
@@ -49,7 +49,7 @@ namespace bsn.GoldParser.Grammar {
 		/// <param name="index">Symbol index in symbol table.</param>
 		/// <param name="name">Name of the symbol.</param>
 		/// <param name="kind">Type of the symbol.</param>
-		internal Symbol(CompiledGrammar owner, int index, string name, SymbolType kind): base(owner, index) {
+		internal Symbol(CompiledGrammar owner, int index, string name, SymbolKind kind): base(owner, index) {
 			this.name = name;
 			this.kind = kind;
 		}
@@ -58,7 +58,7 @@ namespace bsn.GoldParser.Grammar {
 		/// Returns an enumerated data type that denotes
 		/// the class of symbols that the object belongs to.
 		/// </summary>
-		public SymbolType Kind {
+		public SymbolKind Kind {
 			get {
 				return kind;
 			}
@@ -99,10 +99,10 @@ namespace bsn.GoldParser.Grammar {
 		public override string ToString() {
 			if (text == null) {
 				switch (Kind) {
-				case SymbolType.NonTerminal:
+				case SymbolKind.NonTerminal:
 					text = '<'+Name+'>';
 					break;
-				case SymbolType.Terminal:
+				case SymbolKind.Terminal:
 					text = FormatTerminalSymbol(Name);
 					break;
 				default:

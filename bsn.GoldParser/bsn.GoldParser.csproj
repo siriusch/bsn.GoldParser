@@ -28,6 +28,9 @@
     <OldToolsVersion>2.0</OldToolsVersion>
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <TargetFrameworkSubset>
+    </TargetFrameworkSubset>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <OutputPath>..\..\Bin\</OutputPath>
@@ -122,13 +125,16 @@
     <Compile Include="Grammar\Symbol.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Grammar\SymbolType.cs">
+    <Compile Include="Grammar\SymbolKind.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Parser\TextToken.cs" />
     <Compile Include="Parser\Token.cs" />
     <Compile Include="Parser\TokenParseResult.cs" />
-    <Compile Include="TokenXmlReader.cs" />
+    <Compile Include="Xml\GrammarXmlProcessor.cs" />
+    <Compile Include="Xml\ProcessResult.cs" />
+    <Compile Include="Xml\TokenXmlReader.cs" />
+    <None Include="app.config" />
     <None Include="Grammar\GoldParser.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

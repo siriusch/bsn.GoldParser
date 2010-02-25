@@ -9,7 +9,7 @@ namespace bsn.GoldParser.Grammar {
 		/// <summary>
 		/// Nothing
 		/// </summary>
-		Empty = 0,
+		None = 0,
 
 		/// <summary>
 		/// Each time a token is read, this message is generated.
@@ -31,12 +31,6 @@ namespace bsn.GoldParser.Grammar {
 		/// In other words, the source text was successfully analyzed.
 		/// </summary>
 		Accept = 3,
-
-		/// <summary>
-		/// Before any parsing can take place,
-		/// a Compiled Grammar Table file must be loaded.
-		/// </summary>
-		NotLoadedError = 4,
 
 		/// <summary>
 		/// The tokenizer will generate this message when

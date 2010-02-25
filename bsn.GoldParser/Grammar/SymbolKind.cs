@@ -5,7 +5,7 @@ namespace bsn.GoldParser.Grammar {
 	/// <summary>
 	/// Type of symbol.
 	/// </summary>
-	public enum SymbolType {
+	public enum SymbolKind {
 		/// <summary>
 		/// Normal nonterminal
 		/// </summary>

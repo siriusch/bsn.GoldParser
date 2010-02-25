@@ -296,12 +296,12 @@ namespace bsn.GoldParser.Grammar {
 			foreach (Symbol symbol in symbolTable) {
 				if (symbolName == symbol.Name) {
 					switch (symbol.Kind) {
-					case SymbolType.Terminal:
+					case SymbolKind.Terminal:
 						if (terminal) {
 							return symbol;
 						}
 						break;
-					case SymbolType.NonTerminal:
+					case SymbolKind.NonTerminal:
 						if (!terminal) {
 							return symbol;
 						}
@@ -646,14 +646,14 @@ namespace bsn.GoldParser.Grammar {
 		private void ReadSymbols() {
 			int index = ReadInt16Entry();
 			string name = ReadStringEntry();
-			SymbolType symbolType = (SymbolType)ReadInt16Entry();
-			Symbol symbol = new Symbol(this, index, name, symbolType);
-			switch (symbolType) {
-			case SymbolType.Error:
+			SymbolKind symbolKind = (SymbolKind)ReadInt16Entry();
+			Symbol symbol = new Symbol(this, index, name, symbolKind);
+			switch (symbolKind) {
+			case SymbolKind.Error:
 				errorSymbol = symbol;
 				break;
 
-			case SymbolType.End:
+			case SymbolKind.End:
 				endSymbol = symbol;
 				break;
 			}
