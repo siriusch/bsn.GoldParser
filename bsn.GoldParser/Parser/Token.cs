@@ -1,6 +1,5 @@
+// (C) 2010 Arsène von Wyss / bsn
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 using bsn.GoldParser.Grammar;
 
@@ -11,14 +10,10 @@ namespace bsn.GoldParser.Parser {
 	public abstract class Token {
 		private LalrState state;
 
-		protected Token() {}
-
-		/// <summary>
-		/// Gets the line number where this token begins.
-		/// </summary>
-		/// <value>The line number and position.</value>
-		public abstract LineInfo Position {
-			get;
+		public virtual Token[] Children {
+			get {
+				return new Token[0];
+			}
 		}
 
 		/// <summary>
@@ -29,24 +24,26 @@ namespace bsn.GoldParser.Parser {
 			get;
 		}
 
+		/// <summary>
+		/// Gets the line number where this token begins.
+		/// </summary>
+		/// <value>The line number and position.</value>
+		public abstract LineInfo Position {
+			get;
+		}
+
+		public virtual string Text {
+			get {
+				return string.Empty;
+			}
+		}
+
 		internal LalrState State {
 			get {
 				return state;
 			}
 			set {
 				state = value;
-			}
-		}
-		
-		public virtual string Text {
-			get {
-				return string.Empty;
-			}
-		}
-		
-		public virtual Token[] Children {
-			get {
-				return new Token[0];
 			}
 		}
 	}

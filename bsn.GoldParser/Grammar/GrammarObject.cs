@@ -1,4 +1,5 @@
-﻿using System;
+﻿// (C) 2010 Arsène von Wyss / bsn
+using System;
 
 namespace bsn.GoldParser.Grammar {
 	public abstract class GrammarObject {

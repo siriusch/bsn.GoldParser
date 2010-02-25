@@ -1,3 +1,4 @@
+// (C) 2010 Arsène von Wyss / bsn
 using bsn.GoldParser.Parser;
 
 namespace bsn.GoldParser.Grammar {

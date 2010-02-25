@@ -1,3 +1,4 @@
+// (C) 2010 Arsène von Wyss / bsn
 namespace bsn.GoldParser.Grammar {
 	internal class LalrActionGoto: LalrActionWithLalrState {
 		public LalrActionGoto(int index, Symbol symbol, LalrState state): base(index, symbol, state) {}

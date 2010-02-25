@@ -1,3 +1,4 @@
+// (C) 2010 Arsène von Wyss / bsn
 using System;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -17,6 +18,25 @@ namespace bsn.GoldParser.Grammar {
 	public class Symbol: GrammarObject {
 		private const string QuotedChars = "|-+*?()[]{}<>!";
 		private static readonly Regex rxXml = new Regex(@"\W+");
+
+		private static string FormatTerminalSymbol(string source) {
+			StringBuilder result = new StringBuilder();
+			for (int i = 0; i < source.Length; i++) {
+				char ch = source[i];
+				if (ch == '\'') {
+					result.Append("''");
+				} else if (IsQuotedChar(ch) || (ch == '"')) {
+					result.Append(new Char[] {'\'', ch, '\''});
+				} else {
+					result.Append(ch);
+				}
+			}
+			return result.ToString();
+		}
+
+		private static bool IsQuotedChar(char value) {
+			return (QuotedChars.IndexOf(value) >= 0);
+		}
 
 		private readonly SymbolType kind; // type of the symbol
 		private readonly string name; // name of the symbol
@@ -66,25 +86,6 @@ namespace bsn.GoldParser.Grammar {
 				}
 				return xmlName;
 			}
-		}
-
-		private static string FormatTerminalSymbol(string source) {
-			StringBuilder result = new StringBuilder();
-			for (int i = 0; i < source.Length; i++) {
-				char ch = source[i];
-				if (ch == '\'') {
-					result.Append("''");
-				} else if (IsQuotedChar(ch) || (ch == '"')) {
-					result.Append(new Char[] {'\'', ch, '\''});
-				} else {
-					result.Append(ch);
-				}
-			}
-			return result.ToString();
-		}
-
-		private static bool IsQuotedChar(char value) {
-			return (QuotedChars.IndexOf(value) >= 0);
 		}
 
 		/// <summary>

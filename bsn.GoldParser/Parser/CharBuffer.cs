@@ -1,3 +1,4 @@
+// (C) 2010 Arsène von Wyss / bsn
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -87,6 +88,13 @@ namespace bsn.GoldParser.Parser {
 			}
 
 			/// <summary>
+			/// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+			/// </summary>
+			public void Dispose() {
+				Dispose(true);
+			}
+
+			/// <summary>
 			/// Gets the offset between this mark and the other <paramref name="mark"/>.
 			/// </summary>
 			/// <param name="mark">The mark.</param>
@@ -157,13 +165,6 @@ namespace bsn.GoldParser.Parser {
 			internal void Relocate(int offset) {
 				Debug.Assert((offset > 0) && (offset <= index));
 				index -= offset;
-			}
-
-			/// <summary>
-			/// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-			/// </summary>
-			public void Dispose() {
-				Dispose(true);
 			}
 		}
 

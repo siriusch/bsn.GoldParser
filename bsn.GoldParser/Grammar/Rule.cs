@@ -1,3 +1,4 @@
+// (C) 2010 Arsène von Wyss / bsn
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -90,6 +91,46 @@ namespace bsn.GoldParser.Grammar {
 			}
 		}
 
+		IEnumerator<Symbol> IEnumerable<Symbol>.GetEnumerator() {
+			return (IEnumerator<Symbol>)symbols.GetEnumerator();
+		}
+
+		IEnumerator IEnumerable.GetEnumerator() {
+			return symbols.GetEnumerator();
+		}
+
+		void ICollection<Symbol>.Add(Symbol item) {
+			throw new NotSupportedException();
+		}
+
+		void ICollection<Symbol>.Clear() {
+			throw new NotSupportedException();
+		}
+
+		bool ICollection<Symbol>.Contains(Symbol item) {
+			return Array.IndexOf(symbols, item) >= 0;
+		}
+
+		void ICollection<Symbol>.CopyTo(Symbol[] array, int arrayIndex) {
+			symbols.CopyTo(array, Index);
+		}
+
+		bool ICollection<Symbol>.Remove(Symbol item) {
+			throw new NotSupportedException();
+		}
+
+		int ICollection<Symbol>.Count {
+			get {
+				return symbols.Length;
+			}
+		}
+
+		bool ICollection<Symbol>.IsReadOnly {
+			get {
+				return true;
+			}
+		}
+
 		/// <summary>
 		/// Checks if the symbols in this rule match the given symbols.
 		/// </summary>
@@ -133,46 +174,6 @@ namespace bsn.GoldParser.Grammar {
 			this.head = head;
 			this.symbols = symbols;
 			isOneNonTerminal = (symbols.Length == 1) && (symbols[0].Kind == SymbolType.NonTerminal);
-		}
-
-		IEnumerator<Symbol> IEnumerable<Symbol>.GetEnumerator() {
-			return (IEnumerator<Symbol>)symbols.GetEnumerator();
-		}
-
-		IEnumerator IEnumerable.GetEnumerator() {
-			return symbols.GetEnumerator();
-		}
-
-		void ICollection<Symbol>.Add(Symbol item) {
-			throw new NotSupportedException();
-		}
-
-		void ICollection<Symbol>.Clear() {
-			throw new NotSupportedException();
-		}
-
-		bool ICollection<Symbol>.Contains(Symbol item) {
-			return Array.IndexOf(symbols, item) >= 0;
-		}
-
-		void ICollection<Symbol>.CopyTo(Symbol[] array, int arrayIndex) {
-			symbols.CopyTo(array, Index);
-		}
-
-		bool ICollection<Symbol>.Remove(Symbol item) {
-			throw new NotSupportedException();
-		}
-
-		int ICollection<Symbol>.Count {
-			get {
-				return symbols.Length;
-			}
-		}
-
-		bool ICollection<Symbol>.IsReadOnly {
-			get {
-				return true;
-			}
 		}
 	}
 }

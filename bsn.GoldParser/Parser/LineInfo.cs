@@ -1,4 +1,5 @@
-﻿using System;
+﻿// (C) 2010 Arsène von Wyss / bsn
+using System;
 using System.Globalization;
 
 namespace bsn.GoldParser.Parser {
@@ -11,15 +12,15 @@ namespace bsn.GoldParser.Parser {
 			this.column = column;
 		}
 
-		public int Line {
-			get {
-				return line;
-			}
-		}
-
 		public int Column {
 			get {
 				return column;
+			}
+		}
+
+		public int Line {
+			get {
+				return line;
 			}
 		}
 

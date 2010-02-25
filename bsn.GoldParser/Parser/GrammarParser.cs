@@ -1,8 +1,8 @@
+// (C) 2010 Arsène von Wyss / bsn
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Xml;
 
 using bsn.GoldParser.Grammar;
 
@@ -16,15 +16,15 @@ namespace bsn.GoldParser.Parser {
 				State = state;
 			}
 
-			public override LineInfo Position {
-				get {
-					return default(LineInfo);
-				}
-			}
-
 			public override Symbol ParentSymbol {
 				get {
 					return null;
+				}
+			}
+
+			public override LineInfo Position {
+				get {
+					return default(LineInfo);
 				}
 			}
 		}
@@ -32,10 +32,10 @@ namespace bsn.GoldParser.Parser {
 		private readonly CharBuffer buffer; // Buffer to keep current characters.
 		private readonly CompiledGrammar grammar; // Grammar of parsed language.
 		private readonly Stack<Token> lalrTokenStack; // Stack of LR states used for LR parsing.
-		private int linePosition;
-		private int lineNumber;
 		private LalrState currentLalrState;
 		private TextToken currentToken;
+		private int lineNumber;
+		private int linePosition;
 
 		/// <summary>
 		/// Initializes new instance of Parser class.
@@ -105,6 +105,39 @@ namespace bsn.GoldParser.Parser {
 		public TextReader TextReader {
 			get {
 				return buffer.TextReader;
+			}
+		}
+
+		bool IParser.CanTrim(Rule rule) {
+			return false;
+		}
+
+		Token IParser.PopToken() {
+			return lalrTokenStack.Pop();
+		}
+
+		void IParser.PushToken(Token token) {
+			Debug.Assert(token != null);
+			lalrTokenStack.Push(token);
+		}
+
+		Token IParser.CreateReduction(Rule rule) {
+			Debug.Assert(rule != null);
+			Token[] tokens = new Token[rule.SymbolCount];
+			for (int i = tokens.Length-1; i >= 0; i--) {
+				tokens[i] = lalrTokenStack.Pop();
+			}
+			return new Reduction(rule, tokens);
+		}
+
+		void IParser.SetState(LalrState state) {
+			Debug.Assert(state != null);
+			currentLalrState = state;
+		}
+
+		Token IParser.TopToken {
+			get {
+				return lalrTokenStack.Peek();
 			}
 		}
 
@@ -195,7 +228,7 @@ namespace bsn.GoldParser.Parser {
 		/// </summary>
 		/// <returns>Token symbol which was read.</returns>
 		private TextToken RetrieveToken() {
-			using (CharBuffer.Mark mark = buffer.CreateMark())
+			using (CharBuffer.Mark mark = buffer.CreateMark()) {
 				using (CharBuffer.Mark acceptMark = buffer.CreateMark()) {
 					List<int> lineBreakPositions = null;
 					Symbol tokenSymbol = null;
@@ -257,7 +290,7 @@ namespace bsn.GoldParser.Parser {
 						buffer.MoveToMark(acceptMark);
 						break;
 					}
-					var tokenPosition = new LineInfo(lineNumber, linePosition);
+					LineInfo tokenPosition = new LineInfo(lineNumber, linePosition);
 					bool updateLine = true;
 					if (lineBreakPositions != null) {
 						foreach (int lineBreakPosition in lineBreakPositions) {
@@ -267,44 +300,12 @@ namespace bsn.GoldParser.Parser {
 								updateLine = false;
 							}
 						}
-					} 
+					}
 					if (updateLine) {
 						linePosition += mark.Distance;
 					}
 					return new TextToken(tokenSymbol, mark.Text, tokenPosition);
 				}
-		}
-
-		bool IParser.CanTrim(Rule rule) {
-			return false;
-		}
-
-		Token IParser.PopToken() {
-			return lalrTokenStack.Pop();
-		}
-
-		void IParser.PushToken(Token token) {
-			Debug.Assert(token != null);
-			lalrTokenStack.Push(token);
-		}
-
-		Token IParser.CreateReduction(Rule rule) {
-			Debug.Assert(rule != null);
-			Token[] tokens = new Token[rule.SymbolCount];
-			for (int i = tokens.Length-1; i >= 0; i--) {
-				tokens[i] = lalrTokenStack.Pop();
-			}
-			return new Reduction(rule, tokens);
-		}
-
-		void IParser.SetState(LalrState state) {
-			Debug.Assert(state != null);
-			currentLalrState = state;
-		}
-
-		Token IParser.TopToken {
-			get {
-				return lalrTokenStack.Peek();
 			}
 		}
 	}

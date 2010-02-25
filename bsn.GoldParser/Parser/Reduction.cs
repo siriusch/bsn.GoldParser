@@ -1,6 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿// (C) 2010 Arsène von Wyss / bsn
+using System;
 using System.Diagnostics;
 using System.Text;
 
@@ -25,13 +24,6 @@ namespace bsn.GoldParser.Parser {
 			this.tokens = tokens;
 		}
 
-		public override LineInfo Position {
-			[DebuggerStepThrough]
-			get {
-				return tokens.Length > 0 ? tokens[0].Position : default(LineInfo);
-			}
-		}
-
 		public override Token[] Children {
 			[DebuggerStepThrough]
 			get {
@@ -43,6 +35,13 @@ namespace bsn.GoldParser.Parser {
 			[DebuggerStepThrough]
 			get {
 				return parentRule.Head;
+			}
+		}
+
+		public override LineInfo Position {
+			[DebuggerStepThrough]
+			get {
+				return tokens.Length > 0 ? tokens[0].Position : default(LineInfo);
 			}
 		}
 

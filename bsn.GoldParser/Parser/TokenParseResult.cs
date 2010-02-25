@@ -1,10 +1,5 @@
-// $Archive: /Shared/Library2/Sirius2.GoldParser/TokenParseResult.cs $
-// $Revision: 1 $
-// $UTCDate: 2009-02-26 12:23:53Z $
-// $Author: vonwyssa $
-// 
-// (C) Sirius Technologies AG, Basel. - $NoKeywords:  $
-namespace bsn.GoldParser {
+// (C) 2010 Arsène von Wyss / bsn
+namespace bsn.GoldParser.Parser {
 	/// <summary>
 	/// Result of parsing token.
 	/// </summary>

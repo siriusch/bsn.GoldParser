@@ -1,3 +1,4 @@
+// (C) 2010 Arsène von Wyss / bsn
 using System;
 using System.Diagnostics;
 
