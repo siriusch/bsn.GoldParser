@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// (C) 2010 Arsène von Wyss / bsn
+using System;
 using System.IO;
-using System.Reflection;
 using System.Text;
 using System.Xml;
 using System.Xml.Xsl;
@@ -43,8 +42,8 @@ namespace bsn.GoldParser.Xml {
 		}
 
 		private readonly CompiledGrammar grammar;
-		private readonly XslCompiledTransform transform;
 		private readonly XmlNameTable nametable;
+		private readonly XslCompiledTransform transform;
 
 		protected GrammarXmlProcessor(CompiledGrammar grammar, XmlReader transform) {
 			if (grammar == null) {
@@ -70,7 +69,8 @@ namespace bsn.GoldParser.Xml {
 			if (output == null) {
 				throw new ArgumentNullException("output");
 			}
-			GrammarParser parser = new GrammarParser(input, grammar);
+			Tokenizer tokenizer = new Tokenizer(input, grammar.DfaInitialState, grammar.EndSymbol, grammar.EndSymbol);
+			LalrProcessor parser = new LalrProcessor(tokenizer, grammar.InitialLRState);
 			ParseMessage message = parser.Parse();
 			while (CompiledGrammar.CanContinueParsing(message)) {
 				message = parser.Parse();
