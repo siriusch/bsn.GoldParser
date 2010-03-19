@@ -1,24 +1,19 @@
+// (C) 2010 Arsène von Wyss / bsn
 using bsn.GoldParser.Parser;
 
 namespace bsn.GoldParser.Xml {
 	public struct ProcessResult {
-		private readonly LineInfo lineInfo;
 		private readonly string errorMessage;
+		private readonly LineInfo lineInfo;
 
 		internal ProcessResult(LineInfo lineInfo, string errorMessage) {
 			this.lineInfo = lineInfo;
 			this.errorMessage = errorMessage;
 		}
 
-		public bool Success {
+		public int Column {
 			get {
-				return string.IsNullOrEmpty(errorMessage);
-			}
-		}
-
-		public string Message {
-			get {
-				return errorMessage ?? string.Empty;
+				return lineInfo.Column;
 			}
 		}
 
@@ -28,9 +23,15 @@ namespace bsn.GoldParser.Xml {
 			}
 		}
 
-		public int Column {
+		public string Message {
 			get {
-				return lineInfo.Column;
+				return errorMessage ?? string.Empty;
+			}
+		}
+
+		public bool Success {
+			get {
+				return string.IsNullOrEmpty(errorMessage);
 			}
 		}
 
