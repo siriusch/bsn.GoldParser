@@ -6,7 +6,7 @@ using System.IO;
 using bsn.GoldParser.Grammar;
 
 namespace bsn.GoldParser.Parser {
-	public class Tokenizer: ITokenizer, IDisposable {
+	public class Tokenizer: ITokenizer {
 		private readonly CharBuffer buffer; // Buffer to keep current characters.
 		private readonly Symbol endSymbol;
 		private readonly Symbol errorSymbol;
@@ -69,10 +69,6 @@ namespace bsn.GoldParser.Parser {
 			}
 		}
 
-		public void Dispose() {
-			buffer.Dispose();
-		}
-
 		/// <summary>
 		/// Reads next token from the input stream.
 		/// </summary>
@@ -80,6 +76,7 @@ namespace bsn.GoldParser.Parser {
 		public ParseMessage NextToken(out TextToken token) {
 			using (CharBuffer.Mark mark = buffer.CreateMark()) {
 				using (CharBuffer.Mark acceptMark = buffer.CreateMark()) {
+					ParseMessage result = ParseMessage.None;
 					LineInfo tokenPosition = new LineInfo(lineNumber, linePosition);
 					List<int> lineBreakPositions = null;
 					Symbol tokenSymbol = null;
@@ -130,21 +127,21 @@ namespace bsn.GoldParser.Parser {
 						if ((ch == '\r') || (ch == '\n')) {
 							buffer.StepBack(1);
 						}
-						token = ParseMessage.CommentLineRead;
+						result = ParseMessage.CommentLineRead;
 						break;
 					case SymbolKind.CommentStart:
 						SymbolKind kind;
 						do {
-							kind = NextToken(out token).ParentSymbol.Kind;
+							kind = NextToken(out token) != ParseMessage.None ? token.ParentSymbol.Kind : SymbolKind.Error;
 						} while ((kind != SymbolKind.End) && (kind != SymbolKind.Error) && (kind != SymbolKind.CommentEnd));
-						token = (kind == SymbolKind.CommentEnd) ? ParseMessage.CommentBlockRead : ParseMessage.CommentError;
+						result = (kind == SymbolKind.CommentEnd) ? ParseMessage.CommentBlockRead : ParseMessage.CommentError;
 						break;
 					case SymbolKind.Error:
-						token = ParseMessage.LexicalError;
+						result = ParseMessage.LexicalError;
 						break;
 					default:
 						buffer.MoveToMark(acceptMark);
-						token = ParseMessage.TokenRead;
+						result = ParseMessage.TokenRead;
 						break;
 					}
 					bool updateLine = true;
@@ -161,7 +158,8 @@ namespace bsn.GoldParser.Parser {
 						// no linebreak was encountered, so we need to move the column
 						linePosition += mark.Distance;
 					}
-					return new TextToken(tokenSymbol, mark.Text, tokenPosition);
+					token = new TextToken(tokenSymbol, mark.Text, tokenPosition);
+					return result;
 				}
 			}
 		}
