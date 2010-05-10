@@ -22,7 +22,7 @@
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
     <StartupObject>
     </StartupObject>
-    <KeyContainerName>bsn</KeyContainerName>
+    <KeyContainerName>SiriusKey</KeyContainerName>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>2.0</OldToolsVersion>
@@ -31,6 +31,10 @@
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <TargetFrameworkSubset>
     </TargetFrameworkSubset>
+    <SccProjectName>bsn.GoldParser</SccProjectName>
+    <SccLocalPath>2~7ae42090-ad44-48c7-ae1f-54e10fe5ed3d</SccLocalPath>
+    <SccAuxPath>https://www.sirius.ch/VaultService</SccAuxPath>
+    <SccProvider>SourceGear Vault Visual Studio 2005 Client:{1EA47954-8515-402d-82D9-B5C332120A8D}</SccProvider>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <OutputPath>..\..\Bin\</OutputPath>

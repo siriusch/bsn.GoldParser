@@ -3,13 +3,21 @@ using System;
 using System.Globalization;
 
 namespace bsn.GoldParser.Parser {
-	public struct LineInfo {
+	public struct LineInfo: IEquatable<LineInfo>, IComparable<LineInfo> {
 		private readonly int column;
 		private readonly int line;
+		private readonly int index;
 
-		public LineInfo(int line, int column) {
+		public LineInfo(int index, int line, int column) {
 			this.line = line;
+			this.index = index;
 			this.column = column;
+		}
+
+		public int Index {
+			get {
+				return index;
+			}
 		}
 
 		public int Column {
@@ -25,7 +33,7 @@ namespace bsn.GoldParser.Parser {
 		}
 
 		public bool Equals(LineInfo other) {
-			return (other.line == line) && (other.column == column);
+			return (other.line == line) && (other.column == column) && (other.index == column);
 		}
 
 		public override bool Equals(object obj) {
@@ -40,8 +48,12 @@ namespace bsn.GoldParser.Parser {
 
 		public override int GetHashCode() {
 			unchecked {
-				return (line*397)^column;
+				return (line*397)^(column*31)^index;
 			}
+		}
+
+		public int CompareTo(LineInfo other) {
+			return index-other.index;
 		}
 
 		public override string ToString() {

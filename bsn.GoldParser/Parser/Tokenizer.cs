@@ -31,14 +31,11 @@ namespace bsn.GoldParser.Parser {
 			if (endSymbol == null) {
 				throw new ArgumentNullException("endSymbol");
 			}
-			if (errorSymbol == null) {
-				throw new ArgumentNullException("errorSymbol");
-			}
 			buffer = new CharBuffer(textReader);
 			linePosition = 1;
 			lineNumber = 1;
 			this.endSymbol = endSymbol;
-			this.errorSymbol = errorSymbol;
+			this.errorSymbol = errorSymbol ?? endSymbol;
 			this.initialState = initialState;
 		}
 
@@ -61,6 +58,16 @@ namespace bsn.GoldParser.Parser {
 		}
 
 		/// <summary>
+		/// Gets the index of the input.
+		/// </summary>
+		/// <value>The index of the input.</value>
+		public int InputIndex {
+			get {
+				return buffer.Position;
+			}
+		}
+
+		/// <summary>
 		/// Gets source of parsed data.
 		/// </summary>
 		public TextReader TextReader {
@@ -77,7 +84,7 @@ namespace bsn.GoldParser.Parser {
 			using (CharBuffer.Mark mark = buffer.CreateMark()) {
 				using (CharBuffer.Mark acceptMark = buffer.CreateMark()) {
 					ParseMessage result = ParseMessage.None;
-					LineInfo tokenPosition = new LineInfo(lineNumber, linePosition);
+					LineInfo tokenPosition = new LineInfo(InputIndex, lineNumber, linePosition);
 					List<int> lineBreakPositions = null;
 					Symbol tokenSymbol = null;
 					DfaState state = initialState;

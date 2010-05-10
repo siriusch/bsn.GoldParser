@@ -122,7 +122,6 @@ namespace bsn.GoldParser.Grammar {
 		private DfaState[] dfaStateTable; // DFA state table
 		private Symbol endSymbol;
 		private int entryCount; // Number of entries left
-
 		private Symbol errorSymbol;
 		private LalrState[] lalrStateTable; // LR state table
 		private int lrInitialState; // LR initial state
@@ -276,7 +275,7 @@ namespace bsn.GoldParser.Grammar {
 			}
 		}
 
-		internal Symbol ErrorSymbol {
+		public Symbol ErrorSymbol {
 			get {
 				return errorSymbol;
 			}

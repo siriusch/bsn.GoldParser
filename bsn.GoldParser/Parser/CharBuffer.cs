@@ -53,17 +53,6 @@ namespace bsn.GoldParser.Parser {
 			}
 
 			/// <summary>
-			/// Gets the position relative to the beginning of the text data.
-			/// </summary>
-			/// <value>The position.</value>
-			public int Position {
-				get {
-					AssertNotDisposed();
-					return owner.bufferPosition+index;
-				}
-			}
-
-			/// <summary>
 			/// Gets the text between the mark and the current read position of the <see cref="Owner"/>.
 			/// </summary>
 			/// <remarks>The text will be <see cref="Distance"/> characters long.</remarks>
@@ -170,8 +159,8 @@ namespace bsn.GoldParser.Parser {
 
 		private readonly List<Mark> marks = new List<Mark>(10);
 		private readonly TextReader reader;
+		private int charIndex;
 		private char[] buffer = new char[1024];
-		private int bufferPosition;
 		private bool endReached;
 		private int head;
 		private int tail;
@@ -189,26 +178,12 @@ namespace bsn.GoldParser.Parser {
 		}
 
 		/// <summary>
-		/// Gets the <see cref="System.Char"/> st the specified position.
-		/// </summary>
-		/// <remarks>The range of available characters is dynamic. Only by using <see cref="Mark"/>s the availability of characters can be guaranteed.</remarks>
-		public char this[int position] {
-			get {
-				int index = position-bufferPosition;
-				if ((index < 0) || (index >= head)) {
-					throw new ArgumentOutOfRangeException("position");
-				}
-				return buffer[index];
-			}
-		}
-
-		/// <summary>
 		/// Gets the position.
 		/// </summary>
 		/// <value>The position.</value>
 		public int Position {
 			get {
-				return bufferPosition+tail;
+				return charIndex-head+tail;
 			}
 		}
 
@@ -254,10 +229,10 @@ namespace bsn.GoldParser.Parser {
 			if (mark.Index < 0) {
 				throw new ObjectDisposedException("mark");
 			}
-			tail = mark.Index;
-			foreach (Mark item in marks) {
-				Debug.Assert(item.Index <= tail);
+			if (mark.Index > tail) {
+				throw new InvalidOperationException("Forward jump not allowed");
 			}
+			tail = mark.Index;
 		}
 
 		/// <summary>
@@ -313,7 +288,7 @@ namespace bsn.GoldParser.Parser {
 				// the easy case: buffer is empty and we have no mark
 				tail = 0;
 				head = reader.ReadBlock(buffer, 0, buffer.Length);
-				bufferPosition += head;
+				charIndex += head;
 			} else {
 				int tailMark = marks[0].Index;
 				if (tailMark > 0) {
@@ -334,6 +309,7 @@ namespace bsn.GoldParser.Parser {
 				}
 				int read = reader.ReadBlock(buffer, head, buffer.Length-head); // fill buffer
 				head += read;
+				charIndex += read;
 			}
 			return (head > tail);
 		}

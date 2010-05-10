@@ -32,15 +32,25 @@ namespace bsn.GoldParser.Parser {
 
 		private readonly ITokenizer tokenizer;
 		private readonly Stack<Token> tokenStack; // Stack of LR states used for LR parsing.
+		private readonly bool trim;
 		private LalrState currentState;
 		private TextToken currentToken;
 
 		/// <summary>
 		/// Initializes new instance of Parser class.
 		/// </summary>
-		/// <param name="textReader"><see cref="TextReader"/> instance to read data from.</param>
-		/// <param name="grammar">Grammar with parsing tables to parser input stream.</param>
-		public LalrProcessor(ITokenizer tokenizer, LalrState initialLalrState): base() {
+		/// <param name="tokenizer">The tokenizer.</param>
+		/// <param name="initialLalrState">Initial state of the lalr.</param>
+		public LalrProcessor(ITokenizer tokenizer, LalrState initialLalrState) : this(tokenizer, initialLalrState, false) {}
+
+		/// <summary>
+		/// Initializes new instance of Parser class.
+		/// </summary>
+		/// <param name="tokenizer">The tokenizer.</param>
+		/// <param name="initialLalrState">Initial state of the lalr.</param>
+		/// <param name="trim">if set to <c>true</c> [trim].</param>
+		public LalrProcessor(ITokenizer tokenizer, LalrState initialLalrState, bool trim)
+			: base() {
 			if (tokenizer == null) {
 				throw new ArgumentNullException("tokenizer");
 			}
@@ -49,6 +59,7 @@ namespace bsn.GoldParser.Parser {
 			}
 			this.tokenizer = tokenizer;
 			currentState = initialLalrState;
+			this.trim = trim;
 			tokenStack = new Stack<Token>();
 			tokenStack.Push(new RootToken(initialLalrState));
 		}
@@ -70,7 +81,7 @@ namespace bsn.GoldParser.Parser {
 		}
 
 		bool IParser.CanTrim(Rule rule) {
-			return false;
+			return trim;
 		}
 
 		Token IParser.PopToken() {

@@ -69,7 +69,7 @@ namespace bsn.GoldParser.Xml {
 			if (output == null) {
 				throw new ArgumentNullException("output");
 			}
-			Tokenizer tokenizer = new Tokenizer(input, grammar.DfaInitialState, grammar.EndSymbol, grammar.EndSymbol);
+			Tokenizer tokenizer = new Tokenizer(input, grammar.DfaInitialState, grammar.EndSymbol, grammar.ErrorSymbol);
 			LalrProcessor parser = new LalrProcessor(tokenizer, grammar.InitialLRState);
 			ParseMessage message = parser.Parse();
 			while (CompiledGrammar.CanContinueParsing(message)) {
