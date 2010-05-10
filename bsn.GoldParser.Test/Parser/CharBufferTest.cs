@@ -1,7 +1,5 @@
 ﻿// (C) 2010 Arsène von Wyss / bsn
 using System;
-using System.IO;
-using System.Text;
 
 using NUnit.Framework;
 
@@ -16,7 +14,7 @@ namespace bsn.GoldParser.Parser {
 		
 		[Test]
 		public void EmptyTextReader() {
-			using (TextReader reader = new StringReader(string.Empty)) {
+			using (TestStringReader reader = new TestStringReader(0)) {
 				CharBuffer charBuffer = new CharBuffer(reader);
 				char ch;
 				Expect(!charBuffer.TryReadChar(out ch));
@@ -25,28 +23,95 @@ namespace bsn.GoldParser.Parser {
 
 		[Test]
 		public void ReadSingleChar() {
-			using (TextReader reader = new StringReader("1")) {
+			using (TestStringReader reader = new TestStringReader(1)) {
 				CharBuffer charBuffer = new CharBuffer(reader);
 				char ch;
 				Expect(charBuffer.TryReadChar(out ch));
-				Expect(ch == '1');
+				Expect(ch == reader[0]);
 				Expect(!charBuffer.TryReadChar(out ch));
 			}
 		}
 
 		[Test]
 		public void ReadManyChars() {
-			const int charCount = 1024*1024;
-			StringBuilder builder = new StringBuilder(charCount);
-			for (int i = 0; i < charCount; i++) {
-				builder.Append((char)(i % 80 + 32));
-			}
-			using (TextReader reader = new StringReader(builder.ToString())) {
+			using (TestStringReader reader = new TestStringReader(1024*1024)) {
 				CharBuffer charBuffer = new CharBuffer(reader);
 				char ch;
-				for (int i = 0; i < charCount; i++) {
+				for (int i = 0; i < reader.Length; i++) {
 					Expect(charBuffer.TryReadChar(out ch));
-					Expect(ch == builder[i]);
+					Expect(ch == reader[i]);
+				}
+				Expect(!charBuffer.TryReadChar(out ch));
+			}
+		}
+
+		[Test]
+		public void MarkCreate() {
+			using (TestStringReader reader = new TestStringReader(0)) {
+				CharBuffer charBuffer = new CharBuffer(reader);
+				using (CharBuffer.Mark mark = charBuffer.CreateMark()) {
+					Expect(mark != null);
+				}
+			}
+		}
+
+		[Test]
+		public void MarkShortDistance() {
+			using (TestStringReader reader = new TestStringReader(2)) {
+				CharBuffer charBuffer = new CharBuffer(reader);
+				using (CharBuffer.Mark mark = charBuffer.CreateMark()) {
+					Expect(mark.Distance == 0);
+					char c;
+					Expect(charBuffer.TryReadChar(out c));
+					Expect(mark.Distance == 1);
+					charBuffer.MoveToMark(mark);
+					Expect(mark.Distance == 0);
+				}
+			}
+		}
+
+		[Test]
+		public void MarkShortReplay() {
+			using (TestStringReader reader = new TestStringReader(10)) {
+				CharBuffer charBuffer = new CharBuffer(reader);
+				char ch;
+				using (CharBuffer.Mark mark = charBuffer.CreateMark()) {
+					Expect(mark != null);
+					Expect(charBuffer.TryReadChar(out ch));
+					Expect(ch == reader[0]);
+					charBuffer.MoveToMark(mark);
+					Expect(charBuffer.TryReadChar(out ch));
+					Expect(ch == reader[0]);
+				}
+			}
+		}
+
+		[Test]
+		public void MarkLongDistanceAndReplay() {
+			using (TestStringReader reader = new TestStringReader(1024*20)) {
+				CharBuffer charBuffer = new CharBuffer(reader);
+				char ch;
+				for (int i = 0; i < 128; i++) {
+					Expect(charBuffer.TryReadChar(out ch));
+					Expect(ch == reader[i]);
+				}
+				using (CharBuffer.Mark mark = charBuffer.CreateMark()) {
+					Expect(mark.Distance == 0);
+					for (int i = 128; i < 1024*16; i++) {
+						Expect(charBuffer.TryReadChar(out ch));
+						Expect(ch == reader[i]);
+					}
+					Expect(mark.Distance == (1024*16-128));
+					charBuffer.MoveToMark(mark);
+					Expect(mark.Distance == 0);
+					for (int i = 128; i < 1024*8; i++) {
+						Expect(charBuffer.TryReadChar(out ch));
+						Expect(ch == reader[i]);
+					}
+				}
+				for (int i = 1024*8; i < reader.Length;  i++) {
+					Expect(charBuffer.TryReadChar(out ch));
+					Expect(ch == reader[i]);
 				}
 				Expect(!charBuffer.TryReadChar(out ch));
 			}

@@ -49,6 +49,9 @@
   <ItemGroup>
     <Compile Include="Grammar\CompiledGrammarTest.cs" />
     <Compile Include="Parser\CharBufferTest.cs" />
+    <Compile Include="Parser\LalrProcessorTest.cs" />
+    <Compile Include="TestStringReader.cs" />
+    <Compile Include="Parser\TokenizerTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

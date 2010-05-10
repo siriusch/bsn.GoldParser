@@ -6,13 +6,16 @@
 "Start Symbol" = <Expression>
 "Auto Whitespace" = True
 
-! ------------------------------------------------- Sets
+Comment Start = '/*'
+Comment End   = '*/'
+Comment Line  = '--'
 
+! ------------------------------------------------- Sets
 
 ! ------------------------------------------------- Terminals
 
 Integer = {Digit}+
-Float = {Digit}*'.'{Digit}+([Ee][+-]?{Digit}+)
+Float = {Digit}*'.'{Digit}+([Ee][+-]?{Digit}+)?
 
 ! ------------------------------------------------- Rules
 

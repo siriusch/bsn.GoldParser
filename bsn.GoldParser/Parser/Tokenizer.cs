@@ -31,11 +31,20 @@ namespace bsn.GoldParser.Parser {
 			if (endSymbol == null) {
 				throw new ArgumentNullException("endSymbol");
 			}
+			if (endSymbol.Kind != SymbolKind.End) {
+				throw new ArgumentException("End symbol expected", "endSymbol");
+			}
+			if (errorSymbol == null) {
+				throw new ArgumentNullException("errorSymbol");
+			}
+			if (errorSymbol.Kind != SymbolKind.Error) {
+				throw new ArgumentException("Error symbol expected", "errorSymbol");
+			}
 			buffer = new CharBuffer(textReader);
 			linePosition = 1;
 			lineNumber = 1;
 			this.endSymbol = endSymbol;
-			this.errorSymbol = errorSymbol ?? endSymbol;
+			this.errorSymbol = errorSymbol;
 			this.initialState = initialState;
 		}
 
@@ -140,7 +149,7 @@ namespace bsn.GoldParser.Parser {
 						SymbolKind kind;
 						do {
 							kind = NextToken(out token) != ParseMessage.None ? token.ParentSymbol.Kind : SymbolKind.Error;
-						} while ((kind != SymbolKind.End) && (kind != SymbolKind.Error) && (kind != SymbolKind.CommentEnd));
+						} while ((kind != SymbolKind.End) && (kind != SymbolKind.CommentEnd));
 						result = (kind == SymbolKind.CommentEnd) ? ParseMessage.CommentBlockRead : ParseMessage.CommentError;
 						break;
 					case SymbolKind.Error:

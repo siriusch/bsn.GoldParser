@@ -9,7 +9,7 @@ using NUnit.Framework;
 namespace bsn.GoldParser.Grammar {
 	[TestFixture]
 	public class CompiledGrammarTest: AssertionHelper {
-		private static CompiledGrammar LoadTestGrammar() {
+		internal static CompiledGrammar LoadTestGrammar() {
 			return CompiledGrammar.Load(typeof(CompiledGrammarTest), "TestGrammar.cgt");
 		}
 	
@@ -66,6 +66,20 @@ namespace bsn.GoldParser.Grammar {
 		public void CheckInitialDfaStateIndex() {
 			CompiledGrammar grammar = LoadTestGrammar();
 			Expect(grammar.DfaInitialState, Not.Append(Null));
+			Expect(grammar.DfaInitialState.Index, EqualTo(0));
+		}
+
+		[Test]
+		public void CheckErrorSymbol() {
+			CompiledGrammar grammar = LoadTestGrammar();
+			Expect(grammar.ErrorSymbol.Kind == SymbolKind.Error);
+			Expect(grammar.DfaInitialState.Index, EqualTo(0));
+		}
+
+		[Test]
+		public void CheckEndSymbol() {
+			CompiledGrammar grammar = LoadTestGrammar();
+			Expect(grammar.EndSymbol.Kind == SymbolKind.End);
 			Expect(grammar.DfaInitialState.Index, EqualTo(0));
 		}
 	}

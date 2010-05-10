@@ -291,13 +291,17 @@ namespace bsn.GoldParser.Parser {
 				charIndex += head;
 			} else {
 				int tailMark = marks[0].Index;
+				char[] dst = buffer;
+				if ((head-tailMark) > (buffer.Length/2)) {
+					// the tail fills more than 50% of the buffer, therefore grow the buffer
+					dst = new char[buffer.Length*2];
+					if (tailMark == 0) {
+						// if no relocate is going to take place, copy data now
+						Array.Copy(buffer, 0, dst, 0, head);
+					}
+				}
 				if (tailMark > 0) {
 					// we have a mark, and it is not on position 0 -> relocate marked data
-					char[] dst = buffer;
-					if ((tailMark+64) >= buffer.Length) {
-						// the tail (almost) fills the whole buffer, therefore grow the buffer
-						dst = new char[buffer.Length*2];
-					}
 					head -= tailMark;
 					Array.Copy(buffer, tailMark, dst, 0, head);
 					tail = head;
@@ -305,8 +309,8 @@ namespace bsn.GoldParser.Parser {
 						// relocate all marks in order to keep their index in sync
 						mark.Relocate(tailMark);
 					}
-					buffer = dst; // replace the buffer, it may have been grown
 				}
+				buffer = dst; // replace the buffer, it may have been grown
 				int read = reader.ReadBlock(buffer, head, buffer.Length-head); // fill buffer
 				head += read;
 				charIndex += read;
