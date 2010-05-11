@@ -34,7 +34,7 @@ namespace bsn.GoldParser.Grammar {
 		[Test]
 		public void CheckSymbolCount() {
 			CompiledGrammar grammar = LoadTestGrammar();
-			Expect(grammar.SymbolCount, EqualTo(15));
+			Expect(grammar.SymbolCount, EqualTo(18));
 		}
 
 		[Test]

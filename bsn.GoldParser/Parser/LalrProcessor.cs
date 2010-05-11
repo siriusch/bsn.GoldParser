@@ -80,6 +80,12 @@ namespace bsn.GoldParser.Parser {
 			}
 		}
 
+		public bool Trim {
+			get {
+				return trim;
+			}
+		}
+
 		bool IParser.CanTrim(Rule rule) {
 			return trim;
 		}

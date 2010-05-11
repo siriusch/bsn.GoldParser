@@ -8,7 +8,7 @@ using NUnit.Framework;
 namespace bsn.GoldParser.Parser {
 	[TestFixture]
 	public class TokenizerTest: AssertionHelper {
-		private static TestStringReader GetReader() {
+		internal static TestStringReader GetReader() {
 			return new TestStringReader("0*(3-5)/-9 -- line comment\r\n+1.0 /* block\r\ncomment */ *.0e2");
 		}
 
