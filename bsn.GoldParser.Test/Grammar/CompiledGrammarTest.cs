@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 
 using NUnit.Framework;
 
@@ -12,36 +9,6 @@ namespace bsn.GoldParser.Grammar {
 		internal static CompiledGrammar LoadTestGrammar() {
 			return CompiledGrammar.Load(typeof(CompiledGrammarTest), "TestGrammar.cgt");
 		}
-	
-		[Test]
-		[ExpectedException(typeof(ArgumentNullException))]
-		public void ConstructWithoutBinaryReader() {
-			CompiledGrammar.Load((BinaryReader)null);
-		}
-
-		[Test]
-		[ExpectedException(typeof(ArgumentNullException))]
-		public void ConstructWithoutStream() {
-			CompiledGrammar.Load((Stream)null);
-		}
-
-		[Test]
-		[ExpectedException(typeof(ArgumentNullException))]
-		public void ConstructWithoutManifestResourceName() {
-			CompiledGrammar.Load(null, null);
-		}
-
-		[Test]
-		public void CheckSymbolCount() {
-			CompiledGrammar grammar = LoadTestGrammar();
-			Expect(grammar.SymbolCount, EqualTo(18));
-		}
-
-		[Test]
-		public void CheckRuleCount() {
-			CompiledGrammar grammar = LoadTestGrammar();
-			Expect(grammar.RuleCount, EqualTo(11));
-		}
 
 		[Test]
 		public void CheckDfaCharsetCount() {
@@ -50,22 +17,9 @@ namespace bsn.GoldParser.Grammar {
 		}
 
 		[Test]
-		public void CheckLalrStateCount() {
+		public void CheckEndSymbol() {
 			CompiledGrammar grammar = LoadTestGrammar();
-			Expect(grammar.LalrStateCount, EqualTo(20));
-		}
-
-		[Test]
-		public void CheckInitialLalrStateIndex() {
-			CompiledGrammar grammar = LoadTestGrammar();
-			Expect(grammar.InitialLRState, Not.Append(Null));
-			Expect(grammar.InitialLRState.Index, EqualTo(0));
-		}
-
-		[Test]
-		public void CheckInitialDfaStateIndex() {
-			CompiledGrammar grammar = LoadTestGrammar();
-			Expect(grammar.DfaInitialState, Not.Append(Null));
+			Expect(grammar.EndSymbol.Kind == SymbolKind.End);
 			Expect(grammar.DfaInitialState.Index, EqualTo(0));
 		}
 
@@ -77,10 +31,53 @@ namespace bsn.GoldParser.Grammar {
 		}
 
 		[Test]
-		public void CheckEndSymbol() {
+		public void CheckInitialDfaStateIndex() {
 			CompiledGrammar grammar = LoadTestGrammar();
-			Expect(grammar.EndSymbol.Kind == SymbolKind.End);
+			Expect(grammar.DfaInitialState, Not.Append(Null));
 			Expect(grammar.DfaInitialState.Index, EqualTo(0));
+		}
+
+		[Test]
+		public void CheckInitialLalrStateIndex() {
+			CompiledGrammar grammar = LoadTestGrammar();
+			Expect(grammar.InitialLRState, Not.Append(Null));
+			Expect(grammar.InitialLRState.Index, EqualTo(0));
+		}
+
+		[Test]
+		public void CheckLalrStateCount() {
+			CompiledGrammar grammar = LoadTestGrammar();
+			Expect(grammar.LalrStateCount, EqualTo(20));
+		}
+
+		[Test]
+		public void CheckRuleCount() {
+			CompiledGrammar grammar = LoadTestGrammar();
+			Expect(grammar.RuleCount, EqualTo(11));
+		}
+
+		[Test]
+		public void CheckSymbolCount() {
+			CompiledGrammar grammar = LoadTestGrammar();
+			Expect(grammar.SymbolCount, EqualTo(18));
+		}
+
+		[Test]
+		[ExpectedException(typeof(ArgumentNullException))]
+		public void ConstructWithoutBinaryReader() {
+			CompiledGrammar.Load((BinaryReader)null);
+		}
+
+		[Test]
+		[ExpectedException(typeof(ArgumentNullException))]
+		public void ConstructWithoutManifestResourceName() {
+			CompiledGrammar.Load(null, null);
+		}
+
+		[Test]
+		[ExpectedException(typeof(ArgumentNullException))]
+		public void ConstructWithoutStream() {
+			CompiledGrammar.Load((Stream)null);
 		}
 	}
 }

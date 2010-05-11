@@ -65,6 +65,27 @@ namespace bsn.GoldParser.Parser {
 		}
 
 		[Test]
+		public void CheckLexicalError() {
+			CompiledGrammar grammar = CompiledGrammarTest.LoadTestGrammar();
+			using (TestStringReader reader = new TestStringReader("1+x*200")) {
+				ITokenizer tokenizer = new Tokenizer(reader, grammar.DfaInitialState, grammar.EndSymbol, grammar.ErrorSymbol);
+				TextToken token;
+				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
+				Expect(token.ParentSymbol.Kind, EqualTo(SymbolKind.Terminal));
+				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
+				Expect(token.ParentSymbol.Kind, EqualTo(SymbolKind.Terminal));
+				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.LexicalError));
+				Expect(token.ParentSymbol.Kind, EqualTo(SymbolKind.Error));
+				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
+				Expect(token.ParentSymbol.Kind, EqualTo(SymbolKind.Terminal));
+				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
+				Expect(token.ParentSymbol.Kind, EqualTo(SymbolKind.Terminal));
+				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
+				Expect(token.ParentSymbol.Kind, EqualTo(SymbolKind.End));
+			}
+		}
+
+		[Test]
 		public void CheckTokens() {
 			CompiledGrammar grammar = CompiledGrammarTest.LoadTestGrammar();
 			using (TestStringReader reader = GetReader()) {

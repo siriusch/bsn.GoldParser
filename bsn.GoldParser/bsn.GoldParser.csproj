@@ -140,7 +140,6 @@
     <Compile Include="Xml\GrammarXmlProcessor.cs" />
     <Compile Include="Xml\ProcessResult.cs" />
     <Compile Include="Xml\TokenXmlReader.cs" />
-    <None Include="app.config" />
     <None Include="Grammar\GoldParser.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
