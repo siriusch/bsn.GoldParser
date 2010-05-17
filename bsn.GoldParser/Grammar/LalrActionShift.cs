@@ -2,7 +2,7 @@
 using bsn.GoldParser.Parser;
 
 namespace bsn.GoldParser.Grammar {
-	internal class LalrActionShift: LalrActionWithLalrState {
+	internal sealed class LalrActionShift: LalrActionWithLalrState {
 		public LalrActionShift(int index, Symbol symbol, LalrState state): base(index, symbol, state) {}
 
 		public override LalrActionType ActionType {
@@ -12,9 +12,7 @@ namespace bsn.GoldParser.Grammar {
 		}
 
 		internal override TokenParseResult Execute(IParser parser, Token token) {
-			token.State = State;
-			parser.PushToken(token);
-			parser.SetState(State);
+			parser.PushTokenAndState(token, State);
 			return TokenParseResult.Shift;
 		}
 	}

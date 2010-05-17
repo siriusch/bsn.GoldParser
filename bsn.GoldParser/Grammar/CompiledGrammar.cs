@@ -753,5 +753,9 @@ namespace bsn.GoldParser.Grammar {
 				lalrStateTable[i] = new LalrState(this, i);
 			}
 		}
+
+		public override string ToString() {
+			return Name;
+		}
 	}
 }

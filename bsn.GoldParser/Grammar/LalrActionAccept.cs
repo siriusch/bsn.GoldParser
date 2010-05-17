@@ -2,7 +2,7 @@
 using bsn.GoldParser.Parser;
 
 namespace bsn.GoldParser.Grammar {
-	internal class LalrActionAccept: LalrAction {
+	internal sealed class LalrActionAccept: LalrAction {
 		public LalrActionAccept(int index, Symbol symbol): base(index, symbol) {}
 
 		public override LalrActionType ActionType {

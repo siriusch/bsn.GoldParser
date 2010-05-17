@@ -31,14 +31,5 @@ namespace bsn.GoldParser.Parser {
 				return string.Empty;
 			}
 		}
-
-		internal LalrState State {
-			get {
-				return state;
-			}
-			set {
-				state = value;
-			}
-		}
 	}
 }

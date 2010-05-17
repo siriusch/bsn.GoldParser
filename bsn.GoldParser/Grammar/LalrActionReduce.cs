@@ -5,7 +5,7 @@ using System.Diagnostics;
 using bsn.GoldParser.Parser;
 
 namespace bsn.GoldParser.Grammar {
-	internal class LalrActionReduce: LalrAction {
+	internal sealed class LalrActionReduce: LalrAction {
 		private readonly Rule reduceRule;
 
 		public LalrActionReduce(int index, Symbol symbol, Rule reduceRule): base(index, symbol) {
@@ -35,14 +35,12 @@ namespace bsn.GoldParser.Grammar {
 			} else {
 				head = parser.CreateReduction(reduceRule);
 			}
-			LalrActionGoto gotoAction = parser.TopToken.State.GetActionBySymbol(reduceRule.RuleSymbol) as LalrActionGoto;
+			LalrActionGoto gotoAction = parser.TopState.GetActionBySymbol(reduceRule.RuleSymbol) as LalrActionGoto;
 			if (gotoAction == null) {
 				Debug.Fail("Internal table error.");
 				return TokenParseResult.InternalError;
 			}
-			head.State = gotoAction.State;
-			parser.PushToken(head);
-			parser.SetState(gotoAction.State);
+			parser.PushTokenAndState(head, gotoAction.State);
 			return trim ? TokenParseResult.ReduceEliminated : TokenParseResult.ReduceNormal;
 		}
 	}

@@ -5,6 +5,7 @@
 
 "Start Symbol" = <Expression>
 "Auto Whitespace" = True
+"Character Mapping" = 'Unicode'
 
 Comment Start = '/*'
 Comment End   = '*/'

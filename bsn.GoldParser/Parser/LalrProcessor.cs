@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.IO;
 
 using bsn.GoldParser.Grammar;
 
@@ -13,8 +12,10 @@ namespace bsn.GoldParser.Parser {
 	/// </summary>
 	public class LalrProcessor: IParser {
 		private class RootToken: Token {
-			public RootToken(LalrState state) {
-				State = state;
+			public override LineInfo Position {
+				get {
+					return default(LineInfo);
+				}
 			}
 
 			public override Symbol Symbol {
@@ -22,16 +23,10 @@ namespace bsn.GoldParser.Parser {
 					return null;
 				}
 			}
-
-			public override LineInfo Position {
-				get {
-					return default(LineInfo);
-				}
-			}
 		}
 
+		private readonly Stack<KeyValuePair<Token, LalrState>> tokenStack; // Stack of LR states used for LR parsing.
 		private readonly ITokenizer tokenizer;
-		private readonly Stack<Token> tokenStack; // Stack of LR states used for LR parsing.
 		private readonly bool trim;
 		private LalrState currentState;
 		private Token currentToken;
@@ -41,7 +36,7 @@ namespace bsn.GoldParser.Parser {
 		/// </summary>
 		/// <param name="tokenizer">The tokenizer.</param>
 		/// <param name="initialLalrState">Initial state of the lalr.</param>
-		public LalrProcessor(ITokenizer tokenizer) : this(tokenizer, false) {}
+		public LalrProcessor(ITokenizer tokenizer): this(tokenizer, false) {}
 
 		/// <summary>
 		/// Initializes new instance of Parser class.
@@ -49,16 +44,15 @@ namespace bsn.GoldParser.Parser {
 		/// <param name="tokenizer">The tokenizer.</param>
 		/// <param name="initialLalrState">Initial state of the lalr.</param>
 		/// <param name="trim">if set to <c>true</c> [trim].</param>
-		public LalrProcessor(ITokenizer tokenizer, bool trim)
-			: base() {
+		public LalrProcessor(ITokenizer tokenizer, bool trim) {
 			if (tokenizer == null) {
 				throw new ArgumentNullException("tokenizer");
 			}
 			this.tokenizer = tokenizer;
 			currentState = tokenizer.Grammar.InitialLRState;
 			this.trim = trim;
-			tokenStack = new Stack<Token>();
-			tokenStack.Push(new RootToken(currentState));
+			tokenStack = new Stack<KeyValuePair<Token, LalrState>>();
+			tokenStack.Push(new KeyValuePair<Token, LalrState>(new RootToken(), currentState));
 		}
 
 		/// <summary>
@@ -71,56 +65,19 @@ namespace bsn.GoldParser.Parser {
 					return currentToken;
 				}
 				if (tokenStack.Count > 0) {
-					return tokenStack.Peek();
+					return tokenStack.Peek().Key;
 				}
 				return null;
 			}
 		}
 
+		/// <summary>
+		/// Gets a value indicating whether this <see cref="LalrProcessor"/> does automatically trim the tokens with a single terminal.
+		/// </summary>
+		/// <value><c>true</c> if automatic trimming is enabled; otherwise, <c>false</c>.</value>
 		public bool Trim {
 			get {
 				return trim;
-			}
-		}
-
-		bool IParser.CanTrim(Rule rule) {
-			return CanTrim(rule);
-		}
-
-		protected virtual bool CanTrim(Rule rule) {
-			return trim;
-		}
-
-		Token IParser.PopToken() {
-			return tokenStack.Pop();
-		}
-
-		void IParser.PushToken(Token token) {
-			Debug.Assert(token != null);
-			tokenStack.Push(token);
-		}
-
-		Token IParser.CreateReduction(Rule rule) {
-			Debug.Assert(rule != null);
-			Token[] tokens = new Token[rule.SymbolCount];
-			for (int i = tokens.Length-1; i >= 0; i--) {
-				tokens[i] = tokenStack.Pop();
-			}
-			return CreateReduction(rule, tokens);
-		}
-
-		protected virtual Token CreateReduction(Rule rule, Token[] children) {
-			return new Reduction(rule, children);
-		}
-
-		void IParser.SetState(LalrState state) {
-			Debug.Assert(state != null);
-			currentState = state;
-		}
-
-		Token IParser.TopToken {
-			get {
-				return tokenStack.Peek();
 			}
 		}
 
@@ -195,8 +152,46 @@ namespace bsn.GoldParser.Parser {
 			}
 		}
 
+		protected virtual bool CanTrim(Rule rule) {
+			return trim;
+		}
+
 		protected virtual Token ConvertToken(TextToken inputToken) {
 			return inputToken;
+		}
+
+		protected virtual Token CreateReduction(Rule rule, Token[] children) {
+			return new Reduction(rule, children);
+		}
+
+		bool IParser.CanTrim(Rule rule) {
+			return CanTrim(rule);
+		}
+
+		Token IParser.PopToken() {
+			return tokenStack.Pop().Key;
+		}
+
+		void IParser.PushTokenAndState(Token token, LalrState state) {
+			Debug.Assert(token != null);
+			Debug.Assert(state != null);
+			tokenStack.Push(new KeyValuePair<Token, LalrState>(token, state));
+			currentState = state;
+		}
+
+		Token IParser.CreateReduction(Rule rule) {
+			Debug.Assert(rule != null);
+			Token[] tokens = new Token[rule.SymbolCount];
+			for (int i = tokens.Length-1; i >= 0; i--) {
+				tokens[i] = tokenStack.Pop().Key;
+			}
+			return CreateReduction(rule, tokens);
+		}
+
+		LalrState IParser.TopState {
+			get {
+				return tokenStack.Peek().Value;
+			}
 		}
 	}
 }

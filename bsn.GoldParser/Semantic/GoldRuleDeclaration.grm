@@ -28,11 +28,11 @@ Whitespace = {Whitespace Ch}+
 ! Rule Definition
 ! ====================================================================
 
-<Rule Decl>  ::= Nonterminal '::=' <Handle>
+<Rule Decl> ::= Nonterminal '::=' <Handle>
 
-<Handle>     ::= <Handle> <Symbol>   !Zero or more               
-               |                     !Leave the entry blank - makes a "null"
+<Handle> ::= <Symbol> <Handle>
+           |
 
-<Symbol>     ::= Terminal
-               | Nonterminal           
+<Symbol> ::= Terminal
+           | Nonterminal           
 

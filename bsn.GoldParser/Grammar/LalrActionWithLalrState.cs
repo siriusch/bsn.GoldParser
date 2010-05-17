@@ -1,5 +1,6 @@
 // (C) 2010 Arsène von Wyss / bsn
 using System;
+using System.Diagnostics;
 
 using bsn.GoldParser.Parser;
 
@@ -11,6 +12,7 @@ namespace bsn.GoldParser.Grammar {
 			if (state == null) {
 				throw new ArgumentNullException("state");
 			}
+			Debug.Assert(symbol.Owner == state.Owner);
 			this.state = state;
 		}
 
@@ -18,10 +20,6 @@ namespace bsn.GoldParser.Grammar {
 			get {
 				return state;
 			}
-		}
-
-		internal override TokenParseResult Execute(IParser parser, Token token) {
-			return TokenParseResult.Empty;
 		}
 	}
 }
