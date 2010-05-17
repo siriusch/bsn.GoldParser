@@ -1,0 +1,38 @@
+"Name"         = 'GOLD Meta-Language Rule Declaration'
+"Version"      = '2.6.0'
+"Author"       = 'Arsene von Wyss'
+"About"        = 'This grammar defines rule declarations as used in the GOLD Meta-Language.'
+
+"Start Symbol" = <Rule Decl>
+
+! ====================================================================
+! Special Terminals
+! ====================================================================
+
+{Nonterminal Ch} = {Alphanumeric} + [_-.] + {Space} 
+{Terminal Ch}    = {Alphanumeric} + [_-.] 
+{Literal Ch}     = {Printable}    - ['']       !Basically anything, DO NOT CHANGE!
+
+Nonterminal    = '<' {Nonterminal Ch}+ '>'
+Terminal       = {Terminal Ch}+  | '' {Literal Ch}* ''  
+
+! ====================================================================
+! Line-Based Grammar Declarations
+! ====================================================================
+
+{Whitespace Ch} = {Whitespace} - {CR} - {LF}
+
+Whitespace = {Whitespace Ch}+
+
+! ====================================================================
+! Rule Definition
+! ====================================================================
+
+<Rule Decl>  ::= Nonterminal '::=' <Handle>
+
+<Handle>     ::= <Handle> <Symbol>   !Zero or more               
+               |                     !Leave the entry blank - makes a "null"
+
+<Symbol>     ::= Terminal
+               | Nonterminal           
+

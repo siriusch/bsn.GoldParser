@@ -15,18 +15,18 @@ namespace bsn.GoldParser.Grammar {
 	/// into several categories for use by the GOLD Parser Engine 
 	/// which are enumerated in <c>SymbolKind</c> enumeration.
 	/// </remarks>
-	public class Symbol: GrammarObject {
+	public class Symbol: GrammarObject<Symbol> {
 		private const string QuotedChars = "|-+*?()[]{}<>!";
 		private static readonly Regex rxXml = new Regex(@"(^[^:_a-z]|(?<!^)[^:_a-z0-9\-\.])+", RegexOptions.CultureInvariant|RegexOptions.IgnoreCase|RegexOptions.ExplicitCapture);
 
-		private static string FormatTerminalSymbol(string source) {
+		public static string FormatTerminalSymbol(string source) {
 			StringBuilder result = new StringBuilder();
 			for (int i = 0; i < source.Length; i++) {
 				char ch = source[i];
 				if (ch == '\'') {
 					result.Append("''");
 				} else if (IsQuotedChar(ch) || (ch == '"')) {
-					result.Append(new Char[] {'\'', ch, '\''});
+					result.Append(new[] {'\'', ch, '\''});
 				} else {
 					result.Append(ch);
 				}

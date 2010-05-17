@@ -11,13 +11,13 @@ namespace bsn.GoldParser.Parser {
 	/// <summary>
 	/// Pull parser which uses Grammar table to parse input stream.
 	/// </summary>
-	public sealed class LalrProcessor: IParser {
+	public class LalrProcessor: IParser {
 		private class RootToken: Token {
 			public RootToken(LalrState state) {
 				State = state;
 			}
 
-			public override Symbol ParentSymbol {
+			public override Symbol Symbol {
 				get {
 					return null;
 				}
@@ -34,14 +34,14 @@ namespace bsn.GoldParser.Parser {
 		private readonly Stack<Token> tokenStack; // Stack of LR states used for LR parsing.
 		private readonly bool trim;
 		private LalrState currentState;
-		private TextToken currentToken;
+		private Token currentToken;
 
 		/// <summary>
 		/// Initializes new instance of Parser class.
 		/// </summary>
 		/// <param name="tokenizer">The tokenizer.</param>
 		/// <param name="initialLalrState">Initial state of the lalr.</param>
-		public LalrProcessor(ITokenizer tokenizer, LalrState initialLalrState) : this(tokenizer, initialLalrState, false) {}
+		public LalrProcessor(ITokenizer tokenizer) : this(tokenizer, false) {}
 
 		/// <summary>
 		/// Initializes new instance of Parser class.
@@ -49,19 +49,16 @@ namespace bsn.GoldParser.Parser {
 		/// <param name="tokenizer">The tokenizer.</param>
 		/// <param name="initialLalrState">Initial state of the lalr.</param>
 		/// <param name="trim">if set to <c>true</c> [trim].</param>
-		public LalrProcessor(ITokenizer tokenizer, LalrState initialLalrState, bool trim)
+		public LalrProcessor(ITokenizer tokenizer, bool trim)
 			: base() {
 			if (tokenizer == null) {
 				throw new ArgumentNullException("tokenizer");
 			}
-			if (initialLalrState == null) {
-				throw new ArgumentNullException("initialLalrState");
-			}
 			this.tokenizer = tokenizer;
-			currentState = initialLalrState;
+			currentState = tokenizer.Grammar.InitialLRState;
 			this.trim = trim;
 			tokenStack = new Stack<Token>();
-			tokenStack.Push(new RootToken(initialLalrState));
+			tokenStack.Push(new RootToken(currentState));
 		}
 
 		/// <summary>
@@ -87,6 +84,10 @@ namespace bsn.GoldParser.Parser {
 		}
 
 		bool IParser.CanTrim(Rule rule) {
+			return CanTrim(rule);
+		}
+
+		protected virtual bool CanTrim(Rule rule) {
 			return trim;
 		}
 
@@ -105,7 +106,11 @@ namespace bsn.GoldParser.Parser {
 			for (int i = tokens.Length-1; i >= 0; i--) {
 				tokens[i] = tokenStack.Pop();
 			}
-			return new Reduction(rule, tokens);
+			return CreateReduction(rule, tokens);
+		}
+
+		protected virtual Token CreateReduction(Rule rule, Token[] children) {
+			return new Reduction(rule, children);
 		}
 
 		void IParser.SetState(LalrState state) {
@@ -124,6 +129,7 @@ namespace bsn.GoldParser.Parser {
 		/// </summary>
 		public ReadOnlyCollection<Symbol> GetExpectedTokens() {
 			List<Symbol> expectedTokens = new List<Symbol>(currentState.ActionCount);
+#warning Do we need to recurse somehow on non-terminals?
 			for (int i = 0; i < currentState.ActionCount; i++) {
 				switch (currentState.GetAction(i).Symbol.Kind) {
 				case SymbolKind.Terminal:
@@ -141,19 +147,21 @@ namespace bsn.GoldParser.Parser {
 		/// <returns>Parser current currentState.</returns>
 		public ParseMessage Parse() {
 			while (true) {
-				TextToken inputToken;
+				Token inputToken;
 				if (currentToken == null) {
 					//We must read a currentToken
-					ParseMessage message = tokenizer.NextToken(out inputToken);
-					//					Debug.WriteLine(string.Format("State: {0} Line: {1}, Column: {2}, Parse Value: {3}, Token Type: {4}", currentState.Index, inputToken.Line, inputToken.LinePosition, inputToken.Text, inputToken.ParentSymbol.Name), "Token Read");
-					if (inputToken.ParentSymbol.Kind != SymbolKind.End) {
-						currentToken = inputToken;
+					TextToken textInputToken;
+					ParseMessage message = tokenizer.NextToken(out textInputToken);
+					//					Debug.WriteLine(string.Format("State: {0} Line: {1}, Column: {2}, Parse Value: {3}, Token Type: {4}", currentState.Index, inputToken.Line, inputToken.LinePosition, inputToken.Text, inputToken.symbol.Name), "Token Read");
+					if (textInputToken.Symbol.Kind != SymbolKind.End) {
+						currentToken = ConvertToken(textInputToken);
 						return message;
 					}
+					inputToken = textInputToken;
 				} else {
 					inputToken = currentToken;
 				}
-				switch (inputToken.ParentSymbol.Kind) {
+				switch (inputToken.Symbol.Kind) {
 				case SymbolKind.WhiteSpace:
 				case SymbolKind.CommentStart:
 				case SymbolKind.CommentLine:
@@ -162,7 +170,7 @@ namespace bsn.GoldParser.Parser {
 				case SymbolKind.Error:
 					return ParseMessage.LexicalError;
 				default:
-					LalrAction action = currentState.GetActionBySymbol(inputToken.ParentSymbol);
+					LalrAction action = currentState.GetActionBySymbol(inputToken.Symbol);
 					if (action == null) {
 						return ParseMessage.SyntaxError;
 					}
@@ -185,6 +193,10 @@ namespace bsn.GoldParser.Parser {
 					break;
 				}
 			}
+		}
+
+		protected virtual Token ConvertToken(TextToken inputToken) {
+			return inputToken;
 		}
 	}
 }

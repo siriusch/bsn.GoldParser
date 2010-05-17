@@ -9,36 +9,36 @@ namespace bsn.GoldParser.Parser {
 	/// <summary>
 	/// A reduction token, which contains the child tokens reduced with the <see cref="ParentRule"/>.
 	/// </summary>
-	public sealed class Reduction: Token {
-		private readonly Rule parentRule;
+	public class Reduction: Token {
+		private readonly Rule rule;
 		private readonly Token[] tokens;
 
-		internal Reduction(Rule parentRule, Token[] tokens): base() {
-			if (parentRule == null) {
-				throw new ArgumentNullException("parentRule");
+		internal Reduction(Rule rule, Token[] tokens): base() {
+			if (rule == null) {
+				throw new ArgumentNullException("rule");
 			}
 			if (tokens == null) {
 				throw new ArgumentNullException("tokens");
 			}
-			this.parentRule = parentRule;
+			this.rule = rule;
 			this.tokens = tokens;
 		}
 
-		public override Token[] Children {
+		public Token[] Children {
 			[DebuggerStepThrough]
 			get {
 				return tokens;
 			}
 		}
 
-		public override Symbol ParentSymbol {
+		public sealed override Symbol Symbol {
 			[DebuggerStepThrough]
 			get {
-				return parentRule.Head;
+				return rule.RuleSymbol;
 			}
 		}
 
-		public override LineInfo Position {
+		public sealed override LineInfo Position {
 			[DebuggerStepThrough]
 			get {
 				return tokens.Length > 0 ? tokens[0].Position : default(LineInfo);

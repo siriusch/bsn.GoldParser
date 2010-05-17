@@ -50,6 +50,7 @@
     <Compile Include="Grammar\CompiledGrammarTest.cs" />
     <Compile Include="Parser\CharBufferTest.cs" />
     <Compile Include="Parser\LalrProcessorTest.cs" />
+    <Compile Include="Semantic\RuleDeclarationParserTest.cs" />
     <Compile Include="TestStringReader.cs" />
     <Compile Include="Parser\TokenizerTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -3,6 +3,10 @@ using bsn.GoldParser.Grammar;
 
 namespace bsn.GoldParser.Parser {
 	public interface ITokenizer {
+		CompiledGrammar Grammar {
+			get;
+		}
+
 		ParseMessage NextToken(out TextToken token);
 	}
 }

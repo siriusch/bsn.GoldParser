@@ -35,7 +35,7 @@ namespace bsn.GoldParser.Grammar {
 			} else {
 				head = parser.CreateReduction(reduceRule);
 			}
-			LalrActionGoto gotoAction = parser.TopToken.State.GetActionBySymbol(reduceRule.Head) as LalrActionGoto;
+			LalrActionGoto gotoAction = parser.TopToken.State.GetActionBySymbol(reduceRule.RuleSymbol) as LalrActionGoto;
 			if (gotoAction == null) {
 				Debug.Fail("Internal table error.");
 				return TokenParseResult.InternalError;

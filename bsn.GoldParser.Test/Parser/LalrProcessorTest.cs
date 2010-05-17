@@ -9,34 +9,27 @@ namespace bsn.GoldParser.Parser {
 	public class LalrProcessorTest: AssertionHelper {
 		private int CountTokens(Token currentToken) {
 			int result = 1;
-			foreach (Token token in currentToken.Children) {
-				result += CountTokens(token);
+			Reduction reduction = currentToken as Reduction;
+			if (reduction != null) {
+				foreach (Token childToken in reduction.Children) {
+					result += CountTokens(childToken);
+				}
 			}
 			return result;
 		}
 
 		[Test]
-		[ExpectedException]
-		public void ConstructWithoutInitialState() {
-			CompiledGrammar grammar = CompiledGrammarTest.LoadTestGrammar();
-			using (TestStringReader reader = TokenizerTest.GetReader()) {
-				ITokenizer tokenizer = new Tokenizer(reader, grammar.DfaInitialState, grammar.EndSymbol, grammar.ErrorSymbol);
-				new LalrProcessor(tokenizer, null);
-			}
-		}
-
-		[Test]
-		[ExpectedException]
+		[ExpectedException(typeof(ArgumentNullException))]
 		public void ConstructWithoutTokenizer() {
-			new LalrProcessor(null, CompiledGrammarTest.LoadTestGrammar().InitialLRState);
+			new LalrProcessor(null);
 		}
 
 		[Test]
 		public void ParseTreeWithTrim() {
 			CompiledGrammar grammar = CompiledGrammarTest.LoadTestGrammar();
 			using (TestStringReader reader = TokenizerTest.GetReader()) {
-				ITokenizer tokenizer = new Tokenizer(reader, grammar.DfaInitialState, grammar.EndSymbol, grammar.ErrorSymbol);
-				LalrProcessor processor = new LalrProcessor(tokenizer, grammar.InitialLRState, true);
+				ITokenizer tokenizer = new Tokenizer(reader, grammar);
+				LalrProcessor processor = new LalrProcessor(tokenizer, true);
 				Expect(processor.Trim, EqualTo(true));
 				Expect(processor.Parse(), EqualTo(ParseMessage.TokenRead));
 				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
@@ -105,7 +98,7 @@ namespace bsn.GoldParser.Parser {
 				Expect(processor.Parse(), EqualTo(ParseMessage.Reduction));
 				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(Reduction)));
 				Expect(processor.Parse(), EqualTo(ParseMessage.Accept));
-				Expect(processor.CurrentToken.ParentSymbol.Name, EqualTo("Expression"));
+				Expect(processor.CurrentToken.Symbol.Name, EqualTo("Expression"));
 				Expect(CountTokens(processor.CurrentToken), EqualTo(27));
 			}
 		}
@@ -114,8 +107,8 @@ namespace bsn.GoldParser.Parser {
 		public void ParseTreeWithoutTrim() {
 			CompiledGrammar grammar = CompiledGrammarTest.LoadTestGrammar();
 			using (TestStringReader reader = TokenizerTest.GetReader()) {
-				ITokenizer tokenizer = new Tokenizer(reader, grammar.DfaInitialState, grammar.EndSymbol, grammar.ErrorSymbol);
-				LalrProcessor processor = new LalrProcessor(tokenizer, grammar.InitialLRState);
+				ITokenizer tokenizer = new Tokenizer(reader, grammar);
+				LalrProcessor processor = new LalrProcessor(tokenizer);
 				Expect(processor.Trim, EqualTo(false));
 				Expect(processor.Parse(), EqualTo(ParseMessage.TokenRead));
 				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
@@ -208,7 +201,7 @@ namespace bsn.GoldParser.Parser {
 				Expect(processor.Parse(), EqualTo(ParseMessage.Reduction));
 				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(Reduction)));
 				Expect(processor.Parse(), EqualTo(ParseMessage.Accept));
-				Expect(processor.CurrentToken.ParentSymbol.Name, EqualTo("Expression"));
+				Expect(processor.CurrentToken.Symbol.Name, EqualTo("Expression"));
 				Expect(CountTokens(processor.CurrentToken), EqualTo(39));
 			}
 		}

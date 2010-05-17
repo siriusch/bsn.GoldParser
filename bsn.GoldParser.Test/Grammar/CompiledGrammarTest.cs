@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using System.IO;
 
 using NUnit.Framework;
@@ -14,6 +15,36 @@ namespace bsn.GoldParser.Grammar {
 		public void CheckDfaCharsetCount() {
 			CompiledGrammar grammar = LoadTestGrammar();
 			Expect(grammar.DfaCharsetCount, EqualTo(11));
+		}
+
+		[Test]
+		public void CheckAuthor() {
+			CompiledGrammar grammar = LoadTestGrammar();
+			Expect(grammar.Author, EqualTo("Robert van Loenhout and Arsene von Wyss"));
+		}
+
+		[Test]
+		public void CheckCaseSensitive() {
+			CompiledGrammar grammar = LoadTestGrammar();
+			Expect(grammar.CaseSensitive, EqualTo(false));
+		}
+
+		[Test]
+		public void CheckVersion() {
+			CompiledGrammar grammar = LoadTestGrammar();
+			Expect(grammar.Version, EqualTo("1.1"));
+		}
+
+		[Test]
+		public void CheckAbout() {
+			CompiledGrammar grammar = LoadTestGrammar();
+			Expect(grammar.About, EqualTo("Example for testing Gold Parser Engine"));
+		}
+
+		[Test]
+		public void CheckName() {
+			CompiledGrammar grammar = LoadTestGrammar();
+			Expect(grammar.Name, EqualTo("Text Calculator Grammar"));
 		}
 
 		[Test]
@@ -78,6 +109,30 @@ namespace bsn.GoldParser.Grammar {
 		[ExpectedException(typeof(ArgumentNullException))]
 		public void ConstructWithoutStream() {
 			CompiledGrammar.Load((Stream)null);
+		}
+
+		[Test]
+		public void GetTerminalSymbol() {
+			Symbol symbol = LoadTestGrammar().GetSymbolByName("Float");
+			Expect(symbol, Not.Null);
+			Expect(symbol.Name, EqualTo("Float"));
+		}
+
+		[Test]
+		public void GetNonTerminalSymbol() {
+			Symbol symbol = LoadTestGrammar().GetSymbolByName("<Expression>");
+			Expect(symbol, Not.Null);
+			Expect(symbol.Name, EqualTo("Expression"));
+		}
+
+		[Test]
+		public void GetNonTerminalRules() {
+			CompiledGrammar grammar = LoadTestGrammar();
+			Symbol symbol = grammar.GetSymbolByName("<Expression>");
+			Expect(symbol, Not.Null);
+			ReadOnlyCollection<Rule> rules = grammar.GetRulesForSymbol(symbol);
+			Expect(rules, Not.Null);
+			Expect(rules.Count, EqualTo(3));
 		}
 	}
 }

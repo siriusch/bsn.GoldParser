@@ -1,5 +1,7 @@
 // (C) 2010 Arsène von Wyss / bsn
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Reflection;
 using System.Text;
@@ -109,6 +111,7 @@ namespace bsn.GoldParser.Grammar {
 		}
 
 		private readonly BinaryReader reader; // Source of the grammar    
+		private readonly object sync = new object();
 
 		// Grammar header information
 		private string about; // Grammar description
@@ -127,8 +130,12 @@ namespace bsn.GoldParser.Grammar {
 		private int lrInitialState; // LR initial state
 		private string name; // Name of the grammar
 		private Rule[] ruleTable; // Rule table
+		private Dictionary<Symbol, ReadOnlyCollection<Rule>> rules;
 		private int startSymbolIndex; // Start symbol index
 		private Symbol[] symbolTable; // Symbol table
+
+		// helper data structures for optimized access/query
+		private Dictionary<string, Symbol> symbols;
 		private string version; // Version of the grammar
 
 		/// <summary>
@@ -186,6 +193,16 @@ namespace bsn.GoldParser.Grammar {
 		public Symbol EndSymbol {
 			get {
 				return endSymbol;
+			}
+		}
+
+		/// <summary>
+		/// Gets the error symbol.
+		/// </summary>
+		/// <value>The error symbol.</value>
+		public Symbol ErrorSymbol {
+			get {
+				return errorSymbol;
 			}
 		}
 
@@ -275,40 +292,66 @@ namespace bsn.GoldParser.Grammar {
 			}
 		}
 
-		public Symbol ErrorSymbol {
-			get {
-				return errorSymbol;
+		/// <summary>
+		/// Gets the rules for a nonterminal symbol.
+		/// </summary>
+		/// <param name="symbol">The nonterminal symbol.</param>
+		/// <returns>A collection of associated rules.</returns>
+		public ReadOnlyCollection<Rule> GetRulesForSymbol(Symbol symbol) {
+			ReadOnlyCollection<Rule> result;
+			if (!TryGetRulesForSymbol(symbol, out result)) {
+				throw new ArgumentException("No rules exist for the given symbol", "symbol");
 			}
+			return result;
 		}
 
 		/// <summary>
 		/// Gets the symbol with the specified name.
 		/// </summary>
-		/// <param name="symbolName">Name of the symbol (without <c>&lt; &gt;</c> for non-terminals) .</param>
-		/// <param name="terminal">Returns terminal symbols if <c>true</c> and non-terminal symbols otherwise.</param>
+		/// <param name="symbolName">Name of the symbol (including <c>&lt; &gt;</c> for non-terminals) .</param>
 		/// <returns>The matching symbol.</returns>
 		/// <exception cref="ArgumentException">The symbol name was not found.</exception>
-		public Symbol GetSymbolByName(string symbolName, bool terminal) {
-			if (string.IsNullOrEmpty(symbolName)) {
-				throw new ArgumentNullException("symbolName");
+		public Symbol GetSymbolByName(string symbolName) {
+			Symbol result;
+			if (!TryGetSymbol(symbolName, out result)) {
+				throw new ArgumentException("No symbol exists with the given name", "symbolName");
 			}
-			foreach (Symbol symbol in symbolTable) {
-				if (symbolName == symbol.Name) {
-					switch (symbol.Kind) {
-					case SymbolKind.Terminal:
-						if (terminal) {
-							return symbol;
-						}
-						break;
-					case SymbolKind.NonTerminal:
-						if (!terminal) {
-							return symbol;
-						}
-						break;
-					}
-				}
+			return result;
+		}
+
+		/// <summary>
+		/// Tries the get rules for symbol.
+		/// </summary>
+		/// <param name="symbol">The symbol.</param>
+		/// <param name="rules">The rules.</param>
+		/// <returns></returns>
+		public bool TryGetRulesForSymbol(Symbol symbol, out ReadOnlyCollection<Rule> rules) {
+			if (symbol == null) {
+				throw new ArgumentNullException("symbol");
 			}
-			throw new ArgumentException(string.Format("Symbol name {0} not found", symbolName), "symbolName");
+			if (symbol.Owner != this) {
+				throw new ArgumentException("The symbol belongs to another grammar");
+			}
+			if (symbol.Kind != SymbolKind.NonTerminal) {
+				rules = null;
+				return false;
+			}
+			InitializeRuleLookup();
+			if (!this.rules.TryGetValue(symbol, out rules)) {
+				rules = Array.AsReadOnly(new Rule[0]);
+			}
+			return true;
+		}
+
+		/// <summary>
+		/// Tries the get symbol.
+		/// </summary>
+		/// <param name="symbolName">Name of the symbol.</param>
+		/// <param name="symbol">The symbol.</param>
+		/// <returns></returns>
+		public bool TryGetSymbol(string symbolName, out Symbol symbol) {
+			InitializeSymbolLookup();
+			return symbols.TryGetValue(symbolName, out symbol);
 		}
 
 		/// <summary>
@@ -354,6 +397,37 @@ namespace bsn.GoldParser.Grammar {
 		/// <returns></returns>
 		protected internal Symbol GetSymbol(int symbolIndex) {
 			return symbolTable[symbolIndex];
+		}
+
+		private void InitializeRuleLookup() {
+			lock (sync) {
+				if (rules == null) {
+					Dictionary<Symbol, List<Rule>> ruleTemp = new Dictionary<Symbol, List<Rule>>();
+					foreach (Rule rule in ruleTable) {
+						List<Rule> ruleList;
+						if (!ruleTemp.TryGetValue(rule.RuleSymbol, out ruleList)) {
+							ruleList = new List<Rule>();
+							ruleTemp.Add(rule.RuleSymbol, ruleList);
+						}
+						ruleList.Add(rule);
+					}
+					rules = new Dictionary<Symbol, ReadOnlyCollection<Rule>>(ruleTemp.Count);
+					foreach (KeyValuePair<Symbol, List<Rule>> pair in ruleTemp) {
+						rules.Add(pair.Key, Array.AsReadOnly(pair.Value.ToArray()));
+					}
+				}
+			}
+		}
+
+		private void InitializeSymbolLookup() {
+			lock (sync) {
+				if (symbols == null) {
+					symbols = new Dictionary<string, Symbol>(StringComparer.Ordinal);
+					foreach (Symbol symbol in symbolTable) {
+						symbols.Add(symbol.ToString(), symbol);
+					}
+				}
+			}
 		}
 
 		/// <summary>

@@ -1,11 +1,12 @@
 // (C) 2010 Arsène von Wyss / bsn
 using System;
+using System.Runtime.CompilerServices;
 
 namespace bsn.GoldParser.Grammar {
 	/// <summary>
 	/// State of LR parser.
 	/// </summary>
-	public class LalrState: GrammarObject {
+	public class LalrState: GrammarObject<LalrState> {
 		private LalrAction[] actions;
 		private LalrAction[] transitionVector;
 

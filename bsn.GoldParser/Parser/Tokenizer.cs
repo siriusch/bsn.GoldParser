@@ -6,11 +6,15 @@ using System.IO;
 using bsn.GoldParser.Grammar;
 
 namespace bsn.GoldParser.Parser {
+	///<summary>
+	/// The tokenizer reads an input character stream and outputs the tokens read.
+	///</summary>
+	/// <remarks>
+	/// A pull-model is used for the tokenizer.
+	/// </remarks>
 	public class Tokenizer: ITokenizer {
+		private readonly CompiledGrammar grammar;
 		private readonly CharBuffer buffer; // Buffer to keep current characters.
-		private readonly Symbol endSymbol;
-		private readonly Symbol errorSymbol;
-		private readonly DfaState initialState;
 		private int lineNumber;
 		private int linePosition;
 
@@ -18,34 +22,18 @@ namespace bsn.GoldParser.Parser {
 		/// Initializes new instance of Parser class.
 		/// </summary>
 		/// <param name="textReader"><see cref="TextReader"/> instance to read data from.</param>
-		/// <param name="initialState">The initial DFA state</param>
-		/// <param name="endSymbol">The symbol to be used when the end is reached (EOF)</param>
-		/// <param name="errorSymbol">The symbol to be used for lexical errors</param>
-		public Tokenizer(TextReader textReader, DfaState initialState, Symbol endSymbol, Symbol errorSymbol) {
+		/// <param name="grammar">The grammar used for the DFA states</param>
+		public Tokenizer(TextReader textReader, CompiledGrammar grammar) {
+			this.grammar = grammar;
 			if (textReader == null) {
 				throw new ArgumentNullException("textReader");
 			}
-			if (initialState == null) {
-				throw new ArgumentNullException("initialState");
-			}
-			if (endSymbol == null) {
-				throw new ArgumentNullException("endSymbol");
-			}
-			if (endSymbol.Kind != SymbolKind.End) {
-				throw new ArgumentException("End symbol expected", "endSymbol");
-			}
-			if (errorSymbol == null) {
-				throw new ArgumentNullException("errorSymbol");
-			}
-			if (errorSymbol.Kind != SymbolKind.Error) {
-				throw new ArgumentException("Error symbol expected", "errorSymbol");
+			if (grammar == null) {
+				throw new ArgumentNullException("grammar");
 			}
 			buffer = new CharBuffer(textReader);
 			linePosition = 1;
 			lineNumber = 1;
-			this.endSymbol = endSymbol;
-			this.errorSymbol = errorSymbol;
-			this.initialState = initialState;
 		}
 
 		/// <summary>
@@ -86,17 +74,27 @@ namespace bsn.GoldParser.Parser {
 		}
 
 		/// <summary>
+		/// Gets the grammar.
+		/// </summary>
+		/// <value>The grammar.</value>
+		public CompiledGrammar Grammar {
+			get {
+				return grammar;
+			}
+		}
+
+		/// <summary>
 		/// Reads next token from the input stream.
 		/// </summary>
 		/// <returns>Token symbol which was read.</returns>
 		public ParseMessage NextToken(out TextToken token) {
 			using (CharBuffer.Mark mark = buffer.CreateMark()) {
 				using (CharBuffer.Mark acceptMark = buffer.CreateMark()) {
-					ParseMessage result = ParseMessage.None;
+					ParseMessage result;
 					LineInfo tokenPosition = new LineInfo(InputIndex, lineNumber, linePosition);
 					List<int> lineBreakPositions = null;
 					Symbol tokenSymbol = null;
-					DfaState state = initialState;
+					DfaState state = grammar.DfaInitialState;
 					char ch;
 					while (buffer.TryReadChar(out ch)) {
 						if (ch == '\n') {
@@ -119,7 +117,7 @@ namespace bsn.GoldParser.Parser {
 								acceptMark.MoveToReadPosition();
 								buffer.MoveToMark(mark);
 								buffer.TryReadChar(out ch);
-								tokenSymbol = errorSymbol;
+								tokenSymbol = grammar.ErrorSymbol;
 							} else {
 								buffer.StepBack(1);
 							}
@@ -135,7 +133,7 @@ namespace bsn.GoldParser.Parser {
 					}
 					if (tokenSymbol == null) {
 						acceptMark.MoveToReadPosition();
-						tokenSymbol = endSymbol;
+						tokenSymbol = grammar.EndSymbol;
 					}
 					switch (tokenSymbol.Kind) {
 					case SymbolKind.CommentLine:
@@ -148,7 +146,7 @@ namespace bsn.GoldParser.Parser {
 					case SymbolKind.CommentStart:
 						SymbolKind kind;
 						do {
-							kind = NextToken(out token) != ParseMessage.None ? token.ParentSymbol.Kind : SymbolKind.Error;
+							kind = NextToken(out token) != ParseMessage.None ? token.Symbol.Kind : SymbolKind.Error;
 						} while ((kind != SymbolKind.End) && (kind != SymbolKind.CommentEnd));
 						result = (kind == SymbolKind.CommentEnd) ? ParseMessage.CommentBlockRead : ParseMessage.CommentError;
 						break;

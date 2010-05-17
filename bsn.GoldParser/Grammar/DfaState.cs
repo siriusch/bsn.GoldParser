@@ -7,7 +7,7 @@ namespace bsn.GoldParser.Grammar {
 	/// State in the Deterministic Finite Automata 
 	/// which is used by the tokenizer.
 	/// </summary>
-	public sealed class DfaState: GrammarObject {
+	public sealed class DfaState: GrammarObject<DfaState> {
 		private readonly Dictionary<char, DfaState> transitionVector = new Dictionary<char, DfaState>();
 		private Symbol acceptSymbol;
 

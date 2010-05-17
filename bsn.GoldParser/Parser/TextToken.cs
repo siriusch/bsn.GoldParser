@@ -8,7 +8,7 @@ namespace bsn.GoldParser.Parser {
 	/// Represents data about current token.
 	/// </summary>
 	public sealed class TextToken: Token {
-		private readonly Symbol parentSymbol; // Token symbol.
+		private readonly Symbol symbol; // Token symbol.
 		private readonly LineInfo position; // Token source line number.
 		private readonly string text; // Token text.
 
@@ -19,14 +19,14 @@ namespace bsn.GoldParser.Parser {
 			if (text == null) {
 				throw new ArgumentNullException("text");
 			}
-			parentSymbol = symbol;
+			this.symbol = symbol;
 			this.position = position;
-			this.text = parentSymbol.Name.Equals(text, StringComparison.OrdinalIgnoreCase) ? parentSymbol.Name : text; // "intern" the strings which are equal to the terminal name
+			this.text = this.symbol.Name.Equals(text, StringComparison.OrdinalIgnoreCase) ? this.symbol.Name : text; // "intern" the strings which are equal to the terminal name
 		}
 
-		public override Symbol ParentSymbol {
+		public override Symbol Symbol {
 			get {
-				return parentSymbol;
+				return symbol;
 			}
 		}
 

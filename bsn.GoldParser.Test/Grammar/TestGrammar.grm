@@ -19,12 +19,12 @@ Float = {Digit}*'.'{Digit}+([Ee][+-]?{Digit}+)?
 
 ! ------------------------------------------------- Rules
 
-<Expression>  ::= <Expression> '+' <Mult Exp> 
-                | <Expression> '-' <Mult Exp> 
+<Expression>  ::= <Expression> '+' <Mult Exp>
+                | <Expression> '-' <Mult Exp>
                 | <Mult Exp> 
 
-<Mult Exp>    ::= <Mult Exp> '*' <Negate Exp> 
-                | <Mult Exp> '/' <Negate Exp> 
+<Mult Exp>    ::= <Mult Exp> '*' <Negate Exp>
+                | <Mult Exp> '/' <Negate Exp>
                 | <Negate Exp> 
 
 <Negate Exp>  ::= '-' <Value> 

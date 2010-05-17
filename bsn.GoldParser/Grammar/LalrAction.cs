@@ -7,7 +7,7 @@ namespace bsn.GoldParser.Grammar {
 	/// <summary>
 	/// Action in a LR State. 
 	/// </summary>
-	public abstract class LalrAction: GrammarObject {
+	public abstract class LalrAction: GrammarObject<LalrAction> {
 		private readonly Symbol symbol;
 
 		/// <summary>

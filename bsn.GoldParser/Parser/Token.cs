@@ -10,17 +10,11 @@ namespace bsn.GoldParser.Parser {
 	public abstract class Token {
 		private LalrState state;
 
-		public virtual Token[] Children {
-			get {
-				return new Token[0];
-			}
-		}
-
 		/// <summary>
 		/// Gets the symbol associated with this token.
 		/// </summary>
 		/// <value>The parent symbol.</value>
-		public abstract Symbol ParentSymbol {
+		public abstract Symbol Symbol {
 			get;
 		}
 

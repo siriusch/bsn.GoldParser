@@ -74,7 +74,7 @@ namespace bsn.GoldParser.Xml {
 			lineAttribute = this.nametable.Add("line");
 			columnAttribute = this.nametable.Add("column");
 			readState = ReadState.Initial;
-			if ((root != null) && (root.ParentSymbol != null)) {
+			if ((root != null) && (root.Symbol != null)) {
 				current = root;
 			}
 		}
@@ -177,7 +177,7 @@ namespace bsn.GoldParser.Xml {
 					break;
 				default:
 					if ((current != null) && (elementPosition != ElementPosition.Text)) {
-						return nametable.Add(current.ParentSymbol.XmlName);
+						return nametable.Add(current.Symbol.XmlName);
 					}
 					break;
 				}
@@ -480,11 +480,15 @@ namespace bsn.GoldParser.Xml {
 					if (IsTerminal) {
 						elementPosition = ElementPosition.Text;
 						return true;
-					}
-					if (current.Children.Length > 0) {
-						stack.Push(new KeyValuePair<Token, int>(current, 0));
-						current = current.Children[0];
-						return true;
+					} else {
+						Reduction reduction = current as Reduction;
+						if (reduction != null) {
+							if (reduction.Children.Length > 0) {
+								stack.Push(new KeyValuePair<Token, int>(reduction, 0));
+								current = reduction.Children[0];
+								return true;
+							}
+						}
 					}
 					elementPosition = ElementPosition.End;
 					return true;
@@ -495,8 +499,9 @@ namespace bsn.GoldParser.Xml {
 					if (stack.Count > 0) {
 						KeyValuePair<Token, int> pair = stack.Pop();
 						current = pair.Key;
-						if (pair.Value < (current.Children.Length-1)) {
-							current = current.Children[pair.Value+1];
+						Reduction reduction = (Reduction)current;
+						if (pair.Value < (reduction.Children.Length-1)) {
+							current = reduction.Children[pair.Value+1];
 							stack.Push(new KeyValuePair<Token, int>(pair.Key, pair.Value+1));
 							elementPosition = ElementPosition.Start;
 						}

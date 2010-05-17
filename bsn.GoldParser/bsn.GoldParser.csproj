@@ -90,6 +90,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Parser\ITokenizer.cs" />
+    <Compile Include="Semantic\RuleAttribute.cs" />
+    <Compile Include="Semantic\RuleDeclarationParser.cs" />
+    <Compile Include="Semantic\SemanticActions.cs" />
+    <Compile Include="Semantic\SemanticProcessor.cs" />
     <Compile Include="Parser\Tokenizer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
@@ -137,10 +141,15 @@
     <Compile Include="Parser\TextToken.cs" />
     <Compile Include="Parser\Token.cs" />
     <Compile Include="Parser\TokenParseResult.cs" />
+    <Compile Include="Semantic\SemanticToken.cs" />
+    <Compile Include="Semantic\SemanticTokenConverter.cs" />
+    <Compile Include="Semantic\SemanticTokenFactory.cs" />
     <Compile Include="Xml\GrammarXmlProcessor.cs" />
     <Compile Include="Xml\ProcessResult.cs" />
     <Compile Include="Xml\TokenXmlReader.cs" />
     <None Include="Grammar\GoldParser.txt" />
+    <EmbeddedResource Include="Semantic\GoldRuleDeclaration.cgt" />
+    <None Include="Semantic\GoldRuleDeclaration.grm" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

@@ -9,11 +9,11 @@ namespace bsn.GoldParser.Grammar {
 	/// Rule is the logical structures of the grammar.
 	/// </summary>
 	/// <remarks>
-	/// Rules consist of a head containing a nonterminal 
+	/// Rules consist of a ruleSymbol containing a nonterminal 
 	/// followed by a series of both nonterminals and terminals.
 	/// </remarks>	
-	public sealed class Rule: GrammarObject, ICollection<Symbol> {
-		private Symbol head;
+	public sealed class Rule: GrammarObject<Rule>, ICollection<Symbol> {
+		private Symbol ruleSymbol;
 		private bool isOneNonTerminal;
 		private Symbol[] symbols;
 
@@ -59,11 +59,11 @@ namespace bsn.GoldParser.Grammar {
 		}
 
 		/// <summary>
-		/// Gets the head symbol of the rule.
+		/// Gets the ruleSymbol symbol of the rule.
 		/// </summary>
-		public Symbol Head {
+		public Symbol RuleSymbol {
 			get {
-				return head;
+				return ruleSymbol;
 			}
 		}
 
@@ -72,7 +72,7 @@ namespace bsn.GoldParser.Grammar {
 		/// </summary>
 		public string Name {
 			get {
-				return '<'+head.Name+'>';
+				return '<'+ruleSymbol.Name+'>';
 			}
 		}
 
@@ -137,12 +137,16 @@ namespace bsn.GoldParser.Grammar {
 		/// <param name="symbols">The symbols.</param>
 		/// <returns></returns>
 		public bool Matches(ICollection<Symbol> symbols) {
+			if (symbols == null) {
+				throw new ArgumentNullException("symbols");
+			}
+			if (symbols.Count != this.symbols.Length) {
+				return false;
+			}
 			int index = 0;
 			foreach (Symbol symbol in symbols) {
-				if (symbol != null) {
-					if (symbol != this.symbols[index++]) {
-						return false;
-					}
+				if (symbol != this.symbols[index++]) {
+					return false;
 				}
 			}
 			return true;
@@ -157,7 +161,7 @@ namespace bsn.GoldParser.Grammar {
 		}
 
 		/// <summary>
-		/// Initializes the specified head.
+		/// Initializes the specified ruleSymbol.
 		/// </summary>
 		/// <param name="head">Nonterminal of the rule.</param>
 		/// <param name="symbols">Terminal and nonterminal symbols of the rule.</param>
@@ -168,10 +172,10 @@ namespace bsn.GoldParser.Grammar {
 			if (symbols == null) {
 				throw new ArgumentNullException("symbols");
 			}
-			if (this.head != null) {
+			if (this.ruleSymbol != null) {
 				throw new InvalidOperationException("The rule has already been initialized");
 			}
-			this.head = head;
+			this.ruleSymbol = head;
 			this.symbols = symbols;
 			isOneNonTerminal = (symbols.Length == 1) && (symbols[0].Kind == SymbolKind.NonTerminal);
 		}

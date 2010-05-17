@@ -1,8 +1,9 @@
 ﻿// (C) 2010 Arsène von Wyss / bsn
 using System;
+using System.Runtime.CompilerServices;
 
 namespace bsn.GoldParser.Grammar {
-	public abstract class GrammarObject {
+	public abstract class GrammarObject<TSelf>: IEquatable<TSelf> where TSelf: GrammarObject<TSelf> {
 		private readonly int index;
 		private readonly CompiledGrammar owner;
 
@@ -27,6 +28,18 @@ namespace bsn.GoldParser.Grammar {
 			get {
 				return owner;
 			}
+		}
+
+		public bool Equals(TSelf other) {
+			return ReferenceEquals(this, other);
+		}
+
+		public sealed override int GetHashCode() {
+			return base.GetHashCode();
+		}
+
+		public sealed override bool Equals(object other) {
+			return ReferenceEquals(this, other);
 		}
 	}
 }
