@@ -43,7 +43,7 @@ namespace bsn.GoldParser.Parser {
 		}
 
 		public override string ToString() {
-			return Text;
+			return text;
 		}
 	}
 }

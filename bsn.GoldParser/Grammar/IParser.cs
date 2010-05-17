@@ -10,8 +10,8 @@ namespace bsn.GoldParser.Grammar {
 		}
 
 		bool CanTrim(Rule rule);
-		Token CreateReduction(Rule rule);
-		Token PopToken();
-		void PushTokenAndState(Token token, LalrState state);
+		IToken CreateReduction(Rule rule);
+		IToken PopToken();
+		void PushTokenAndState(IToken token, LalrState state);
 	}
 }

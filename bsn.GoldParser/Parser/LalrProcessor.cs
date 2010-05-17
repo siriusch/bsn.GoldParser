@@ -11,21 +11,7 @@ namespace bsn.GoldParser.Parser {
 	/// Pull parser which uses Grammar table to parse input stream.
 	/// </summary>
 	public class LalrProcessor: IParser {
-		private class RootToken: Token {
-			public override LineInfo Position {
-				get {
-					return default(LineInfo);
-				}
-			}
-
-			public override Symbol Symbol {
-				get {
-					return null;
-				}
-			}
-		}
-
-		private readonly Stack<KeyValuePair<Token, LalrState>> tokenStack; // Stack of LR states used for LR parsing.
+		private readonly Stack<KeyValuePair<IToken, LalrState>> tokenStack; // Stack of LR states used for LR parsing.
 		private readonly ITokenizer tokenizer;
 		private readonly bool trim;
 		private LalrState currentState;
@@ -51,15 +37,15 @@ namespace bsn.GoldParser.Parser {
 			this.tokenizer = tokenizer;
 			currentState = tokenizer.Grammar.InitialLRState;
 			this.trim = trim;
-			tokenStack = new Stack<KeyValuePair<Token, LalrState>>();
-			tokenStack.Push(new KeyValuePair<Token, LalrState>(new RootToken(), currentState));
+			tokenStack = new Stack<KeyValuePair<IToken, LalrState>>();
+			tokenStack.Push(new KeyValuePair<IToken, LalrState>(null, currentState));
 		}
 
 		/// <summary>
 		/// Gets the current currentToken.
 		/// </summary>
 		/// <value>The current currentToken.</value>
-		public Token CurrentToken {
+		public IToken CurrentToken {
 			get {
 				if (currentToken != null) {
 					return currentToken;
@@ -160,7 +146,7 @@ namespace bsn.GoldParser.Parser {
 			return inputToken;
 		}
 
-		protected virtual Token CreateReduction(Rule rule, Token[] children) {
+		protected virtual Token CreateReduction(Rule rule, IToken[] children) {
 			return new Reduction(rule, children);
 		}
 
@@ -168,20 +154,20 @@ namespace bsn.GoldParser.Parser {
 			return CanTrim(rule);
 		}
 
-		Token IParser.PopToken() {
+		IToken IParser.PopToken() {
 			return tokenStack.Pop().Key;
 		}
 
-		void IParser.PushTokenAndState(Token token, LalrState state) {
+		void IParser.PushTokenAndState(IToken token, LalrState state) {
 			Debug.Assert(token != null);
 			Debug.Assert(state != null);
-			tokenStack.Push(new KeyValuePair<Token, LalrState>(token, state));
+			tokenStack.Push(new KeyValuePair<IToken, LalrState>(token, state));
 			currentState = state;
 		}
 
-		Token IParser.CreateReduction(Rule rule) {
+		IToken IParser.CreateReduction(Rule rule) {
 			Debug.Assert(rule != null);
-			Token[] tokens = new Token[rule.SymbolCount];
+			IToken[] tokens = new Token[rule.SymbolCount];
 			for (int i = tokens.Length-1; i >= 0; i--) {
 				tokens[i] = tokenStack.Pop().Key;
 			}

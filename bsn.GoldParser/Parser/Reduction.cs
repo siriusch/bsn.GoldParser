@@ -11,9 +11,9 @@ namespace bsn.GoldParser.Parser {
 	/// </summary>
 	public class Reduction: Token {
 		private readonly Rule rule;
-		private readonly Token[] tokens;
+		private readonly IToken[] tokens;
 
-		internal Reduction(Rule rule, Token[] tokens): base() {
+		internal Reduction(Rule rule, IToken[] tokens): base() {
 			if (rule == null) {
 				throw new ArgumentNullException("rule");
 			}
@@ -24,7 +24,7 @@ namespace bsn.GoldParser.Parser {
 			this.tokens = tokens;
 		}
 
-		public Token[] Children {
+		public IToken[] Children {
 			[DebuggerStepThrough]
 			get {
 				return tokens;

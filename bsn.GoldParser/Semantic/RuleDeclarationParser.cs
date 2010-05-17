@@ -35,7 +35,7 @@ namespace bsn.GoldParser.Semantic {
 
 		internal static bool TryBind(Reduction ruleDeclaration, CompiledGrammar grammar, out Rule rule) {
 			Symbol ruleSymbol;
-			if (grammar.TryGetSymbol(ruleDeclaration.Children[0].Text, out ruleSymbol)) {
+			if (grammar.TryGetSymbol(ruleDeclaration.Children[0].ToString(), out ruleSymbol)) {
 				ReadOnlyCollection<Rule> rules;
 				if (grammar.TryGetRulesForSymbol(ruleSymbol, out rules)) {
 					List<Symbol> symbols = new List<Symbol>();

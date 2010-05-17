@@ -7,9 +7,7 @@ namespace bsn.GoldParser.Parser {
 	/// <summary>
 	/// The <c>Token</c> class is the non-generic base class for tokens in the AST (abstract syntax tree).
 	/// </summary>
-	public abstract class Token {
-		private LalrState state;
-
+	public abstract class Token: IToken {
 		/// <summary>
 		/// Gets the symbol associated with this token.
 		/// </summary>

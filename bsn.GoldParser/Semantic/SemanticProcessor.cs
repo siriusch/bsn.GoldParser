@@ -25,7 +25,7 @@ namespace bsn.GoldParser.Semantic {
 			return !actions.TryGetFactory(rule, out dummy);
 		}
 
-		protected override Token CreateReduction(Rule rule, Token[] children) {
+		protected override Token CreateReduction(Rule rule, IToken[] children) {
 			SemanticTokenFactory factory;
 			if (actions.TryGetFactory(rule, out factory)) {
 				Debug.Assert(factory != null);

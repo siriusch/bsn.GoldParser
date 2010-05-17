@@ -16,7 +16,7 @@ namespace bsn.GoldParser.Semantic {
 			get;
 		}
 
-		internal abstract Token CreateInternal(Rule rule, Token[] tokens);
+		internal abstract Token CreateInternal(Rule rule, IToken[] tokens);
 	}
 
 	public abstract class SemanticTokenFactory<T>: SemanticTokenFactory where T: Token {
@@ -26,9 +26,9 @@ namespace bsn.GoldParser.Semantic {
 			}
 		}
 
-		protected abstract T Create(Rule rule, Token[] tokens);
+		protected abstract T Create(Rule rule, IToken[] tokens);
 
-		internal override sealed Token CreateInternal(Rule rule, Token[] tokens) {
+		internal override sealed Token CreateInternal(Rule rule, IToken[] tokens) {
 			return Create(rule, tokens);
 		}
 	}

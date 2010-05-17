@@ -7,7 +7,7 @@ using NUnit.Framework;
 namespace bsn.GoldParser.Parser {
 	[TestFixture]
 	public class LalrProcessorTest: AssertionHelper {
-		private int CountTokens(Token currentToken) {
+		private int CountTokens(IToken currentToken) {
 			int result = 1;
 			Reduction reduction = currentToken as Reduction;
 			if (reduction != null) {
