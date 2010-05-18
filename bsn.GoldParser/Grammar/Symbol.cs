@@ -99,7 +99,7 @@ namespace bsn.GoldParser.Grammar {
 		public override string ToString() {
 			if (text == null) {
 				switch (Kind) {
-				case SymbolKind.NonTerminal:
+				case SymbolKind.Nonterminal:
 					text = '<'+Name+'>';
 					break;
 				case SymbolKind.Terminal:

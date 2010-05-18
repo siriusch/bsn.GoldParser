@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Text;
 
 using bsn.GoldParser.Grammar;
 using bsn.GoldParser.Parser;
@@ -16,9 +17,10 @@ namespace bsn.GoldParser.Semantic {
 			}
 		}
 
+
 		internal static bool TryParse(string ruleString, out Reduction ruleToken) {
 			using (StringReader reader = new StringReader(ruleString)) {
-				ITokenizer tokenizer = new Tokenizer(reader, ruleGrammar);
+				Tokenizer tokenizer = new Tokenizer(reader, ruleGrammar);
 				LalrProcessor processor = new LalrProcessor(tokenizer);
 				ParseMessage message;
 				do {
@@ -40,7 +42,7 @@ namespace bsn.GoldParser.Semantic {
 				if (grammar.TryGetRulesForSymbol(ruleSymbol, out rules)) {
 					List<Symbol> symbols = new List<Symbol>();
 					Reduction handle = (Reduction)ruleDeclaration.Children[2];
-					while (handle.Children.Length == 2) {
+					while (handle.Children.Count == 2) {
 						Symbol symbol;
 						if (!grammar.TryGetSymbol(handle.Children[0].ToString(), out symbol)) {
 							symbols = null;

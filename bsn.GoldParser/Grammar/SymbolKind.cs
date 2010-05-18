@@ -9,7 +9,7 @@ namespace bsn.GoldParser.Grammar {
 		/// <summary>
 		/// Normal nonterminal
 		/// </summary>
-		NonTerminal = 0,
+		Nonterminal = 0,
 
 		/// <summary>
 		/// Normal terminal

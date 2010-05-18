@@ -11,7 +11,7 @@ namespace bsn.GoldParser.Grammar {
 			}
 		}
 
-		internal override TokenParseResult Execute(IParser parser, IToken token) {
+		internal override TokenParseResult Execute<T>(IParser<T> parser, T token) {
 			return TokenParseResult.Accept;
 		}
 	}

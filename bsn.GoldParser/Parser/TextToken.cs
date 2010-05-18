@@ -12,7 +12,7 @@ namespace bsn.GoldParser.Parser {
 		private readonly LineInfo position; // Token source line number.
 		private readonly string text; // Token text.
 
-		internal TextToken(Symbol symbol, string text, LineInfo position) {
+		internal TextToken(Symbol symbol, LineInfo position, string text) {
 			if (symbol == null) {
 				throw new ArgumentNullException("symbol");
 			}

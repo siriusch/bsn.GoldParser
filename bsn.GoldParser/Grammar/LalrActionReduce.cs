@@ -27,9 +27,9 @@ namespace bsn.GoldParser.Grammar {
 			}
 		}
 
-		internal override TokenParseResult Execute(IParser parser, IToken token) {
-			bool trim = reduceRule.ContainsOneNonTerminal && parser.CanTrim(reduceRule);
-			IToken head;
+		internal override TokenParseResult Execute<T>(IParser<T> parser, T token) {
+			bool trim = reduceRule.ContainsOneNonterminal && parser.CanTrim(reduceRule);
+			T head;
 			if (trim) {
 				head = parser.PopToken();
 			} else {

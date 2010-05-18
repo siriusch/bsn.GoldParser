@@ -45,6 +45,6 @@ namespace bsn.GoldParser.Grammar {
 			return string.Format("Action {0}: {1}, Symbol {2}, Target: {3}", Index, ActionType, Symbol, Target);
 		}
 
-		internal abstract TokenParseResult Execute(IParser parser, IToken token);
+		internal abstract TokenParseResult Execute<T>(IParser<T> parser, T token) where T: IToken;
 	}
 }

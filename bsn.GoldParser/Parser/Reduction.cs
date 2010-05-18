@@ -1,5 +1,6 @@
 ﻿// (C) 2010 Arsène von Wyss / bsn
 using System;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Text;
 
@@ -11,9 +12,9 @@ namespace bsn.GoldParser.Parser {
 	/// </summary>
 	public class Reduction: Token {
 		private readonly Rule rule;
-		private readonly IToken[] tokens;
+		private readonly ReadOnlyCollection<Token> tokens;
 
-		internal Reduction(Rule rule, IToken[] tokens): base() {
+		internal Reduction(Rule rule, ReadOnlyCollection<Token> tokens): base() {
 			if (rule == null) {
 				throw new ArgumentNullException("rule");
 			}
@@ -24,7 +25,7 @@ namespace bsn.GoldParser.Parser {
 			this.tokens = tokens;
 		}
 
-		public IToken[] Children {
+		public ReadOnlyCollection<Token> Children {
 			[DebuggerStepThrough]
 			get {
 				return tokens;
@@ -41,7 +42,7 @@ namespace bsn.GoldParser.Parser {
 		public sealed override LineInfo Position {
 			[DebuggerStepThrough]
 			get {
-				return tokens.Length > 0 ? tokens[0].Position : default(LineInfo);
+				return tokens.Count > 0 ? tokens[0].Position : default(LineInfo);
 			}
 		}
 

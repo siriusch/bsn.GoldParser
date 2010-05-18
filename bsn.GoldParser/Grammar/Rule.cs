@@ -14,7 +14,7 @@ namespace bsn.GoldParser.Grammar {
 	/// </remarks>	
 	public sealed class Rule: GrammarObject<Rule>, ICollection<Symbol> {
 		private Symbol ruleSymbol;
-		private bool isOneNonTerminal;
+		private bool isOneNonterminal;
 		private Symbol[] symbols;
 
 		/// <summary>
@@ -36,9 +36,9 @@ namespace bsn.GoldParser.Grammar {
 		/// Gets true if the rule contains exactly one symbol.
 		/// </summary>
 		/// <remarks>Used by the Parser object to TrimReductions</remarks>
-		public bool ContainsOneNonTerminal {
+		public bool ContainsOneNonterminal {
 			get {
-				return isOneNonTerminal;
+				return isOneNonterminal;
 			}
 		}
 
@@ -85,9 +85,9 @@ namespace bsn.GoldParser.Grammar {
 			}
 		}
 
-		internal bool IsOneNonTerminal {
+		internal bool IsOneNonterminal {
 			get {
-				return isOneNonTerminal;
+				return isOneNonterminal;
 			}
 		}
 
@@ -177,7 +177,7 @@ namespace bsn.GoldParser.Grammar {
 			}
 			this.ruleSymbol = head;
 			this.symbols = symbols;
-			isOneNonTerminal = (symbols.Length == 1) && (symbols[0].Kind == SymbolKind.NonTerminal);
+			isOneNonterminal = (symbols.Length == 1) && (symbols[0].Kind == SymbolKind.Nonterminal);
 		}
 	}
 }

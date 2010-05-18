@@ -32,8 +32,8 @@ namespace bsn.GoldParser.Parser {
 		public void CheckLexicalError() {
 			CompiledGrammar grammar = CompiledGrammarTest.LoadTestGrammar();
 			using (TestStringReader reader = new TestStringReader("1+x*200")) {
-				ITokenizer tokenizer = new Tokenizer(reader, grammar);
-				TextToken token;
+				Tokenizer tokenizer = new Tokenizer(reader, grammar);
+				Token token;
 				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
 				Expect(token.Symbol.Kind, EqualTo(SymbolKind.Terminal));
 				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
@@ -53,8 +53,8 @@ namespace bsn.GoldParser.Parser {
 		public void CheckTokens() {
 			CompiledGrammar grammar = CompiledGrammarTest.LoadTestGrammar();
 			using (TestStringReader reader = GetReader()) {
-				ITokenizer tokenizer = new Tokenizer(reader, grammar);
-				TextToken token;
+				Tokenizer tokenizer = new Tokenizer(reader, grammar);
+				Token token;
 				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
 				Expect(token.Text, EqualTo("0"));
 				Expect(token.Position.Index, EqualTo(0));

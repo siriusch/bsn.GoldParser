@@ -332,7 +332,7 @@ namespace bsn.GoldParser.Grammar {
 			if (symbol.Owner != this) {
 				throw new ArgumentException("The symbol belongs to another grammar");
 			}
-			if (symbol.Kind != SymbolKind.NonTerminal) {
+			if (symbol.Kind != SymbolKind.Nonterminal) {
 				rules = null;
 				return false;
 			}
@@ -678,13 +678,13 @@ namespace bsn.GoldParser.Grammar {
 		/// </summary>
 		private void ReadRules() {
 			int index = ReadInt16Entry();
-			Symbol nonTerminal = symbolTable[ReadInt16Entry()];
+			Symbol nonterminal = symbolTable[ReadInt16Entry()];
 			ReadEmptyEntry();
 			Symbol[] symbols = new Symbol[entryCount];
 			for (int i = 0; i < symbols.Length; i++) {
 				symbols[i] = symbolTable[ReadInt16Entry()];
 			}
-			GetRule(index).Initialize(nonTerminal, symbols);
+			GetRule(index).Initialize(nonterminal, symbols);
 		}
 
 		/// <summary>

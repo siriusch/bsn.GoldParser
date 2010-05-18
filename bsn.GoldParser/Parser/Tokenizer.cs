@@ -12,7 +12,7 @@ namespace bsn.GoldParser.Parser {
 	/// <remarks>
 	/// A pull-model is used for the tokenizer.
 	/// </remarks>
-	public class Tokenizer: ITokenizer {
+	public abstract class Tokenizer<T>: ITokenizer<T> where T: IToken {
 		private readonly CompiledGrammar grammar;
 		private readonly CharBuffer buffer; // Buffer to keep current characters.
 		private int lineNumber;
@@ -23,7 +23,7 @@ namespace bsn.GoldParser.Parser {
 		/// </summary>
 		/// <param name="textReader"><see cref="TextReader"/> instance to read data from.</param>
 		/// <param name="grammar">The grammar used for the DFA states</param>
-		public Tokenizer(TextReader textReader, CompiledGrammar grammar) {
+		protected Tokenizer(TextReader textReader, CompiledGrammar grammar) {
 			this.grammar = grammar;
 			if (textReader == null) {
 				throw new ArgumentNullException("textReader");
@@ -87,7 +87,7 @@ namespace bsn.GoldParser.Parser {
 		/// Reads next token from the input stream.
 		/// </summary>
 		/// <returns>Token symbol which was read.</returns>
-		public ParseMessage NextToken(out TextToken token) {
+		public ParseMessage NextToken(out T token) {
 			using (CharBuffer.Mark mark = buffer.CreateMark()) {
 				using (CharBuffer.Mark acceptMark = buffer.CreateMark()) {
 					ParseMessage result;
@@ -172,10 +172,28 @@ namespace bsn.GoldParser.Parser {
 						// no linebreak was encountered, so we need to move the column
 						linePosition += mark.Distance;
 					}
-					token = new TextToken(tokenSymbol, mark.Text, tokenPosition);
+					token = CreateToken(tokenSymbol, tokenPosition, mark.Text);
 					return result;
 				}
 			}
+		}
+
+		protected abstract T CreateToken(Symbol tokenSymbol, LineInfo tokenPosition, string text);
+	}
+
+	/// <summary>
+	/// A concrete tokenizer creating the normal <see cref="TextToken"/> as tokens.
+	/// </summary>
+	public class Tokenizer: Tokenizer<Token> {
+		/// <summary>
+		/// Initializes a new instance of the <see cref="Tokenizer"/> class.
+		/// </summary>
+		/// <param name="textReader"><see cref="TextReader"/> instance to read data from.</param>
+		/// <param name="grammar">The grammar used for the DFA states</param>
+		public Tokenizer(TextReader textReader, CompiledGrammar grammar): base(textReader, grammar) {}
+
+		protected override Token CreateToken(Symbol tokenSymbol, LineInfo tokenPosition, string text) {
+			return new TextToken(tokenSymbol, tokenPosition, text);
 		}
 	}
 }

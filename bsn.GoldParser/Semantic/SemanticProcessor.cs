@@ -1,11 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 
 using bsn.GoldParser.Grammar;
 using bsn.GoldParser.Parser;
 
 namespace bsn.GoldParser.Semantic {
-	public class SemanticProcessor<T>: LalrProcessor where T: Token {
+	public class SemanticProcessor<T>: LalrProcessor<T> where T: IToken {
 		private readonly SemanticActions<T> actions;
 
 		private static CompiledGrammar GetGrammar(SemanticActions<T> actions) {
@@ -15,38 +17,23 @@ namespace bsn.GoldParser.Semantic {
 			return actions.Grammar;
 		}
 
-		public SemanticProcessor(ITokenizer tokenizer, SemanticActions<T> actions)
+		public SemanticProcessor(ITokenizer<T> tokenizer, SemanticActions<T> actions)
 			: base(tokenizer) {
 			this.actions = actions;
 		}
 
 		protected override bool CanTrim(Rule rule) {
-			SemanticTokenFactory dummy;
+			SemanticTokenFactory<T> dummy;
 			return !actions.TryGetFactory(rule, out dummy);
 		}
 
-		protected override Token CreateReduction(Rule rule, IToken[] children) {
-			SemanticTokenFactory factory;
+		protected override T CreateReduction(Rule rule, ReadOnlyCollection<T> children) {
+			SemanticTokenFactory<T> factory;
 			if (actions.TryGetFactory(rule, out factory)) {
 				Debug.Assert(factory != null);
 				return factory.CreateInternal(rule, children);
 			}
-			return base.CreateReduction(rule, children);
-		}
-
-		protected override Token ConvertToken(TextToken inputToken) {
-			SemanticTokenConverter converter;
-			if (actions.TryGetConverter(inputToken.Symbol, out converter)) {
-				Debug.Assert(converter != null);
-				return converter.ConvertInternal(inputToken);
-			}
-			return base.ConvertToken(inputToken);
-		}
-
-		public T Result {
-			get {
-				return CurrentToken as T;
-			}
+			throw new InvalidOperationException(string.Format("Missing a token type for the rule {0}", rule.Definition));
 		}
 	}
 }

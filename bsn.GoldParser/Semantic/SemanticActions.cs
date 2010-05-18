@@ -1,15 +1,15 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 using bsn.GoldParser.Grammar;
 using bsn.GoldParser.Parser;
 
 namespace bsn.GoldParser.Semantic {
-	public class SemanticActions<T> where T: Token {
+	public class SemanticActions<T> where T: IToken {
 		private readonly CompiledGrammar grammar;
 		private readonly Dictionary<string, Symbol> symbols = new Dictionary<string, Symbol>(StringComparer.Ordinal);
 		private readonly Dictionary<Symbol, ICollection<Rule>> rulesOfSymbol = new Dictionary<Symbol, ICollection<Rule>>();
-		private readonly Dictionary<Rule, SemanticTokenFactory> factories = new Dictionary<Rule, SemanticTokenFactory>();
+		private readonly Dictionary<Rule, SemanticTokenFactory<T>> factories = new Dictionary<Rule, SemanticTokenFactory<T>>();
 		private readonly Dictionary<Symbol, SemanticTokenConverter> converters = new Dictionary<Symbol, SemanticTokenConverter>();
 
 		public SemanticActions(CompiledGrammar grammar) {
@@ -21,7 +21,7 @@ namespace bsn.GoldParser.Semantic {
 				Symbol symbol = grammar.GetSymbol(i);
 				switch (symbol.Kind) {
 				case SymbolKind.Terminal:
-				case SymbolKind.NonTerminal:
+				case SymbolKind.Nonterminal:
 					symbols.Add(symbol.ToString(), symbol);
 					break;
 				}
@@ -66,7 +66,7 @@ namespace bsn.GoldParser.Semantic {
 			throw new ArgumentException("The specified rule does not exist in the grammar with these symbols", "ruleName");
 		}
 
-		public void RegisterSemanticTokenCreator(Rule rule, SemanticTokenFactory creator) {
+		public void RegisterSemanticTokenCreator(Rule rule, SemanticTokenFactory<T> creator) {
 			if (rule == null) {
 				throw new ArgumentNullException("rule");
 			}
@@ -95,7 +95,7 @@ namespace bsn.GoldParser.Semantic {
 			converters.Add(symbol, converter);
 		}
 
-		public bool TryGetFactory(Rule rule, out SemanticTokenFactory factory) {
+		public bool TryGetFactory(Rule rule, out SemanticTokenFactory<T> factory) {
 			return factories.TryGetValue(rule, out factory);
 		}
 

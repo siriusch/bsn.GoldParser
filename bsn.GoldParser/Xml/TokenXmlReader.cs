@@ -483,7 +483,7 @@ namespace bsn.GoldParser.Xml {
 					} else {
 						Reduction reduction = current as Reduction;
 						if (reduction != null) {
-							if (reduction.Children.Length > 0) {
+							if (reduction.Children.Count > 0) {
 								stack.Push(new KeyValuePair<Token, int>(reduction, 0));
 								current = reduction.Children[0];
 								return true;
@@ -500,7 +500,7 @@ namespace bsn.GoldParser.Xml {
 						KeyValuePair<Token, int> pair = stack.Pop();
 						current = pair.Key;
 						Reduction reduction = (Reduction)current;
-						if (pair.Value < (reduction.Children.Length-1)) {
+						if (pair.Value < (reduction.Children.Count-1)) {
 							current = reduction.Children[pair.Value+1];
 							stack.Push(new KeyValuePair<Token, int>(pair.Key, pair.Value+1));
 							elementPosition = ElementPosition.Start;

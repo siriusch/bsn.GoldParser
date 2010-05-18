@@ -119,14 +119,14 @@ namespace bsn.GoldParser.Grammar {
 		}
 
 		[Test]
-		public void GetNonTerminalSymbol() {
+		public void GetNonterminalSymbol() {
 			Symbol symbol = LoadTestGrammar().GetSymbolByName("<Expression>");
 			Expect(symbol, Not.Null);
 			Expect(symbol.Name, EqualTo("Expression"));
 		}
 
 		[Test]
-		public void GetNonTerminalRules() {
+		public void GetNonterminalRules() {
 			CompiledGrammar grammar = LoadTestGrammar();
 			Symbol symbol = grammar.GetSymbolByName("<Expression>");
 			Expect(symbol, Not.Null);

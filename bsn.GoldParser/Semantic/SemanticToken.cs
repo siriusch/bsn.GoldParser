@@ -4,7 +4,7 @@ using bsn.GoldParser.Grammar;
 using bsn.GoldParser.Parser;
 
 namespace bsn.GoldParser.Semantic {
-	public abstract class SemanticToken: Token {
+	public abstract class SemanticToken: IToken {
 		private readonly LineInfo position;
 		private readonly Symbol symbol;
 
@@ -16,13 +16,13 @@ namespace bsn.GoldParser.Semantic {
 			this.position = position;
 		}
 
-		public override LineInfo Position {
+		public LineInfo Position {
 			get {
 				return position;
 			}
 		}
 
-		public override Symbol Symbol {
+		public Symbol Symbol {
 			get {
 				return symbol;
 			}

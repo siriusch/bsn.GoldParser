@@ -28,7 +28,7 @@ namespace bsn.GoldParser.Parser {
 		public void ParseTreeWithTrim() {
 			CompiledGrammar grammar = CompiledGrammarTest.LoadTestGrammar();
 			using (TestStringReader reader = TokenizerTest.GetReader()) {
-				ITokenizer tokenizer = new Tokenizer(reader, grammar);
+				Tokenizer tokenizer = new Tokenizer(reader, grammar);
 				LalrProcessor processor = new LalrProcessor(tokenizer, true);
 				Expect(processor.Trim, EqualTo(true));
 				Expect(processor.Parse(), EqualTo(ParseMessage.TokenRead));
@@ -107,7 +107,7 @@ namespace bsn.GoldParser.Parser {
 		public void ParseTreeWithoutTrim() {
 			CompiledGrammar grammar = CompiledGrammarTest.LoadTestGrammar();
 			using (TestStringReader reader = TokenizerTest.GetReader()) {
-				ITokenizer tokenizer = new Tokenizer(reader, grammar);
+				Tokenizer tokenizer = new Tokenizer(reader, grammar);
 				LalrProcessor processor = new LalrProcessor(tokenizer);
 				Expect(processor.Trim, EqualTo(false));
 				Expect(processor.Parse(), EqualTo(ParseMessage.TokenRead));
