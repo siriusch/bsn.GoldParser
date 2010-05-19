@@ -1,16 +1,37 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 using bsn.GoldParser.Grammar;
 using bsn.GoldParser.Parser;
 
 namespace bsn.GoldParser.Semantic {
-	public class SemanticActions<T> where T: IToken {
-		private readonly CompiledGrammar grammar;
-		private readonly Dictionary<string, Symbol> symbols = new Dictionary<string, Symbol>(StringComparer.Ordinal);
-		private readonly Dictionary<Symbol, ICollection<Rule>> rulesOfSymbol = new Dictionary<Symbol, ICollection<Rule>>();
-		private readonly Dictionary<Rule, SemanticTokenFactory<T>> factories = new Dictionary<Rule, SemanticTokenFactory<T>>();
+	public class SemanticActions<T> where T: SemanticToken {
+		private class SemanticTokenizer: Tokenizer<SemanticToken> {
+			private readonly SemanticActions<T> actions;
+
+			public SemanticTokenizer(TextReader textReader, SemanticActions<T> actions): base(textReader, actions.Grammar) {
+				this.actions = actions;
+			}
+
+			protected override SemanticToken CreateToken(Symbol tokenSymbol, LineInfo tokenPosition, string text) {
+				return actions.CreateTerminalToken(tokenSymbol, tokenPosition, text);
+			}
+		}
+
+		internal static CompiledGrammar GetGrammar(SemanticActions<T> actions) {
+			if (actions == null) {
+				throw new ArgumentNullException("actions");
+			}
+			return actions.Grammar;
+		}
+
 		private readonly Dictionary<Symbol, SemanticTokenConverter> converters = new Dictionary<Symbol, SemanticTokenConverter>();
+		private readonly Dictionary<Rule, SemanticTokenFactory> factories = new Dictionary<Rule, SemanticTokenFactory>();
+
+		private readonly CompiledGrammar grammar;
+		private readonly Dictionary<Symbol, ICollection<Rule>> rulesOfSymbol = new Dictionary<Symbol, ICollection<Rule>>();
+		private readonly Dictionary<string, Symbol> symbols = new Dictionary<string, Symbol>(StringComparer.Ordinal);
 
 		public SemanticActions(CompiledGrammar grammar) {
 			if (grammar == null) {
@@ -43,8 +64,15 @@ namespace bsn.GoldParser.Semantic {
 			}
 		}
 
-		public Symbol FindSymbol(string symbolName) {
-			return symbols[symbolName];
+		public void AssertRulesHaveActions() {
+			for (int i = 0; i < grammar.RuleCount; i++) {
+				Rule rule = grammar.GetRule(i);
+				if (rule.SymbolCount > 1) {
+					if (!factories.ContainsKey(rule)) {
+						throw new InvalidOperationException(string.Format("Semantic action is missing for rule {0}", rule));
+					}
+				}
+			}
 		}
 
 		public Rule FindRule(string ruleName, params string[] ruleParts) {
@@ -66,17 +94,8 @@ namespace bsn.GoldParser.Semantic {
 			throw new ArgumentException("The specified rule does not exist in the grammar with these symbols", "ruleName");
 		}
 
-		public void RegisterSemanticTokenCreator(Rule rule, SemanticTokenFactory<T> creator) {
-			if (rule == null) {
-				throw new ArgumentNullException("rule");
-			}
-			if (rule.Owner != grammar) {
-				throw new ArgumentException("The rule was defined on another grammar", "rule");
-			}
-			if (creator == null) {
-				throw new ArgumentNullException("creator");
-			}
-			factories.Add(rule, creator);
+		public Symbol FindSymbol(string symbolName) {
+			return symbols[symbolName];
 		}
 
 		public void RegisterSemanticTokenConverter(Symbol symbol, SemanticTokenConverter converter) {
@@ -95,23 +114,35 @@ namespace bsn.GoldParser.Semantic {
 			converters.Add(symbol, converter);
 		}
 
-		public bool TryGetFactory(Rule rule, out SemanticTokenFactory<T> factory) {
-			return factories.TryGetValue(rule, out factory);
+		public void RegisterSemanticTokenCreator(Rule rule, SemanticTokenFactory<T> creator) {
+			if (rule == null) {
+				throw new ArgumentNullException("rule");
+			}
+			if (rule.Owner != grammar) {
+				throw new ArgumentException("The rule was defined on another grammar", "rule");
+			}
+			if (creator == null) {
+				throw new ArgumentNullException("creator");
+			}
+			factories.Add(rule, creator);
 		}
 
 		public bool TryGetConverter(Symbol symbol, out SemanticTokenConverter converter) {
 			return converters.TryGetValue(symbol, out converter);
 		}
 
-		public void AssertRulesHaveActions() {
-			for (int i = 0; i < grammar.RuleCount; i++) {
-				Rule rule = grammar.GetRule(i);
-				if (rule.SymbolCount > 1) {
-					if (!factories.ContainsKey(rule)) {
-						throw new InvalidOperationException(string.Format("Semantic action is missing for rule {0}", rule));
-					}
-				}
-			}
+		public bool TryGetFactory(Rule rule, out SemanticTokenFactory factory) {
+			return factories.TryGetValue(rule, out factory);
+		}
+
+		protected internal virtual ITokenizer<SemanticToken> CreateTokenizer(TextReader reader) {
+			return new SemanticTokenizer(reader, this);
+		}
+
+		private SemanticToken CreateTerminalToken(Symbol tokenSymbol, LineInfo tokenPosition, string text) {
+			SemanticToken result = null; // use factory here
+			result.Initialize(tokenSymbol, tokenPosition);
+			return result;
 		}
 	}
 }

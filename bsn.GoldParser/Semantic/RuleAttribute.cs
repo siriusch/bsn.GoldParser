@@ -4,7 +4,7 @@ using bsn.GoldParser.Grammar;
 using bsn.GoldParser.Parser;
 
 namespace bsn.GoldParser.Semantic {
-	[AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
+	[AttributeUsage(AttributeTargets.Constructor, AllowMultiple = true, Inherited = true)]
 	public sealed class RuleAttribute: Attribute {
 		private readonly Reduction parsedRule;
 
@@ -28,9 +28,7 @@ namespace bsn.GoldParser.Semantic {
 				throw new ArgumentNullException("grammar");
 			}
 			Rule rule;
-			if (!RuleDeclarationParser.TryBind(parsedRule, grammar, out rule)) {
-				throw new InvalidOperationException(string.Format("The rule {0} cannot be bound to the grammar {1}", parsedRule, grammar));
-			}
+			RuleDeclarationParser.TryBind(parsedRule, grammar, out rule);
 			return rule;
 		}
 	}

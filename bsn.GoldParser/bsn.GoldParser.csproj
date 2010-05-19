@@ -145,6 +145,7 @@
     <Compile Include="Semantic\SemanticToken.cs" />
     <Compile Include="Semantic\SemanticTokenConverter.cs" />
     <Compile Include="Semantic\SemanticTokenFactory.cs" />
+    <Compile Include="Semantic\TerminalAttribute.cs" />
     <Compile Include="Xml\GrammarXmlProcessor.cs" />
     <Compile Include="Xml\ProcessResult.cs" />
     <Compile Include="Xml\TokenXmlReader.cs" />

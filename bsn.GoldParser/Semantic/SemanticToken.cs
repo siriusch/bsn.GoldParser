@@ -5,24 +5,24 @@ using bsn.GoldParser.Parser;
 
 namespace bsn.GoldParser.Semantic {
 	public abstract class SemanticToken: IToken {
-		private readonly LineInfo position;
-		private readonly Symbol symbol;
+		private LineInfo position;
+		private Symbol symbol;
 
-		protected SemanticToken(Symbol symbol, LineInfo position) {
+		protected SemanticToken() {}
+
+		protected internal virtual void Initialize(Symbol symbol, LineInfo position) {
 			if (symbol == null) {
 				throw new ArgumentNullException("symbol");
 			}
-			this.symbol = symbol;
-			this.position = position;
 		}
 
-		public LineInfo Position {
+		LineInfo IToken.Position {
 			get {
 				return position;
 			}
 		}
 
-		public Symbol Symbol {
+		Symbol IToken.Symbol {
 			get {
 				return symbol;
 			}

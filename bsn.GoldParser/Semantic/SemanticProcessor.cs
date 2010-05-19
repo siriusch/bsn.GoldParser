@@ -2,33 +2,34 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 
 using bsn.GoldParser.Grammar;
 using bsn.GoldParser.Parser;
 
 namespace bsn.GoldParser.Semantic {
-	public class SemanticProcessor<T>: LalrProcessor<T> where T: IToken {
+	public class SemanticProcessor<T>: LalrProcessor<SemanticToken> where T: SemanticToken {
 		private readonly SemanticActions<T> actions;
 
-		private static CompiledGrammar GetGrammar(SemanticActions<T> actions) {
+		public SemanticProcessor(TextReader reader, SemanticActions<T> actions): this(actions.CreateTokenizer(reader), actions) {}
+
+		public SemanticProcessor(ITokenizer<SemanticToken> tokenizer, SemanticActions<T> actions): base(tokenizer) {
 			if (actions == null) {
 				throw new ArgumentNullException("actions");
 			}
-			return actions.Grammar;
-		}
-
-		public SemanticProcessor(ITokenizer<T> tokenizer, SemanticActions<T> actions)
-			: base(tokenizer) {
+			if (tokenizer.Grammar != actions.Grammar) {
+				throw new ArgumentException("Mismatch of tokenizer and action grammars");
+			}
 			this.actions = actions;
 		}
 
 		protected override bool CanTrim(Rule rule) {
-			SemanticTokenFactory<T> dummy;
+			SemanticTokenFactory dummy;
 			return !actions.TryGetFactory(rule, out dummy);
 		}
 
-		protected override T CreateReduction(Rule rule, ReadOnlyCollection<T> children) {
-			SemanticTokenFactory<T> factory;
+		protected override SemanticToken CreateReduction(Rule rule, ReadOnlyCollection<SemanticToken> children) {
+			SemanticTokenFactory factory;
 			if (actions.TryGetFactory(rule, out factory)) {
 				Debug.Assert(factory != null);
 				return factory.CreateInternal(rule, children);
