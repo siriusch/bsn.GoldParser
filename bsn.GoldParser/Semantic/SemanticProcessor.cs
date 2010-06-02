@@ -24,12 +24,12 @@ namespace bsn.GoldParser.Semantic {
 		}
 
 		protected override bool CanTrim(Rule rule) {
-			SemanticTokenFactory dummy;
+			SemanticNonterminalFactory dummy;
 			return !actions.TryGetFactory(rule, out dummy);
 		}
 
 		protected override SemanticToken CreateReduction(Rule rule, ReadOnlyCollection<SemanticToken> children) {
-			SemanticTokenFactory factory;
+			SemanticNonterminalFactory factory;
 			if (actions.TryGetFactory(rule, out factory)) {
 				Debug.Assert(factory != null);
 				return factory.CreateInternal(rule, children);
