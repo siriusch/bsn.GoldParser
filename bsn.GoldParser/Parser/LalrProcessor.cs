@@ -37,15 +37,15 @@ namespace bsn.GoldParser.Parser {
 		/// Gets the current currentToken.
 		/// </summary>
 		/// <value>The current currentToken.</value>
-		public IToken CurrentToken {
+		public T CurrentToken {
 			get {
-				if (currentToken != null) {
+				if (typeof(T).IsValueType || (!ReferenceEquals(currentToken, null))) {
 					return currentToken;
 				}
 				if (tokenStack.Count > 0) {
 					return tokenStack.Peek().Key;
 				}
-				return null;
+				return default(T);
 			}
 		}
 
