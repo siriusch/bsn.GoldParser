@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 
 using NUnit.Framework;
@@ -20,7 +21,7 @@ namespace bsn.GoldParser.Grammar {
 		[Test]
 		public void CheckAuthor() {
 			CompiledGrammar grammar = LoadTestGrammar();
-			Expect(grammar.Author, EqualTo("Robert van Loenhout and Arsene von Wyss"));
+			Expect(grammar.Author, EqualTo("Robert van Loenhout and Arsène von Wyss"));
 		}
 
 		[Test]
@@ -85,12 +86,18 @@ namespace bsn.GoldParser.Grammar {
 		public void CheckRuleCount() {
 			CompiledGrammar grammar = LoadTestGrammar();
 			Expect(grammar.RuleCount, EqualTo(11));
+			for (int i = 0; i < grammar.RuleCount; i++) {
+				Trace.WriteLine(grammar.GetRule(i).Definition, i.ToString());
+			}
 		}
 
 		[Test]
 		public void CheckSymbolCount() {
 			CompiledGrammar grammar = LoadTestGrammar();
 			Expect(grammar.SymbolCount, EqualTo(18));
+			for (int i = 0; i < grammar.SymbolCount; i++) {
+				Trace.WriteLine(grammar.GetSymbol(i).Name, i.ToString());
+			}
 		}
 
 		[Test]

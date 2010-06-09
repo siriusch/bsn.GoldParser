@@ -16,7 +16,7 @@ namespace bsn.GoldParser.Grammar {
 	/// which are enumerated in <c>SymbolKind</c> enumeration.
 	/// </remarks>
 	public class Symbol: GrammarObject<Symbol> {
-		private const string QuotedChars = "|-+*?()[]{}<>!";
+		private const string QuotedChars = @"|-+*?()[]{}<>!""";
 		private static readonly Regex rxXml = new Regex(@"(^[^:_a-z]|(?<!^)[^:_a-z0-9\-\.])+", RegexOptions.CultureInvariant|RegexOptions.IgnoreCase|RegexOptions.ExplicitCapture);
 
 		public static string FormatTerminalSymbol(string source) {
@@ -25,17 +25,15 @@ namespace bsn.GoldParser.Grammar {
 				char ch = source[i];
 				if (ch == '\'') {
 					result.Append("''");
-				} else if (IsQuotedChar(ch) || (ch == '"')) {
-					result.Append(new[] {'\'', ch, '\''});
+				} else if (QuotedChars.IndexOf(ch) >= 0) {
+					result.Append('\'');
+					result.Append(ch);
+					result.Append('\'');
 				} else {
 					result.Append(ch);
 				}
 			}
 			return result.ToString();
-		}
-
-		private static bool IsQuotedChar(char value) {
-			return (QuotedChars.IndexOf(value) >= 0);
 		}
 
 		private readonly SymbolKind kind; // type of the symbol

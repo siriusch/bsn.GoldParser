@@ -94,6 +94,8 @@
     <Compile Include="Semantic\RuleAttribute.cs" />
     <Compile Include="Semantic\RuleDeclarationParser.cs" />
     <Compile Include="Semantic\SemanticActions.cs" />
+    <Compile Include="Semantic\SemanticNonterminalTypeFactory.cs" />
+    <Compile Include="Semantic\SemanticNonterminalTypeTrimmer.cs" />
     <Compile Include="Semantic\SemanticProcessor.cs" />
     <Compile Include="Parser\Tokenizer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -142,10 +144,13 @@
     <Compile Include="Parser\TextToken.cs" />
     <Compile Include="Parser\Token.cs" />
     <Compile Include="Parser\TokenParseResult.cs" />
+    <Compile Include="Semantic\SemanticTerminalTypeFactory.cs" />
     <Compile Include="Semantic\SemanticToken.cs" />
     <Compile Include="Semantic\SemanticTerminalFactory.cs" />
     <Compile Include="Semantic\SemanticNonterminalFactory.cs" />
+    <Compile Include="Semantic\SemanticTypeActions.cs" />
     <Compile Include="Semantic\TerminalAttribute.cs" />
+    <Compile Include="Semantic\TypeUtility.cs" />
     <Compile Include="Xml\GrammarXmlProcessor.cs" />
     <Compile Include="Xml\ProcessResult.cs" />
     <Compile Include="Xml\TokenXmlReader.cs" />

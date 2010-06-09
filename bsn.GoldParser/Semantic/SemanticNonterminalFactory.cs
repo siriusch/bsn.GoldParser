@@ -6,7 +6,7 @@ using bsn.GoldParser.Grammar;
 
 namespace bsn.GoldParser.Semantic {
 	public abstract class SemanticNonterminalFactory {
-		public abstract ICollection<Type> InputTypes {
+		public abstract ReadOnlyCollection<Type> InputTypes {
 			get;
 		}
 

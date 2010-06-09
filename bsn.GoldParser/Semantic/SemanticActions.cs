@@ -6,7 +6,7 @@ using bsn.GoldParser.Grammar;
 using bsn.GoldParser.Parser;
 
 namespace bsn.GoldParser.Semantic {
-	public class SemanticActions<T> where T: SemanticToken {
+	public abstract class SemanticActions<T> where T: SemanticToken {
 		private class SemanticTokenizer: Tokenizer<SemanticToken> {
 			private readonly SemanticActions<T> actions;
 
@@ -44,7 +44,7 @@ namespace bsn.GoldParser.Semantic {
 			}
 		}
 
-		public void CheckConsistency() {
+		protected void CheckConsistency() {
 			Dictionary<Symbol, Type> symbolTypes = new Dictionary<Symbol, Type>();
 			for (int i = 0; i < grammar.SymbolCount; i++) {
 				Symbol symbol = grammar.GetSymbol(i);
@@ -63,7 +63,7 @@ namespace bsn.GoldParser.Semantic {
 			}
 		}
 
-		public void RegisterTerminalFactory(Symbol symbol, SemanticTerminalFactory factory) {
+		protected void RegisterTerminalFactory(Symbol symbol, SemanticTerminalFactory factory) {
 			if (symbol == null) {
 				throw new ArgumentNullException("symbol");
 			}
@@ -79,7 +79,7 @@ namespace bsn.GoldParser.Semantic {
 			terminalFactories.Add(symbol, factory);
 		}
 
-		public void RegisterNonterminalFactory(Rule rule, SemanticNonterminalFactory factory) {
+		protected void RegisterNonterminalFactory(Rule rule, SemanticNonterminalFactory factory) {
 			if (rule == null) {
 				throw new ArgumentNullException("rule");
 			}

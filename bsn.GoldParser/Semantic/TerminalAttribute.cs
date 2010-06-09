@@ -6,7 +6,7 @@ namespace bsn.GoldParser.Semantic {
 	/// <summary>
 	/// This class is used to decorate constructors which accept exactly one string for the terminal value
 	/// </summary>
-	[AttributeUsage(AttributeTargets.Constructor, AllowMultiple = true, Inherited = true)]
+	[AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
 	public sealed class TerminalAttribute: Attribute {
 		private readonly string symbolName;
 
@@ -14,7 +14,7 @@ namespace bsn.GoldParser.Semantic {
 			if (string.IsNullOrEmpty(symbolName)) {
 				throw new ArgumentNullException("symbolName");
 			}
-			this.symbolName = symbolName;
+			this.symbolName = Symbol.FormatTerminalSymbol(symbolName);
 		}
 
 		public Symbol Bind(CompiledGrammar grammar) {

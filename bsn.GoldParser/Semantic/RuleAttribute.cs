@@ -4,11 +4,10 @@ using bsn.GoldParser.Grammar;
 using bsn.GoldParser.Parser;
 
 namespace bsn.GoldParser.Semantic {
-	[AttributeUsage(AttributeTargets.Constructor, AllowMultiple = true, Inherited = true)]
-	public sealed class RuleAttribute: Attribute {
-		private readonly Reduction parsedRule;
+	public abstract class RuleAttributeBase: Attribute {
+		private Reduction parsedRule;
 
-		public RuleAttribute(string rule) {
+		protected RuleAttributeBase(string rule) {
 			if (string.IsNullOrEmpty(rule)) {
 				throw new ArgumentNullException("rule");
 			}
@@ -30,6 +29,26 @@ namespace bsn.GoldParser.Semantic {
 			Rule rule;
 			RuleDeclarationParser.TryBind(parsedRule, grammar, out rule);
 			return rule;
+		}
+	}
+
+	[AttributeUsage(AttributeTargets.Constructor, AllowMultiple = true, Inherited = false)]
+	public sealed class RuleAttribute: RuleAttributeBase {
+		public RuleAttribute(string rule): base(rule) {}
+	}
+
+	[AttributeUsage(AttributeTargets.Assembly, AllowMultiple=true, Inherited=false)]
+	public sealed class RuleTrimAttribute: RuleAttributeBase {
+		private readonly int indexOfSymbolToKeep;
+
+		public RuleTrimAttribute(string rule, int indexOfSymbolToKeep) : base(rule) {
+			this.indexOfSymbolToKeep = indexOfSymbolToKeep;
+		}
+
+		public int IndexOfSymbolToKeep {
+			get {
+				return indexOfSymbolToKeep;
+			}
 		}
 	}
 }
