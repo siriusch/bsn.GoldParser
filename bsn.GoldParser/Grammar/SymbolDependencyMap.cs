@@ -47,6 +47,12 @@ namespace bsn.GoldParser.Grammar {
 			return false;
 		}
 
+		public ICollection<Symbol> SymbolsWithDependencies {
+			get {
+				return symbolDependencies.Keys;
+			}
+		}
+
 		public IEnumerable<Symbol> GetDependencies(Symbol symbol) {
 			if (symbol == null) {
 				throw new ArgumentNullException("symbol");

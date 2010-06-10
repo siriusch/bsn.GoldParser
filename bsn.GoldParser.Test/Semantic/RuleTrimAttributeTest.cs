@@ -35,7 +35,7 @@ namespace bsn.GoldParser.Semantic {
 		public void BindToGrammar() {
 			RuleTrimAttribute attribute = new RuleTrimAttribute("<Negate Exp> ::= '-' <Value>", 1);
 			Expect(attribute.Bind(CompiledGrammarTest.LoadTestGrammar()), Not.Null);
-			Expect(attribute.IndexOfSymbolToKeep, EqualTo(1));
+			Expect(attribute.TrimSymbolIndex, EqualTo(1));
 		}
 	}
 }

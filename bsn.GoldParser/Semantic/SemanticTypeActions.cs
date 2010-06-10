@@ -42,22 +42,26 @@ namespace bsn.GoldParser.Semantic {
 					}
 				}
 			}
-			// next we look for all trim rules 
+			// now we start building a dependency map, which is later used to process the types of the trim reductions
+			SymbolDependencyMap dependencies = new SymbolDependencyMap();
+			// next we look for all trim rules in the assembly, and again remove implicit trims if they are defined explicitly
 			List<KeyValuePair<RuleTrimAttribute, Rule>> trimRules = new List<KeyValuePair<RuleTrimAttribute, Rule>>();
-#warning Missing: item order must be so that dependencies are correctly handled for type resolution, and also respect the implicit trimming rules
 			foreach (RuleTrimAttribute ruleTrimAttribute in typeof(T).Assembly.GetCustomAttributes(typeof(RuleTrimAttribute), false)) {
 				Rule rule = ruleTrimAttribute.Bind(Grammar);
 				if (rule == null) {
 					throw new InvalidOperationException(string.Format("Nonterminal {0} not found in grammar", ruleTrimAttribute.Rule));
 				}
+				dependencies.AddDependecy(rule.RuleSymbol, rule[ruleTrimAttribute.TrimSymbolIndex]);
 				trimRules.Add(new KeyValuePair<RuleTrimAttribute, Rule>(ruleTrimAttribute, rule));
 				implicitTrim.Remove(rule);
 			}
 			foreach (KeyValuePair<Rule, Symbol> pair in implicitTrim) {
-				
+				dependencies.AddDependecy(pair.Key.RuleSymbol, pair.Value);
 			}
+			// the dependencies are now completely resolved, and we can start 
 			foreach (KeyValuePair<RuleTrimAttribute, Rule> pair in trimRules) {
-				int indexOfSymbolToKeep = pair.Key.IndexOfSymbolToKeep;
+#warning Missing: item order must be so that dependencies are correctly handled for type resolution, and also respect the implicit trimming rules
+				int indexOfSymbolToKeep = pair.Key.TrimSymbolIndex;
 				Symbol symbolToKeep = pair.Value[indexOfSymbolToKeep];
 				RegisterNonterminalFactory(pair.Value, CreateTrimFactory(typeUtility.GetSymbolType(symbolToKeep), indexOfSymbolToKeep));
 			}
