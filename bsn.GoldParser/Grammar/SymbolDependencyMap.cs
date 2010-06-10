@@ -39,6 +39,18 @@ namespace bsn.GoldParser.Grammar {
 			if (symbol == dependsOnSymbol) {
 				return false;
 			}
+			foreach (Symbol dependency in GetDependencies(symbol)) {
+				if (dependency == dependsOnSymbol) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		public IEnumerable<Symbol> GetDependencies(Symbol symbol) {
+			if (symbol == null) {
+				throw new ArgumentNullException("symbol");
+			}
 			SymbolSet dependencies;
 			if (symbolDependencies.TryGetValue(symbol, out dependencies)) {
 				SymbolSet visited = new SymbolSet();
@@ -47,9 +59,7 @@ namespace bsn.GoldParser.Grammar {
 				while (toCheck.Count > 0) {
 					Symbol symbolToCheck = toCheck.Dequeue();
 					if (!visited[symbolToCheck]) {
-						if (symbolToCheck == dependsOnSymbol) {
-							return true;
-						}
+						yield return symbolToCheck;
 						if (symbolDependencies.TryGetValue(symbolToCheck, out dependencies)) {
 							foreach (Symbol dependency in dependencies) {
 								toCheck.Enqueue(dependency);
@@ -59,7 +69,6 @@ namespace bsn.GoldParser.Grammar {
 					}
 				}
 			}
-			return false;
 		}
 
 		public int Compare(Symbol x, Symbol y) {

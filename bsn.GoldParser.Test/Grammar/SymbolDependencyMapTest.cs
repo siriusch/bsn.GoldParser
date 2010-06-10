@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using NUnit.Framework;
@@ -56,8 +57,8 @@ namespace bsn.GoldParser.Grammar {
 			Symbol symbolY = grammar.GetSymbol(1);
 			SymbolDependencyMap map = new SymbolDependencyMap();
 			map.AddDependecy(symbolX, symbolY);
-			Expect(map.DependsOn(symbolX, symbolY), EqualTo(true));
-			Expect(map.DependsOn(symbolY, symbolX), EqualTo(false));
+			Expect(map.DependsOn(symbolX, symbolY), True);
+			Expect(map.DependsOn(symbolY, symbolX), False);
 	}
 
 		[Test]
@@ -69,9 +70,9 @@ namespace bsn.GoldParser.Grammar {
 			SymbolDependencyMap map = new SymbolDependencyMap();
 			map.AddDependecy(symbolX, symbolY);
 			map.AddDependecy(symbolY, symbolZ);
-			Expect(map.DependsOn(symbolX, symbolZ), EqualTo(true));
-			Expect(map.DependsOn(symbolY, symbolX), EqualTo(false));
-			Expect(map.DependsOn(symbolZ, symbolX), EqualTo(false));
+			Expect(map.DependsOn(symbolX, symbolZ), True);
+			Expect(map.DependsOn(symbolY, symbolX), False);
+			Expect(map.DependsOn(symbolZ, symbolX), False);
 		}
 
 		[Test]
@@ -98,6 +99,28 @@ namespace bsn.GoldParser.Grammar {
 			Expect(map.Compare(symbolA, symbolX), LessThan(0));
 			Expect(map.Compare(symbolA, symbolY), LessThan(0));
 			Expect(map.Compare(symbolA, symbolZ), GreaterThan(0));
+		}
+
+		[Test]
+		public void GetDependencies() {
+			CompiledGrammar grammar = CompiledGrammarTest.LoadTestGrammar();
+			Symbol symbolX = grammar.GetSymbol(0);
+			Symbol symbolY = grammar.GetSymbol(1);
+			Symbol symbolZ = grammar.GetSymbol(2);
+			SymbolDependencyMap map = new SymbolDependencyMap();
+			map.AddDependecy(symbolX, symbolY);
+			map.AddDependecy(symbolY, symbolZ);
+			List<Symbol> dependencies = new List<Symbol>(2);
+			dependencies.Add(symbolY);
+			dependencies.Add(symbolZ);
+			using (IEnumerator<Symbol> enumerator = map.GetDependencies(symbolX).GetEnumerator()) {
+				Expect(enumerator.MoveNext(), True);
+				Expect(dependencies.Remove(enumerator.Current), True);
+				Expect(enumerator.MoveNext(), True);
+				Expect(dependencies.Remove(enumerator.Current), True);
+				Expect(enumerator.MoveNext(), False);
+			}
+			Expect(dependencies.Count, EqualTo(0));
 		}
 	}
 }
