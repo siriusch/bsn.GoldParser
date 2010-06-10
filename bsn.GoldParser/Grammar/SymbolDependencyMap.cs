@@ -1,12 +1,14 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-
-using bsn.GoldParser.Semantic;
 
 namespace bsn.GoldParser.Grammar {
 	public class SymbolDependencyMap: IComparer<Symbol> {
 		private readonly Dictionary<Symbol, SymbolSet> symbolDependencies = new Dictionary<Symbol, SymbolSet>();
+		public ICollection<Symbol> SymbolsWithDependencies {
+			get {
+				return symbolDependencies.Keys;
+			}
+		}
 
 		public void AddDependecy(Symbol symbol, Symbol dependsOnSymbol) {
 			if (symbol == null) {
@@ -15,18 +17,14 @@ namespace bsn.GoldParser.Grammar {
 			if (dependsOnSymbol == null) {
 				throw new ArgumentNullException("dependsOnSymbol");
 			}
-			if (symbol == dependsOnSymbol) {
-				throw new InvalidOperationException("Cannot add a dependency to itself");
+			if (symbol != dependsOnSymbol) {
+				SymbolSet dependencies;
+				if (!symbolDependencies.TryGetValue(symbol, out dependencies)) {
+					dependencies = new SymbolSet();
+					symbolDependencies.Add(symbol, dependencies);
+				}
+				dependencies[dependsOnSymbol] = true;
 			}
-			if (DependsOn(dependsOnSymbol, symbol)) {
-				throw new InvalidOperationException("Circular dependency detected");
-			}
-			SymbolSet dependencies;
-			if (!symbolDependencies.TryGetValue(symbol, out dependencies)) {
-				dependencies = new SymbolSet();
-				symbolDependencies.Add(symbol, dependencies);
-			}
-			dependencies[dependsOnSymbol] = true;
 		}
 
 		public bool DependsOn(Symbol symbol, Symbol dependsOnSymbol) {
@@ -45,12 +43,6 @@ namespace bsn.GoldParser.Grammar {
 				}
 			}
 			return false;
-		}
-
-		public ICollection<Symbol> SymbolsWithDependencies {
-			get {
-				return symbolDependencies.Keys;
-			}
 		}
 
 		public IEnumerable<Symbol> GetDependencies(Symbol symbol) {
@@ -78,12 +70,15 @@ namespace bsn.GoldParser.Grammar {
 		}
 
 		public int Compare(Symbol x, Symbol y) {
-			if (DependsOn(x, y)) {
-				return 1;
-			}
-			if (DependsOn(y, x)) {
+			// in order to ensure that x>y == y<x, we need to compare both directions
+			bool xOnY = DependsOn(x, y);
+			if (xOnY != DependsOn(y, x)) {
+				if (xOnY) {
+					return 1;
+				}
 				return -1;
 			}
+			// either no dependency or a circular dependency, just compare the index in that case
 			return x.Index-y.Index;
 		}
 	}

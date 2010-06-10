@@ -29,7 +29,6 @@ namespace bsn.GoldParser.Grammar {
 		}
 
 		[Test]
-		[ExpectedException(typeof(InvalidOperationException))]
 		public void AddSelfDependency() {
 			CompiledGrammar grammar = CompiledGrammarTest.LoadTestGrammar();
 			Symbol symbol = grammar.GetSymbol(0);
@@ -38,7 +37,6 @@ namespace bsn.GoldParser.Grammar {
 		}
 
 		[Test]
-		[ExpectedException(typeof(InvalidOperationException))]
 		public void AddCircularDependency() {
 			CompiledGrammar grammar = CompiledGrammarTest.LoadTestGrammar();
 			Symbol symbolX = grammar.GetSymbol(0);
