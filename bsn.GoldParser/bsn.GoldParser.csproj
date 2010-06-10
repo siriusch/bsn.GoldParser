@@ -149,6 +149,8 @@
     <Compile Include="Semantic\SemanticTerminalFactory.cs" />
     <Compile Include="Semantic\SemanticNonterminalFactory.cs" />
     <Compile Include="Semantic\SemanticTypeActions.cs" />
+    <Compile Include="Grammar\SymbolDependencyMap.cs" />
+    <Compile Include="Grammar\SymbolSet.cs" />
     <Compile Include="Semantic\TerminalAttribute.cs" />
     <Compile Include="Semantic\TypeUtility.cs" />
     <Compile Include="Xml\GrammarXmlProcessor.cs" />

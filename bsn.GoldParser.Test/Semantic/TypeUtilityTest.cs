@@ -2,6 +2,8 @@
 using System.Collections.ObjectModel;
 using System.Linq;
 
+using bsn.GoldParser.Grammar;
+
 using NUnit.Framework;
 
 namespace bsn.GoldParser.Semantic {
@@ -59,12 +61,12 @@ namespace bsn.GoldParser.Semantic {
 
 		[Test]
 		public void GetSymbolType() {
+			CompiledGrammar grammar = CompiledGrammarTest.LoadTestGrammar();
+			Symbol symbol = grammar.GetSymbolByName(Symbol.FormatTerminalSymbol("-"));
 			TypeUtility<TestToken> typeUtility = new TypeUtility<TestToken>();
-			ReadOnlyCollection<Type> baseTypes = typeUtility.GetBaseTypes(typeof(TestAdd));
-			Expect(baseTypes, Not.Null);
-			Expect(baseTypes.Count, EqualTo(2));
-			Expect(baseTypes[0], EqualTo(typeof(TestToken)));
-			Expect(baseTypes[1], EqualTo(typeof(TestOperation)));
+			typeUtility.MemorizeTypeForSymbol(symbol, typeof(TestAdd));
+			typeUtility.MemorizeTypeForSymbol(symbol, typeof(TestSubtract));
+			Expect(typeUtility.GetSymbolType(symbol), EqualTo(typeof(TestOperation)));
 		}
 
 		[Test]
