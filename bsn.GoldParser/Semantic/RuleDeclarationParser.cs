@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Text;
 
 using bsn.GoldParser.Grammar;
 using bsn.GoldParser.Parser;
@@ -16,7 +15,6 @@ namespace bsn.GoldParser.Semantic {
 				return ruleGrammar;
 			}
 		}
-
 
 		internal static bool TryParse(string ruleString, out Reduction ruleToken) {
 			using (StringReader reader = new StringReader(ruleString)) {
@@ -37,19 +35,17 @@ namespace bsn.GoldParser.Semantic {
 
 		internal static bool TryBind(Reduction ruleDeclaration, CompiledGrammar grammar, out Rule rule) {
 			Symbol ruleSymbol;
-			if (grammar.TryGetSymbol(ruleDeclaration.Children[0].ToString(), out ruleSymbol)) {
+			if (grammar.TryGetSymbol(GetRuleSymbolName(ruleDeclaration), out ruleSymbol)) {
 				ReadOnlyCollection<Rule> rules;
 				if (grammar.TryGetRulesForSymbol(ruleSymbol, out rules)) {
 					List<Symbol> symbols = new List<Symbol>();
-					Reduction handle = (Reduction)ruleDeclaration.Children[2];
-					while (handle.Children.Count == 2) {
+					foreach (string handleName in GetRuleHandleNames(ruleDeclaration)) {
 						Symbol symbol;
-						if (!grammar.TryGetSymbol(handle.Children[0].ToString(), out symbol)) {
+						if (!grammar.TryGetSymbol(handleName, out symbol)) {
 							symbols = null;
 							break;
 						}
 						symbols.Add(symbol);
-						handle = (Reduction)handle.Children[1];
 					}
 					if (symbols != null) {
 						foreach (Rule currentRule in rules) {
@@ -63,6 +59,24 @@ namespace bsn.GoldParser.Semantic {
 			}
 			rule = null;
 			return false;
+		}
+
+		internal static string GetRuleSymbolName(Reduction ruleDeclaration) {
+			if (ruleDeclaration == null) {
+				throw new ArgumentNullException("ruleDeclaration");
+			}
+			return ruleDeclaration.Children[0].ToString();
+		}
+
+		internal static IEnumerable<string> GetRuleHandleNames(Reduction ruleDeclaration) {
+			if (ruleDeclaration == null) {
+				throw new ArgumentNullException("ruleDeclaration");
+			}
+			Reduction handle = (Reduction)ruleDeclaration.Children[2];
+			while (handle.Children.Count == 2) {
+				yield return handle.Children[0].ToString();
+				handle = (Reduction)handle.Children[1];
+			}
 		}
 
 		private readonly CompiledGrammar grammar;

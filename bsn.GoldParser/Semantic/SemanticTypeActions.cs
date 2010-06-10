@@ -9,7 +9,7 @@ namespace bsn.GoldParser.Semantic {
 	public class SemanticTypeActions<T>: SemanticActions<T> where T: SemanticToken {
 		public SemanticTypeActions(CompiledGrammar grammar)
 			: base(grammar) {
-#warning Add tracking of possible implicit trims, and remove them when an explicit entry is specified
+			// first, wen find all possible implicit trims, so that we can keep track of those used otherwise
 			Dictionary<Rule, Symbol> implicitTrim = new Dictionary<Rule, Symbol>();
 			for (int i = 0; i < Grammar.RuleCount; i++) {
 				Rule rule = Grammar.GetRule(i);
@@ -17,6 +17,7 @@ namespace bsn.GoldParser.Semantic {
 					implicitTrim.Add(rule, rule[0]);
 				}
 			}
+			// then we go through all types which are candidates for carrying rule or terminal attributes and register those
 			TypeUtility<T> typeUtility = new TypeUtility<T>();
 			foreach (Type type in typeof(T).Assembly.GetTypes()) {
 				if (typeof(T).IsAssignableFrom(type) && type.IsClass && (!type.IsAbstract) && (!type.IsGenericTypeDefinition)) {
@@ -41,16 +42,24 @@ namespace bsn.GoldParser.Semantic {
 					}
 				}
 			}
-			RuleTrimAttribute[] ruleTrimAttributes = (RuleTrimAttribute[])typeof(T).Assembly.GetCustomAttributes(typeof(RuleTrimAttribute), false);
+			// next we look for all trim rules 
+			List<KeyValuePair<RuleTrimAttribute, Rule>> trimRules = new List<KeyValuePair<RuleTrimAttribute, Rule>>();
 #warning Missing: item order must be so that dependencies are correctly handled for type resolution, and also respect the implicit trimming rules
-			foreach (RuleTrimAttribute ruleTrimAttribute in ruleTrimAttributes) {
+			foreach (RuleTrimAttribute ruleTrimAttribute in typeof(T).Assembly.GetCustomAttributes(typeof(RuleTrimAttribute), false)) {
 				Rule rule = ruleTrimAttribute.Bind(Grammar);
 				if (rule == null) {
 					throw new InvalidOperationException(string.Format("Nonterminal {0} not found in grammar", ruleTrimAttribute.Rule));
 				}
+				trimRules.Add(new KeyValuePair<RuleTrimAttribute, Rule>(ruleTrimAttribute, rule));
 				implicitTrim.Remove(rule);
-				Symbol symbolToKeep = rule[ruleTrimAttribute.IndexOfSymbolToKeep];
-				RegisterNonterminalFactory(rule, CreateTrimFactory(typeUtility.GetSymbolType(symbolToKeep), ruleTrimAttribute.IndexOfSymbolToKeep));
+			}
+			foreach (KeyValuePair<Rule, Symbol> pair in implicitTrim) {
+				
+			}
+			foreach (KeyValuePair<RuleTrimAttribute, Rule> pair in trimRules) {
+				int indexOfSymbolToKeep = pair.Key.IndexOfSymbolToKeep;
+				Symbol symbolToKeep = pair.Value[indexOfSymbolToKeep];
+				RegisterNonterminalFactory(pair.Value, CreateTrimFactory(typeUtility.GetSymbolType(symbolToKeep), indexOfSymbolToKeep));
 			}
 		}
 
