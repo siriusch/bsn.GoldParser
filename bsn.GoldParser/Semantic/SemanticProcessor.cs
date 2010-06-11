@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -25,12 +25,12 @@ namespace bsn.GoldParser.Semantic {
 
 		protected override bool CanTrim(Rule rule) {
 			SemanticNonterminalFactory dummy;
-			return !actions.TryGetFactory(rule, out dummy);
+			return !actions.TryGetNonterminalFactory(rule, out dummy);
 		}
 
 		protected override SemanticToken CreateReduction(Rule rule, ReadOnlyCollection<SemanticToken> children) {
 			SemanticNonterminalFactory factory;
-			if (actions.TryGetFactory(rule, out factory)) {
+			if (actions.TryGetNonterminalFactory(rule, out factory)) {
 				Debug.Assert(factory != null);
 				SemanticToken result = factory.CreateInternal(rule, children);
 				result.Initialize(rule.RuleSymbol, (children.Count > 0) ? ((IToken)children[0]).Position : default(LineInfo));

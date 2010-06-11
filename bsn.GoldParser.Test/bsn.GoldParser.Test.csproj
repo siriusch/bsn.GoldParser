@@ -67,7 +67,7 @@
     <Compile Include="Semantic\TestToken.cs" />
     <Compile Include="Semantic\TestValue.cs" />
     <Compile Include="Semantic\RuleTrimAttributeTest.cs" />
-    <Compile Include="Semantic\TypeUtilityTest.cs" />
+    <Compile Include="Semantic\SymbolTypeMapTest.cs" />
     <Compile Include="TestStringReader.cs" />
     <Compile Include="Parser\TokenizerTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

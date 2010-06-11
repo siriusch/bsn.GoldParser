@@ -1,12 +1,8 @@
 using System;
 
 namespace bsn.GoldParser.Semantic {
-	public abstract class SemanticTerminalFactory {
+	public abstract class SemanticTerminalFactory: SemanticTokenFactory {
 		internal SemanticTerminalFactory() {
-		}
-
-		public abstract Type OutputType {
-			get;
 		}
 
 		internal abstract SemanticToken CreateInternal(string text);
@@ -23,6 +19,12 @@ namespace bsn.GoldParser.Semantic {
 
 		internal override sealed SemanticToken CreateInternal(string text) {
 			return Create(text);
+		}
+
+		public sealed override bool IsStaticOutputType {
+			get {
+				return true;
+			}
 		}
 	}
 }

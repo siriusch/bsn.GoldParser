@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace bsn.GoldParser.Grammar {
-	internal class SymbolSet: IEnumerable<Symbol> {
+	public class SymbolSet: IEnumerable<Symbol> {
 		private readonly Dictionary<Symbol, bool> entries = new Dictionary<Symbol, bool>();
 
 		public SymbolSet() {}

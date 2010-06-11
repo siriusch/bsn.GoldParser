@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 
 using bsn.GoldParser.Grammar;
@@ -28,7 +29,6 @@ namespace bsn.GoldParser.Semantic {
 
 		private readonly Dictionary<Symbol, SemanticTerminalFactory> terminalFactories = new Dictionary<Symbol, SemanticTerminalFactory>();
 		private readonly Dictionary<Rule, SemanticNonterminalFactory> nonterminalFactories = new Dictionary<Rule, SemanticNonterminalFactory>();
-
 		private readonly CompiledGrammar grammar;
 
 		public SemanticActions(CompiledGrammar grammar) {
@@ -63,7 +63,7 @@ namespace bsn.GoldParser.Semantic {
 			}
 		}
 
-		protected void RegisterTerminalFactory(Symbol symbol, SemanticTerminalFactory factory) {
+		protected virtual void RegisterTerminalFactory(Symbol symbol, SemanticTerminalFactory factory) {
 			if (symbol == null) {
 				throw new ArgumentNullException("symbol");
 			}
@@ -79,7 +79,7 @@ namespace bsn.GoldParser.Semantic {
 			terminalFactories.Add(symbol, factory);
 		}
 
-		protected void RegisterNonterminalFactory(Rule rule, SemanticNonterminalFactory factory) {
+		protected virtual void RegisterNonterminalFactory(Rule rule, SemanticNonterminalFactory factory) {
 			if (rule == null) {
 				throw new ArgumentNullException("rule");
 			}
@@ -92,11 +92,11 @@ namespace bsn.GoldParser.Semantic {
 			nonterminalFactories.Add(rule, factory);
 		}
 
-		public bool TryGetConverter(Symbol symbol, out SemanticTerminalFactory converter) {
-			return terminalFactories.TryGetValue(symbol, out converter);
+		public bool TryGetTerminalFactory(Symbol symbol, out SemanticTerminalFactory factory) {
+			return terminalFactories.TryGetValue(symbol, out factory);
 		}
 
-		public bool TryGetFactory(Rule rule, out SemanticNonterminalFactory factory) {
+		public bool TryGetNonterminalFactory(Rule rule, out SemanticNonterminalFactory factory) {
 			return nonterminalFactories.TryGetValue(rule, out factory);
 		}
 

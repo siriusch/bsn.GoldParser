@@ -5,12 +5,8 @@ using System.Collections.ObjectModel;
 using bsn.GoldParser.Grammar;
 
 namespace bsn.GoldParser.Semantic {
-	public abstract class SemanticNonterminalFactory {
+	public abstract class SemanticNonterminalFactory: SemanticTokenFactory {
 		public abstract ReadOnlyCollection<Type> InputTypes {
-			get;
-		}
-
-		public abstract Type OutputType {
 			get;
 		}
 
@@ -28,6 +24,12 @@ namespace bsn.GoldParser.Semantic {
 
 		internal override sealed SemanticToken CreateInternal(Rule rule, ReadOnlyCollection<SemanticToken> tokens) {
 			return Create(rule, tokens);
+		}
+
+		public sealed override bool IsStaticOutputType {
+			get {
+				return true;
+			}
 		}
 	}
 }
