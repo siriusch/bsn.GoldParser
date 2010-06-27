@@ -3,4 +3,4 @@ using System.Linq;
 
 using bsn.GoldParser.Semantic;
 
-[assembly: RuleTrim("<Value> ::= '(' <Expression> ')'", 1)]
+[assembly: RuleTrim("<Value> ::= '(' <Expression> ')'", "<Expression>")]

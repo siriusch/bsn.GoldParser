@@ -20,6 +20,23 @@ namespace bsn.GoldParser.Semantic {
 		}
 
 		[Test]
+		[ExpectedException(typeof(ArgumentException))]
+		public void ConstructWithInvalidTrimName() {
+			new RuleTrimAttribute("<Negate Exp> ::= '-' <Value>", "Value");
+		}
+
+		[Test]
+		[ExpectedException(typeof(ArgumentNullException))]
+		public void ConstructWithNullTrimName() {
+			new RuleTrimAttribute("<Negate Exp> ::= '-' <Value>", null);
+		}
+
+		[Test]
+		public void ConstructWithTrimName() {
+			new RuleTrimAttribute("<Negate Exp> ::= '-' <Value>", "<Value>");
+		}
+
+		[Test]
 		[ExpectedException(typeof(ArgumentOutOfRangeException))]
 		public void ConstructWithNegativeIndex() {
 			new RuleTrimAttribute("<Negate Exp> ::= '-' <Value>", -1);
