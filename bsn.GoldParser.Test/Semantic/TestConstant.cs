@@ -10,5 +10,9 @@ namespace bsn.GoldParser.Semantic {
 		public TestConstant(string constant) {
 			this.constant = XmlConvert.ToDouble(constant);
 		}
+
+		public override double Compute() {
+			return constant;
+		}
 	}
 }

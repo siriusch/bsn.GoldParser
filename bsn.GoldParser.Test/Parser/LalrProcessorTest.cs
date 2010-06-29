@@ -32,6 +32,17 @@ namespace bsn.GoldParser.Parser {
 		}
 
 		[Test]
+		public void ParseAll() {
+			using (TestStringReader reader = TokenizerTest.GetReader()) {
+				Tokenizer tokenizer = new Tokenizer(reader, grammar);
+				LalrProcessor processor = new LalrProcessor(tokenizer, true);
+				Expect(processor.ParseAll(), EqualTo(ParseMessage.Accept));
+				Expect(processor.CurrentToken.Symbol.Name, EqualTo("Expression"));
+				Expect(CountTokens(processor.CurrentToken), EqualTo(27));
+			}
+		}
+
+		[Test]
 		public void ParseTreeWithTrim() {
 			using (TestStringReader reader = TokenizerTest.GetReader()) {
 				Tokenizer tokenizer = new Tokenizer(reader, grammar);

@@ -1,5 +1,7 @@
 ﻿using System;
 
 namespace bsn.GoldParser.Semantic {
-	public class TestValue: TestToken {}
+	public abstract class TestValue: TestToken {
+		public abstract double Compute();
+	}
 }

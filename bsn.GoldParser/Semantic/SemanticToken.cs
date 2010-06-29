@@ -14,6 +14,8 @@ namespace bsn.GoldParser.Semantic {
 			if (symbol == null) {
 				throw new ArgumentNullException("symbol");
 			}
+			this.symbol = symbol;
+			this.position = position;
 		}
 
 		LineInfo IToken.Position {

@@ -10,7 +10,7 @@ namespace bsn.GoldParser.Parser {
 	/// <summary>
 	/// Pull parser which uses Grammar table to parse input stream.
 	/// </summary>
-	public abstract class LalrProcessor<T>: IParser<T> where T: IToken {
+	public abstract class LalrProcessor<T>: IParser<T> where T: class, IToken {
 		private readonly Stack<KeyValuePair<T, LalrState>> tokenStack; // Stack of LR states used for LR parsing.
 		private readonly ITokenizer<T> tokenizer;
 		private LalrState currentState;
@@ -37,7 +37,7 @@ namespace bsn.GoldParser.Parser {
 		/// <value>The current currentToken.</value>
 		public T CurrentToken {
 			get {
-				if (typeof(T).IsValueType || (!ReferenceEquals(currentToken, null))) {
+				if (currentToken != null) {
 					return currentToken;
 				}
 				if (tokenStack.Count > 0) {
@@ -116,6 +116,14 @@ namespace bsn.GoldParser.Parser {
 			}
 		}
 
+		public ParseMessage ParseAll() {
+			ParseMessage result;
+			do {
+				result = Parse();
+			} while (CompiledGrammar.CanContinueParsing(result));
+			return result;
+		}
+
 		protected abstract bool CanTrim(Rule rule);
 
 		protected abstract T CreateReduction(Rule rule, ReadOnlyCollection<T> children);
@@ -176,20 +184,6 @@ namespace bsn.GoldParser.Parser {
 		}
 
 		/// <summary>
-		/// Creates the reduction.
-		/// </summary>
-		/// <param name="rule">The rule.</param>
-		/// <param name="children">The children.</param>
-		/// <returns></returns>
-		protected override Token CreateReduction(Rule rule, ReadOnlyCollection<Token> children) {
-			return new Reduction(rule, children);
-		}
-
-		protected override bool CanTrim(Rule rule) {
-			return trim;
-		}
-
-		/// <summary>
 		/// Gets a value indicating whether this <see cref="LalrProcessor"/> does automatically trim the tokens with a single terminal.
 		/// </summary>
 		/// <value><c>true</c> if automatic trimming is enabled; otherwise, <c>false</c>.</value>
@@ -197,6 +191,20 @@ namespace bsn.GoldParser.Parser {
 			get {
 				return trim;
 			}
+		}
+
+		protected override bool CanTrim(Rule rule) {
+			return trim;
+		}
+
+		/// <summary>
+		/// Creates the reduction.
+		/// </summary>
+		/// <param name="rule">The rule.</param>
+		/// <param name="children">The children.</param>
+		/// <returns></returns>
+		protected override Token CreateReduction(Rule rule, ReadOnlyCollection<Token> children) {
+			return new Reduction(rule, children);
 		}
 	}
 }
