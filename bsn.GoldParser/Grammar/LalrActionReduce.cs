@@ -29,12 +29,7 @@ namespace bsn.GoldParser.Grammar {
 
 		internal override TokenParseResult Execute<T>(IParser<T> parser, T token) {
 			bool trim = reduceRule.ContainsOneNonterminal && parser.CanTrim(reduceRule);
-			T head;
-			if (trim) {
-				head = parser.PopToken();
-			} else {
-				head = parser.CreateReduction(reduceRule);
-			}
+			T head = trim ? parser.PopToken() : parser.CreateReduction(reduceRule);
 			LalrActionGoto gotoAction = parser.TopState.GetActionBySymbol(reduceRule.RuleSymbol) as LalrActionGoto;
 			if (gotoAction == null) {
 				Debug.Fail("Internal table error.");

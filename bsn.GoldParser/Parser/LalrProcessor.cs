@@ -15,7 +15,6 @@ namespace bsn.GoldParser.Parser {
 		private readonly ITokenizer<T> tokenizer;
 		private LalrState currentState;
 		private T currentToken;
-		private bool currentTokenValid;
 
 		/// <summary>
 		/// Initializes new instance of Parser class.
@@ -28,7 +27,6 @@ namespace bsn.GoldParser.Parser {
 			}
 			this.tokenizer = tokenizer;
 			currentState = tokenizer.Grammar.InitialLRState;
-			currentTokenValid = false;
 			tokenStack = new Stack<KeyValuePair<T, LalrState>>();
 			tokenStack.Push(new KeyValuePair<T, LalrState>(default(T), currentState));
 		}
@@ -124,7 +122,6 @@ namespace bsn.GoldParser.Parser {
 
 		private void ClearCurrentToken() {
 			currentToken = default(T);
-			currentTokenValid = false;
 		}
 
 		bool IParser<T>.CanTrim(Rule rule) {
