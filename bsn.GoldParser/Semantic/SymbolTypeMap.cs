@@ -8,8 +8,8 @@ using bsn.GoldParser.Grammar;
 namespace bsn.GoldParser.Semantic {
 	internal class SymbolTypeMap<T> where T: SemanticToken {
 		private readonly Dictionary<Type, ReadOnlyCollection<Type>> baseTypeCache;
-		private readonly Dictionary<Symbol, Type> symbolType = new Dictionary<Symbol, Type>();
 		private readonly SymbolTypeMap<T> parent;
+		private readonly Dictionary<Symbol, Type> symbolType = new Dictionary<Symbol, Type>();
 		private int version;
 
 		public SymbolTypeMap(SymbolTypeMap<T> parent) {
@@ -20,6 +20,15 @@ namespace bsn.GoldParser.Semantic {
 		}
 
 		public SymbolTypeMap(): this(null) {}
+
+		public int Version {
+			get {
+				if (parent != null) {
+					return parent.Version+version;
+				}
+				return version;
+			}
+		}
 
 		public ReadOnlyCollection<Type> GetBaseTypes(Type type) {
 			if (parent != null) {
@@ -35,6 +44,7 @@ namespace bsn.GoldParser.Semantic {
 			lock (baseTypeCache) {
 				if (!baseTypeCache.TryGetValue(type, out result)) {
 					List<Type> ancestorOrSelf = new List<Type>();
+					ancestorOrSelf.Add(type);
 					Type ancestor = type;
 					while (ancestor != typeof(T)) {
 						ancestor = ancestor.BaseType;
@@ -49,39 +59,13 @@ namespace bsn.GoldParser.Semantic {
 		}
 
 		public Type GetCommonBaseType(Type x, Type y) {
-			ReadOnlyCollection<Type> xBase = GetBaseTypes(x);
-			ReadOnlyCollection<Type> yBase = GetBaseTypes(y);
-			Type result = typeof(T);
-			for (int i = 0; (i < xBase.Count) && (i < yBase.Count); i++) {
-				if (xBase[i] != yBase[i]) {
-					break;
-				}
-				result = xBase[i];
+			if (x == null) {
+				throw new ArgumentNullException("x");
 			}
-			return result;
-		}
-
-		internal void ApplyCommonBaseType(ref Type x, Type y) {
-			Debug.Assert(y != null);
-			x = (x == null) ? y : GetCommonBaseType(x, y);
-		}
-
-		protected Type GetSymbolTypeInternal(Symbol symbol, Type @default) {
-			if (symbol == null) {
-				throw new ArgumentNullException("symbol");
+			if (y == null) {
+				throw new ArgumentNullException("y");
 			}
-			Type result;
-			symbolType.TryGetValue(symbol, out result);
-			if (parent != null) {
-				Type parentResult = parent.GetSymbolTypeInternal(symbol, null);
-				if (parentResult != null) {
-					if (result != null) {
-						return GetCommonBaseType(result, parentResult);
-					}
-					return parentResult;
-				}
-			}
-			return result ?? @default;
+			return GetCommonbaseTypeInternal(x, y);
 		}
 
 		public Type GetSymbolType(Symbol symbol) {
@@ -104,13 +88,43 @@ namespace bsn.GoldParser.Semantic {
 			version++;
 		}
 
-		public int Version {
-			get {
-				if (parent != null) {
-					return parent.Version+version;
-				}
-				return version;
+		protected Type GetSymbolTypeInternal(Symbol symbol, Type @default) {
+			if (symbol == null) {
+				throw new ArgumentNullException("symbol");
 			}
+			Type result;
+			symbolType.TryGetValue(symbol, out result);
+			if (parent != null) {
+				Type parentResult = parent.GetSymbolTypeInternal(symbol, null);
+				if (parentResult != null) {
+					if (result != null) {
+						return GetCommonBaseType(result, parentResult);
+					}
+					return parentResult;
+				}
+			}
+			return result ?? @default;
+		}
+
+		internal void ApplyCommonBaseType(ref Type x, Type y) {
+			Debug.Assert(y != null);
+			x = (x == null) ? y : GetCommonbaseTypeInternal(x, y);
+		}
+
+		private Type GetCommonbaseTypeInternal(Type x, Type y) {
+			if (x == y) {
+				return x;
+			}
+			ReadOnlyCollection<Type> xBase = GetBaseTypes(x);
+			ReadOnlyCollection<Type> yBase = GetBaseTypes(y);
+			Type result = typeof(T);
+			for (int i = 0; (i < xBase.Count) && (i < yBase.Count); i++) {
+				if (xBase[i] != yBase[i]) {
+					break;
+				}
+				result = xBase[i];
+			}
+			return result;
 		}
 	}
 }

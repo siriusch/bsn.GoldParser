@@ -58,6 +58,7 @@
     <Compile Include="Semantic\SemanticTypeActionsTest.cs" />
     <Compile Include="Semantic\TerminalAttributeTest.cs" />
     <Compile Include="Semantic\TestAdd.cs" />
+    <Compile Include="Semantic\TestConstant.cs" />
     <Compile Include="Semantic\TestDivide.cs" />
     <Compile Include="Semantic\TestExpression.cs" />
     <Compile Include="Semantic\TestMultiply.cs" />
@@ -65,7 +66,7 @@
     <Compile Include="Semantic\TestOperation.cs" />
     <Compile Include="Semantic\TestSubtract.cs" />
     <Compile Include="Semantic\TestToken.cs" />
-    <Compile Include="Semantic\TestUnspecific.cs" />
+    <Compile Include="Semantic\TestSpecial.cs" />
     <Compile Include="Semantic\TestValue.cs" />
     <Compile Include="Semantic\RuleTrimAttributeTest.cs" />
     <Compile Include="Semantic\SymbolTypeMapTest.cs" />

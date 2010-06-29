@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace bsn.GoldParser.Semantic {
 	[Terminal("(EOF)")]
@@ -10,10 +8,10 @@ namespace bsn.GoldParser.Semantic {
 	[Terminal("(Comment End)")]
 	[Terminal("(Comment Line)")]
 	[Terminal("(Comment Start)")]
-	public class TestUnspecific: TestToken {
+	public class TestSpecial: TestToken {
 		private readonly string text;
 
-		public TestUnspecific(string text) {
+		public TestSpecial(string text) {
 			this.text = text;
 		}
 

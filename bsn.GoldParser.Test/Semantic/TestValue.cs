@@ -1,6 +1,5 @@
-﻿namespace bsn.GoldParser.Semantic {
-	[Terminal("Integer")]
-	[Terminal("Float")]
-	public class TestValue: TestToken {
-	}
+﻿using System;
+
+namespace bsn.GoldParser.Semantic {
+	public class TestValue: TestToken {}
 }

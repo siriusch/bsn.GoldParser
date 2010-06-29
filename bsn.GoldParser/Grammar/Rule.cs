@@ -13,8 +13,8 @@ namespace bsn.GoldParser.Grammar {
 	/// followed by a series of both nonterminals and terminals.
 	/// </remarks>	
 	public sealed class Rule: GrammarObject<Rule>, ICollection<Symbol> {
-		private Symbol ruleSymbol;
 		private bool containsOneNonterminal;
+		private Symbol ruleSymbol;
 		private Symbol[] symbols;
 
 		/// <summary>
@@ -59,6 +59,14 @@ namespace bsn.GoldParser.Grammar {
 		}
 
 		/// <summary>
+		/// Gets name of the rule.
+		/// </summary>
+		public string Name {
+			get {
+				return '<'+ruleSymbol.Name+'>';
+			}
+		}
+		/// <summary>
 		/// Gets the ruleSymbol symbol of the rule.
 		/// </summary>
 		public Symbol RuleSymbol {
@@ -68,60 +76,11 @@ namespace bsn.GoldParser.Grammar {
 		}
 
 		/// <summary>
-		/// Gets name of the rule.
-		/// </summary>
-		public string Name {
-			get {
-				return '<'+ruleSymbol.Name+'>';
-			}
-		}
-
-		/// <summary>
 		/// Gets number of symbols.
 		/// </summary>
 		public int SymbolCount {
 			get {
 				return symbols.Length;
-			}
-		}
-
-		IEnumerator<Symbol> IEnumerable<Symbol>.GetEnumerator() {
-			return (IEnumerator<Symbol>)symbols.GetEnumerator();
-		}
-
-		IEnumerator IEnumerable.GetEnumerator() {
-			return symbols.GetEnumerator();
-		}
-
-		void ICollection<Symbol>.Add(Symbol item) {
-			throw new NotSupportedException();
-		}
-
-		void ICollection<Symbol>.Clear() {
-			throw new NotSupportedException();
-		}
-
-		bool ICollection<Symbol>.Contains(Symbol item) {
-			return Array.IndexOf(symbols, item) >= 0;
-		}
-
-		void ICollection<Symbol>.CopyTo(Symbol[] array, int arrayIndex) {
-			symbols.CopyTo(array, Index);
-		}
-
-		bool ICollection<Symbol>.Remove(Symbol item) {
-			throw new NotSupportedException();
-		}
-
-		int ICollection<Symbol>.Count {
-			get {
-				return symbols.Length;
-			}
-		}
-
-		bool ICollection<Symbol>.IsReadOnly {
-			get {
-				return true;
 			}
 		}
 
@@ -166,12 +125,52 @@ namespace bsn.GoldParser.Grammar {
 			if (symbols == null) {
 				throw new ArgumentNullException("symbols");
 			}
-			if (this.ruleSymbol != null) {
+			if (ruleSymbol != null) {
 				throw new InvalidOperationException("The rule has already been initialized");
 			}
-			this.ruleSymbol = head;
+			ruleSymbol = head;
 			this.symbols = symbols;
 			containsOneNonterminal = (symbols.Length == 1) && (symbols[0].Kind == SymbolKind.Nonterminal);
+		}
+
+		IEnumerator<Symbol> IEnumerable<Symbol>.GetEnumerator() {
+			return ((IEnumerable<Symbol>)symbols).GetEnumerator();
+		}
+
+		IEnumerator IEnumerable.GetEnumerator() {
+			return symbols.GetEnumerator();
+		}
+
+		void ICollection<Symbol>.Add(Symbol item) {
+			throw new NotSupportedException();
+		}
+
+		void ICollection<Symbol>.Clear() {
+			throw new NotSupportedException();
+		}
+
+		bool ICollection<Symbol>.Contains(Symbol item) {
+			return Array.IndexOf(symbols, item) >= 0;
+		}
+
+		void ICollection<Symbol>.CopyTo(Symbol[] array, int arrayIndex) {
+			symbols.CopyTo(array, Index);
+		}
+
+		bool ICollection<Symbol>.Remove(Symbol item) {
+			throw new NotSupportedException();
+		}
+
+		int ICollection<Symbol>.Count {
+			get {
+				return symbols.Length;
+			}
+		}
+
+		bool ICollection<Symbol>.IsReadOnly {
+			get {
+				return true;
+			}
 		}
 	}
 }

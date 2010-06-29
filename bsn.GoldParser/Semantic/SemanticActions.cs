@@ -43,7 +43,7 @@ namespace bsn.GoldParser.Semantic {
 			this.grammar = grammar;
 			for (int i = 0; i < grammar.RuleCount; i++) {
 				Rule rule = grammar.GetRule(i);
-				if (rule.ContainsOneNonterminal) {
+				if (rule.SymbolCount == 1) {
 					trimFactories.Add(rule, new SemanticTrimFactory<T>(this, rule, 0));
 				}
 			}
@@ -130,7 +130,8 @@ namespace bsn.GoldParser.Semantic {
 				Symbol symbol = grammar.GetSymbol(i);
 				if (symbol.Kind != SymbolKind.Nonterminal) {
 					SemanticTerminalFactory factory;
-					if (terminalFactories.TryGetValue(symbol, out factory)) {
+					if (TryGetTerminalFactory(symbol, out factory)) {
+						Debug.WriteLine(factory.OutputType.FullName, symbol.ToString());
 						symbolTypes.SetTypeForSymbol(symbol, factory.OutputType);
 					} else {
 						errors.Add(String.Format("Semantic token is missing for terminal {0}", symbol));
@@ -140,13 +141,12 @@ namespace bsn.GoldParser.Semantic {
 			// step 2: check that all rules have a factory and register their output type
 			for (int i = 0; i < grammar.RuleCount; i++) {
 				Rule rule = grammar.GetRule(i);
-				if (rule.SymbolCount > 1) {
-					SemanticNonterminalFactory factory;
-					if (nonterminalFactories.TryGetValue(rule, out factory)) {
-						symbolTypes.SetTypeForSymbol(rule.RuleSymbol, factory.OutputType);
-					} else {
-						errors.Add(String.Format("Semantic token is missing for rule {0}", rule.Definition));
-					}
+				SemanticNonterminalFactory factory;
+				if (TryGetNonterminalFactory(rule, out factory)) {
+					Debug.WriteLine(factory.OutputType.FullName, rule.RuleSymbol.ToString());
+					symbolTypes.SetTypeForSymbol(rule.RuleSymbol, factory.OutputType);
+				} else {
+					errors.Add(String.Format("Semantic token is missing for rule {0}", rule));
 				}
 			}
 			// step 3: check the input types of all rules
@@ -179,14 +179,17 @@ namespace bsn.GoldParser.Semantic {
 			if (symbol == null) {
 				throw new ArgumentNullException("symbol");
 			}
-			SemanticTerminalFactory terminalFactory;
-			if (TryGetTerminalFactory(symbol, out terminalFactory)) {
-				yield return terminalFactory;
-			}
-			foreach (Rule rule in grammar.GetRulesForSymbol(symbol)) {
-				SemanticNonterminalFactory nonterminalFactory;
-				if (TryGetNonterminalFactory(rule, out nonterminalFactory)) {
-					yield return nonterminalFactory;
+			if (symbol.Kind == SymbolKind.Nonterminal) {
+				foreach (Rule rule in grammar.GetRulesForSymbol(symbol)) {
+					SemanticNonterminalFactory nonterminalFactory;
+					if (TryGetNonterminalFactory(rule, out nonterminalFactory)) {
+						yield return nonterminalFactory;
+					}
+				}
+			} else {
+				SemanticTerminalFactory terminalFactory;
+				if (TryGetTerminalFactory(symbol, out terminalFactory)) {
+					yield return terminalFactory;
 				}
 			}
 		}

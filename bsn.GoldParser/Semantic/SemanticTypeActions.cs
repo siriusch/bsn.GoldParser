@@ -50,7 +50,7 @@ namespace bsn.GoldParser.Semantic {
 						RegisterTerminalFactory(symbol, CreateTerminalFactory(type));
 					}
 					foreach (ConstructorInfo constructor in type.GetConstructors()) {
-						foreach (RuleAttribute ruleAttribute in type.GetCustomAttributes(typeof(RuleAttribute), true)) {
+						foreach (RuleAttribute ruleAttribute in constructor.GetCustomAttributes(typeof(RuleAttribute), true)) {
 							Rule rule = ruleAttribute.Bind(Grammar);
 							if (rule == null) {
 								throw new InvalidOperationException(string.Format("Nonterminal {0} not found in grammar", ruleAttribute.Rule));
