@@ -128,11 +128,13 @@ namespace bsn.GoldParser.Semantic {
 			// step 1: check that all terminals have a factory and register their output type
 			for (int i = 0; i < grammar.SymbolCount; i++) {
 				Symbol symbol = grammar.GetSymbol(i);
-				SemanticTerminalFactory factory;
-				if (terminalFactories.TryGetValue(symbol, out factory)) {
-					symbolTypes.SetTypeForSymbol(symbol, factory.OutputType);
-				} else {
-					errors.Add(String.Format("Semantic token is missing for terminal {0}", symbol.Name));
+				if (symbol.Kind != SymbolKind.Nonterminal) {
+					SemanticTerminalFactory factory;
+					if (terminalFactories.TryGetValue(symbol, out factory)) {
+						symbolTypes.SetTypeForSymbol(symbol, factory.OutputType);
+					} else {
+						errors.Add(String.Format("Semantic token is missing for terminal {0}", symbol));
+					}
 				}
 			}
 			// step 2: check that all rules have a factory and register their output type
@@ -212,8 +214,8 @@ namespace bsn.GoldParser.Semantic {
 			if (symbol.Owner != grammar) {
 				throw new ArgumentException("The symbol was defined on another grammar", "symbol");
 			}
-			if (symbol.Kind != SymbolKind.Terminal) {
-				throw new ArgumentException("Symbol conversions are only possible for terminals", "symbol");
+			if (symbol.Kind == SymbolKind.Nonterminal) {
+				throw new ArgumentException("Terminal symbol factories can only build terminals and special symbols", "symbol");
 			}
 			if (factory == null) {
 				throw new ArgumentNullException("factory");

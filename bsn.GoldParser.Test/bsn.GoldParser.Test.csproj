@@ -65,6 +65,7 @@
     <Compile Include="Semantic\TestOperation.cs" />
     <Compile Include="Semantic\TestSubtract.cs" />
     <Compile Include="Semantic\TestToken.cs" />
+    <Compile Include="Semantic\TestUnspecific.cs" />
     <Compile Include="Semantic\TestValue.cs" />
     <Compile Include="Semantic\RuleTrimAttributeTest.cs" />
     <Compile Include="Semantic\SymbolTypeMapTest.cs" />

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.RegularExpressions;
 
 using bsn.GoldParser.Grammar;
 
@@ -8,13 +9,15 @@ namespace bsn.GoldParser.Semantic {
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
 	public sealed class TerminalAttribute: Attribute {
+		private static readonly Regex rxSpecialToken = new Regex(@"^\(.*\)$");
+
 		private readonly string symbolName;
 
 		public TerminalAttribute(string symbolName) {
 			if (string.IsNullOrEmpty(symbolName)) {
 				throw new ArgumentNullException("symbolName");
 			}
-			this.symbolName = Symbol.FormatTerminalSymbol(symbolName);
+			this.symbolName = rxSpecialToken.IsMatch(symbolName) ? symbolName : Symbol.FormatTerminalSymbol(symbolName);
 		}
 
 		public Symbol Bind(CompiledGrammar grammar) {
