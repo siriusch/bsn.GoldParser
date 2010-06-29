@@ -1,9 +1,9 @@
 "Name"     = Text Calculator Grammar
-"Author"   = Robert van Loenhout and Arsène von Wyss
+"Author"   = Robert van Loenhout and Ars?ne von Wyss
 "Version"  = 1.1
 "About"    = 'Example for testing Gold Parser Engine'
 
-"Start Symbol" = <Expression>
+"Start Symbol" = <Root>
 "Auto Whitespace" = True
 "Character Mapping" = 'Unicode'
 
@@ -19,6 +19,12 @@ Integer = {Digit}+
 Float = {Digit}*'.'{Digit}+([Ee][+-]?{Digit}+)?
 
 ! ------------------------------------------------- Rules
+
+<Root>        ::= <Expression>
+                | <Empty>
+
+<Empty>       ::= NULL
+                |
 
 <Expression>  ::= <Expression> '+' <Mult Exp>
                 | <Expression> '-' <Mult Exp>

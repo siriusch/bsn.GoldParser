@@ -7,38 +7,15 @@ using NUnit.Framework;
 namespace bsn.GoldParser.Grammar {
 	[TestFixture]
 	public class SymbolDependencyMapTest: AssertionHelper {
-		[Test]
-		public void Create() {
-			new SymbolDependencyMap();
-		}
+		private CompiledGrammar grammar;
 
-		[Test]
-		[ExpectedException(typeof(ArgumentNullException))]
-		public void AddNullSymbol() {
-			CompiledGrammar grammar = CompiledGrammarTest.LoadTestGrammar();
-			SymbolDependencyMap map = new SymbolDependencyMap();
-			map.AddDependecy(null, grammar.GetSymbol(0));
-		}
-
-		[Test]
-		[ExpectedException(typeof(ArgumentNullException))]
-		public void AddNullDependency() {
-			CompiledGrammar grammar = CompiledGrammarTest.LoadTestGrammar();
-			SymbolDependencyMap map = new SymbolDependencyMap();
-			map.AddDependecy(grammar.GetSymbol(0), null);
-		}
-
-		[Test]
-		public void AddSelfDependency() {
-			CompiledGrammar grammar = CompiledGrammarTest.LoadTestGrammar();
-			Symbol symbol = grammar.GetSymbol(0);
-			SymbolDependencyMap map = new SymbolDependencyMap();
-			map.AddDependecy(symbol, symbol);
+		[TestFixtureSetUp]
+		public void SetUp() {
+			grammar = CompiledGrammarTest.LoadTestGrammar();
 		}
 
 		[Test]
 		public void AddCircularDependency() {
-			CompiledGrammar grammar = CompiledGrammarTest.LoadTestGrammar();
 			Symbol symbolX = grammar.GetSymbol(0);
 			Symbol symbolY = grammar.GetSymbol(1);
 			Symbol symbolZ = grammar.GetSymbol(2);
@@ -49,19 +26,7 @@ namespace bsn.GoldParser.Grammar {
 		}
 
 		[Test]
-		public void AddSimpleDependency() {
-			CompiledGrammar grammar = CompiledGrammarTest.LoadTestGrammar();
-			Symbol symbolX = grammar.GetSymbol(0);
-			Symbol symbolY = grammar.GetSymbol(1);
-			SymbolDependencyMap map = new SymbolDependencyMap();
-			map.AddDependecy(symbolX, symbolY);
-			Expect(map.DependsOn(symbolX, symbolY), True);
-			Expect(map.DependsOn(symbolY, symbolX), False);
-	}
-
-		[Test]
 		public void AddNestedDependency() {
-			CompiledGrammar grammar = CompiledGrammarTest.LoadTestGrammar();
 			Symbol symbolX = grammar.GetSymbol(0);
 			Symbol symbolY = grammar.GetSymbol(1);
 			Symbol symbolZ = grammar.GetSymbol(2);
@@ -74,8 +39,38 @@ namespace bsn.GoldParser.Grammar {
 		}
 
 		[Test]
+		[ExpectedException(typeof(ArgumentNullException))]
+		public void AddNullDependency() {
+			SymbolDependencyMap map = new SymbolDependencyMap();
+			map.AddDependecy(grammar.GetSymbol(0), null);
+		}
+
+		[Test]
+		[ExpectedException(typeof(ArgumentNullException))]
+		public void AddNullSymbol() {
+			SymbolDependencyMap map = new SymbolDependencyMap();
+			map.AddDependecy(null, grammar.GetSymbol(0));
+		}
+
+		[Test]
+		public void AddSelfDependency() {
+			Symbol symbol = grammar.GetSymbol(0);
+			SymbolDependencyMap map = new SymbolDependencyMap();
+			map.AddDependecy(symbol, symbol);
+		}
+
+		[Test]
+		public void AddSimpleDependency() {
+			Symbol symbolX = grammar.GetSymbol(0);
+			Symbol symbolY = grammar.GetSymbol(1);
+			SymbolDependencyMap map = new SymbolDependencyMap();
+			map.AddDependecy(symbolX, symbolY);
+			Expect(map.DependsOn(symbolX, symbolY), True);
+			Expect(map.DependsOn(symbolY, symbolX), False);
+		}
+
+		[Test]
 		public void CompareNested() {
-			CompiledGrammar grammar = CompiledGrammarTest.LoadTestGrammar();
 			Symbol symbolX = grammar.GetSymbol(0);
 			Symbol symbolY = grammar.GetSymbol(1);
 			Symbol symbolZ = grammar.GetSymbol(2);
@@ -100,8 +95,12 @@ namespace bsn.GoldParser.Grammar {
 		}
 
 		[Test]
+		public void Create() {
+			new SymbolDependencyMap();
+		}
+
+		[Test]
 		public void GetDependencies() {
-			CompiledGrammar grammar = CompiledGrammarTest.LoadTestGrammar();
 			Symbol symbolX = grammar.GetSymbol(0);
 			Symbol symbolY = grammar.GetSymbol(1);
 			Symbol symbolZ = grammar.GetSymbol(2);

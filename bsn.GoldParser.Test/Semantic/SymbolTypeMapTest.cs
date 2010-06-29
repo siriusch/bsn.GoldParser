@@ -9,9 +9,15 @@ using NUnit.Framework;
 namespace bsn.GoldParser.Semantic {
 	[TestFixture]
 	public class SymbolTypeMapTest: AssertionHelper {
+		private CompiledGrammar grammar;
+
+		[TestFixtureSetUp]
+		public void SetUp() {
+			grammar = CompiledGrammarTest.LoadTestGrammar();
+		}
+
 		[Test]
 		public void CheckParentCommon() {
-			CompiledGrammar grammar = CompiledGrammarTest.LoadTestGrammar();
 			Symbol symbol = grammar.GetSymbolByName(Symbol.FormatTerminalSymbol("-"));
 			SymbolTypeMap<TestToken> parentSymbolTypeMap = new SymbolTypeMap<TestToken>();
 			SymbolTypeMap<TestToken> symbolTypeMap = new SymbolTypeMap<TestToken>(parentSymbolTypeMap);
@@ -22,7 +28,6 @@ namespace bsn.GoldParser.Semantic {
 
 		[Test]
 		public void CheckParentNone() {
-			CompiledGrammar grammar = CompiledGrammarTest.LoadTestGrammar();
 			Symbol symbol = grammar.GetSymbolByName(Symbol.FormatTerminalSymbol("-"));
 			SymbolTypeMap<TestToken> parentSymbolTypeMap = new SymbolTypeMap<TestToken>();
 			SymbolTypeMap<TestToken> symbolTypeMap = new SymbolTypeMap<TestToken>(parentSymbolTypeMap);
@@ -31,7 +36,6 @@ namespace bsn.GoldParser.Semantic {
 
 		[Test]
 		public void CheckParentPassthrough() {
-			CompiledGrammar grammar = CompiledGrammarTest.LoadTestGrammar();
 			Symbol symbol = grammar.GetSymbolByName(Symbol.FormatTerminalSymbol("-"));
 			SymbolTypeMap<TestToken> parentSymbolTypeMap = new SymbolTypeMap<TestToken>();
 			SymbolTypeMap<TestToken> symbolTypeMap = new SymbolTypeMap<TestToken>(parentSymbolTypeMap);
@@ -41,7 +45,6 @@ namespace bsn.GoldParser.Semantic {
 
 		[Test]
 		public void CheckParentSkip() {
-			CompiledGrammar grammar = CompiledGrammarTest.LoadTestGrammar();
 			Symbol symbol = grammar.GetSymbolByName(Symbol.FormatTerminalSymbol("-"));
 			SymbolTypeMap<TestToken> parentSymbolTypeMap = new SymbolTypeMap<TestToken>();
 			SymbolTypeMap<TestToken> symbolTypeMap = new SymbolTypeMap<TestToken>(parentSymbolTypeMap);
@@ -51,7 +54,6 @@ namespace bsn.GoldParser.Semantic {
 
 		[Test]
 		public void CheckParentVersionIncrementType() {
-			CompiledGrammar grammar = CompiledGrammarTest.LoadTestGrammar();
 			Symbol symbol = grammar.GetSymbolByName(Symbol.FormatTerminalSymbol("-"));
 			SymbolTypeMap<TestToken> parentSymbolTypeMap = new SymbolTypeMap<TestToken>();
 			SymbolTypeMap<TestToken> symbolTypeMap = new SymbolTypeMap<TestToken>(parentSymbolTypeMap);
@@ -65,7 +67,6 @@ namespace bsn.GoldParser.Semantic {
 
 		[Test]
 		public void CheckVersionIncrementType() {
-			CompiledGrammar grammar = CompiledGrammarTest.LoadTestGrammar();
 			Symbol symbol = grammar.GetSymbolByName(Symbol.FormatTerminalSymbol("-"));
 			SymbolTypeMap<TestToken> symbolTypeMap = new SymbolTypeMap<TestToken>();
 			long version = symbolTypeMap.Version;
@@ -128,7 +129,6 @@ namespace bsn.GoldParser.Semantic {
 
 		[Test]
 		public void GetSymbolType() {
-			CompiledGrammar grammar = CompiledGrammarTest.LoadTestGrammar();
 			Symbol symbol = grammar.GetSymbolByName(Symbol.FormatTerminalSymbol("-"));
 			SymbolTypeMap<TestToken> symbolTypeMap = new SymbolTypeMap<TestToken>();
 			symbolTypeMap.SetTypeForSymbol(symbol, typeof(TestAdd));

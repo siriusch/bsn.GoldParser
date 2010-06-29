@@ -7,10 +7,16 @@ using NUnit.Framework;
 namespace bsn.GoldParser.Semantic {
 	[TestFixture]
 	public class TerminalAttributeTest: AssertionHelper {
+		private CompiledGrammar grammar;
+
+		[TestFixtureSetUp]
+		public void SetUp() {
+			grammar = CompiledGrammarTest.LoadTestGrammar();
+		}
+
 		[Test]
-		[ExpectedException(typeof(ArgumentNullException))]
-		public void ConstructWithoutString() {
-			new TerminalAttribute(null);
+		public void BindToGrammar() {
+			Expect(new TerminalAttribute("Integer").Bind(grammar), Not.Null);
 		}
 
 		[Test]
@@ -25,8 +31,9 @@ namespace bsn.GoldParser.Semantic {
 		}
 
 		[Test]
-		public void BindToGrammar() {
-			Expect(new TerminalAttribute("Integer").Bind(CompiledGrammarTest.LoadTestGrammar()), Not.Null);
+		[ExpectedException(typeof(ArgumentNullException))]
+		public void ConstructWithoutString() {
+			new TerminalAttribute(null);
 		}
 	}
 }

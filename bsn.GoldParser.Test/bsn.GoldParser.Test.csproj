@@ -55,11 +55,13 @@
     <Compile Include="Semantic\AssemblyAttributes.cs" />
     <Compile Include="Semantic\RuleAttributeTest.cs" />
     <Compile Include="Semantic\RuleDeclarationParserTest.cs" />
+    <Compile Include="Semantic\SemanticProcessorTest.cs" />
     <Compile Include="Semantic\SemanticTypeActionsTest.cs" />
     <Compile Include="Semantic\TerminalAttributeTest.cs" />
     <Compile Include="Semantic\TestAdd.cs" />
     <Compile Include="Semantic\TestConstant.cs" />
     <Compile Include="Semantic\TestDivide.cs" />
+    <Compile Include="Semantic\TestEmpty.cs" />
     <Compile Include="Semantic\TestExpression.cs" />
     <Compile Include="Semantic\TestMultiply.cs" />
     <Compile Include="Semantic\TestNegate.cs" />

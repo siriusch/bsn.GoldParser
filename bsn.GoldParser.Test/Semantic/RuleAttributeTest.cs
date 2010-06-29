@@ -1,20 +1,23 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 using bsn.GoldParser.Grammar;
 
 using NUnit.Framework;
 
-namespace bsn.GoldParser.Semantic
-{
+namespace bsn.GoldParser.Semantic {
 	[TestFixture]
 	public class RuleAttributeTest: AssertionHelper {
+		private CompiledGrammar grammar;
+
+		[TestFixtureSetUp]
+		public void SetUp() {
+			grammar = CompiledGrammarTest.LoadTestGrammar();
+		}
+
 		[Test]
-		[ExpectedException(typeof(ArgumentNullException))]
-		public void ConstructWithoutString() {
-			new RuleAttribute(null);
+		public void BindToGrammar() {
+			Expect(new RuleAttribute("<Negate Exp> ::= '-' <Value>").Bind(grammar), Not.Null);
 		}
 
 		[Test]
@@ -35,8 +38,9 @@ namespace bsn.GoldParser.Semantic
 		}
 
 		[Test]
-		public void BindToGrammar() {
-			Expect(new RuleAttribute("<Negate Exp> ::= '-' <Value>").Bind(CompiledGrammarTest.LoadTestGrammar()), Not.Null);
+		[ExpectedException(typeof(ArgumentNullException))]
+		public void ConstructWithoutString() {
+			new RuleAttribute(null);
 		}
 	}
 }

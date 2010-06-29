@@ -7,13 +7,19 @@ using NUnit.Framework;
 namespace bsn.GoldParser.Parser {
 	[TestFixture]
 	public class TokenizerTest: AssertionHelper {
+		private CompiledGrammar grammar;
+
+		[TestFixtureSetUp]
+		public void SetUp() {
+			grammar = CompiledGrammarTest.LoadTestGrammar();
+		}
+
 		internal static TestStringReader GetReader() {
 			return new TestStringReader("0*(3-5)/-9 -- line comment\r\n+1.0 /* block\r\ncomment */ *.0e2");
 		}
 
 		[Test]
 		public void CheckLexicalError() {
-			CompiledGrammar grammar = CompiledGrammarTest.LoadTestGrammar();
 			using (TestStringReader reader = new TestStringReader("1+x*200")) {
 				Tokenizer tokenizer = new Tokenizer(reader, grammar);
 				Token token;
@@ -34,7 +40,6 @@ namespace bsn.GoldParser.Parser {
 
 		[Test]
 		public void CheckTokens() {
-			CompiledGrammar grammar = CompiledGrammarTest.LoadTestGrammar();
 			using (TestStringReader reader = GetReader()) {
 				Tokenizer tokenizer = new Tokenizer(reader, grammar);
 				Token token;
@@ -116,7 +121,6 @@ namespace bsn.GoldParser.Parser {
 		[Test]
 		[ExpectedException(typeof(ArgumentNullException))]
 		public void ConstructWithoutGrammar() {
-			CompiledGrammar grammar = CompiledGrammarTest.LoadTestGrammar();
 			using (TestStringReader reader = GetReader()) {
 				new Tokenizer(reader, null);
 			}
@@ -125,7 +129,6 @@ namespace bsn.GoldParser.Parser {
 		[Test]
 		[ExpectedException(typeof(ArgumentNullException))]
 		public void ConstructWithoutReader() {
-			CompiledGrammar grammar = CompiledGrammarTest.LoadTestGrammar();
 			new Tokenizer(null, grammar);
 		}
 	}

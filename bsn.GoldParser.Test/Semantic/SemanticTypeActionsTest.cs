@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 using bsn.GoldParser.Grammar;
 
@@ -10,14 +8,15 @@ using NUnit.Framework;
 namespace bsn.GoldParser.Semantic {
 	[TestFixture]
 	public class SemanticTypeActionsTest: AssertionHelper {
-		[Test]
-		public void Create() {
-			CreateSemanticActions();
+		private CompiledGrammar grammar;
+
+		[TestFixtureSetUp]
+		public void SetUp() {
+			grammar = CompiledGrammarTest.LoadTestGrammar();
 		}
 
-		[Test]
-		public void Initialize() {
-			CreateSemanticActions().Initialize();
+		internal SemanticTypeActions<TestToken> CreateSemanticActions() {
+			return new SemanticTypeActions<TestToken>(grammar);
 		}
 
 		[Test]
@@ -26,8 +25,14 @@ namespace bsn.GoldParser.Semantic {
 			new SemanticTypeActions<TestToken>(null);
 		}
 
-		internal static SemanticTypeActions<TestToken> CreateSemanticActions() {
-			return new SemanticTypeActions<TestToken>(CompiledGrammarTest.LoadTestGrammar());
+		[Test]
+		public void Create() {
+			CreateSemanticActions();
+		}
+
+		[Test]
+		public void Initialize() {
+			CreateSemanticActions().Initialize();
 		}
 	}
 }

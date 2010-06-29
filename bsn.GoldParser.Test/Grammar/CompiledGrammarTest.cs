@@ -13,9 +13,9 @@ namespace bsn.GoldParser.Grammar {
 		}
 
 		[Test]
-		public void CheckDfaCharsetCount() {
+		public void CheckAbout() {
 			CompiledGrammar grammar = LoadTestGrammar();
-			Expect(grammar.DfaCharsetCount, EqualTo(11));
+			Expect(grammar.About, EqualTo("Example for testing Gold Parser Engine"));
 		}
 
 		[Test]
@@ -31,21 +31,9 @@ namespace bsn.GoldParser.Grammar {
 		}
 
 		[Test]
-		public void CheckVersion() {
+		public void CheckDfaCharsetCount() {
 			CompiledGrammar grammar = LoadTestGrammar();
-			Expect(grammar.Version, EqualTo("1.1"));
-		}
-
-		[Test]
-		public void CheckAbout() {
-			CompiledGrammar grammar = LoadTestGrammar();
-			Expect(grammar.About, EqualTo("Example for testing Gold Parser Engine"));
-		}
-
-		[Test]
-		public void CheckName() {
-			CompiledGrammar grammar = LoadTestGrammar();
-			Expect(grammar.Name, EqualTo("Text Calculator Grammar"));
+			Expect(grammar.DfaCharsetCount, EqualTo(14));
 		}
 
 		[Test]
@@ -79,13 +67,19 @@ namespace bsn.GoldParser.Grammar {
 		[Test]
 		public void CheckLalrStateCount() {
 			CompiledGrammar grammar = LoadTestGrammar();
-			Expect(grammar.LalrStateCount, EqualTo(20));
+			Expect(grammar.LalrStateCount, EqualTo(23));
+		}
+
+		[Test]
+		public void CheckName() {
+			CompiledGrammar grammar = LoadTestGrammar();
+			Expect(grammar.Name, EqualTo("Text Calculator Grammar"));
 		}
 
 		[Test]
 		public void CheckRuleCount() {
 			CompiledGrammar grammar = LoadTestGrammar();
-			Expect(grammar.RuleCount, EqualTo(11));
+			Expect(grammar.RuleCount, EqualTo(15));
 			for (int i = 0; i < grammar.RuleCount; i++) {
 				Trace.WriteLine(grammar.GetRule(i).Definition, i.ToString());
 			}
@@ -94,10 +88,16 @@ namespace bsn.GoldParser.Grammar {
 		[Test]
 		public void CheckSymbolCount() {
 			CompiledGrammar grammar = LoadTestGrammar();
-			Expect(grammar.SymbolCount, EqualTo(18));
+			Expect(grammar.SymbolCount, EqualTo(21));
 			for (int i = 0; i < grammar.SymbolCount; i++) {
 				Trace.WriteLine(grammar.GetSymbol(i).Name, i.ToString());
 			}
+		}
+
+		[Test]
+		public void CheckVersion() {
+			CompiledGrammar grammar = LoadTestGrammar();
+			Expect(grammar.Version, EqualTo("1.1"));
 		}
 
 		[Test]
@@ -119,10 +119,13 @@ namespace bsn.GoldParser.Grammar {
 		}
 
 		[Test]
-		public void GetTerminalSymbol() {
-			Symbol symbol = LoadTestGrammar().GetSymbolByName("Float");
+		public void GetNonterminalRules() {
+			CompiledGrammar grammar = LoadTestGrammar();
+			Symbol symbol = grammar.GetSymbolByName("<Expression>");
 			Expect(symbol, Not.Null);
-			Expect(symbol.Name, EqualTo("Float"));
+			ReadOnlyCollection<Rule> rules = grammar.GetRulesForSymbol(symbol);
+			Expect(rules, Not.Null);
+			Expect(rules.Count, EqualTo(3));
 		}
 
 		[Test]
@@ -133,13 +136,10 @@ namespace bsn.GoldParser.Grammar {
 		}
 
 		[Test]
-		public void GetNonterminalRules() {
-			CompiledGrammar grammar = LoadTestGrammar();
-			Symbol symbol = grammar.GetSymbolByName("<Expression>");
+		public void GetTerminalSymbol() {
+			Symbol symbol = LoadTestGrammar().GetSymbolByName("Float");
 			Expect(symbol, Not.Null);
-			ReadOnlyCollection<Rule> rules = grammar.GetRulesForSymbol(symbol);
-			Expect(rules, Not.Null);
-			Expect(rules.Count, EqualTo(3));
+			Expect(symbol.Name, EqualTo("Float"));
 		}
 	}
 }

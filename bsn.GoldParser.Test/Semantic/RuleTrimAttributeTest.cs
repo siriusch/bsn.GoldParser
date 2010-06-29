@@ -7,10 +7,18 @@ using NUnit.Framework;
 namespace bsn.GoldParser.Semantic {
 	[TestFixture]
 	public class RuleTrimAttributeTest: AssertionHelper {
+		private CompiledGrammar grammar;
+
+		[TestFixtureSetUp]
+		public void SetUp() {
+			grammar = CompiledGrammarTest.LoadTestGrammar();
+		}
+
 		[Test]
-		[ExpectedException(typeof(ArgumentNullException))]
-		public void ConstructWithoutString() {
-			new RuleTrimAttribute(null, 0);
+		public void BindToGrammar() {
+			RuleTrimAttribute attribute = new RuleTrimAttribute("<Negate Exp> ::= '-' <Value>", 1);
+			Expect(attribute.Bind(grammar), Not.Null);
+			Expect(attribute.TrimSymbolIndex, EqualTo(1));
 		}
 
 		[Test]
@@ -26,20 +34,15 @@ namespace bsn.GoldParser.Semantic {
 		}
 
 		[Test]
-		[ExpectedException(typeof(ArgumentNullException))]
-		public void ConstructWithNullTrimName() {
-			new RuleTrimAttribute("<Negate Exp> ::= '-' <Value>", null);
-		}
-
-		[Test]
-		public void ConstructWithTrimName() {
-			new RuleTrimAttribute("<Negate Exp> ::= '-' <Value>", "<Value>");
-		}
-
-		[Test]
 		[ExpectedException(typeof(ArgumentOutOfRangeException))]
 		public void ConstructWithNegativeIndex() {
 			new RuleTrimAttribute("<Negate Exp> ::= '-' <Value>", -1);
+		}
+
+		[Test]
+		[ExpectedException(typeof(ArgumentNullException))]
+		public void ConstructWithNullTrimName() {
+			new RuleTrimAttribute("<Negate Exp> ::= '-' <Value>", null);
 		}
 
 		[Test]
@@ -49,10 +52,14 @@ namespace bsn.GoldParser.Semantic {
 		}
 
 		[Test]
-		public void BindToGrammar() {
-			RuleTrimAttribute attribute = new RuleTrimAttribute("<Negate Exp> ::= '-' <Value>", 1);
-			Expect(attribute.Bind(CompiledGrammarTest.LoadTestGrammar()), Not.Null);
-			Expect(attribute.TrimSymbolIndex, EqualTo(1));
+		public void ConstructWithTrimName() {
+			new RuleTrimAttribute("<Negate Exp> ::= '-' <Value>", "<Value>");
+		}
+
+		[Test]
+		[ExpectedException(typeof(ArgumentNullException))]
+		public void ConstructWithoutString() {
+			new RuleTrimAttribute(null, 0);
 		}
 	}
 }

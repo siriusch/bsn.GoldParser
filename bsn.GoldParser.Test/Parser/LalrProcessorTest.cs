@@ -7,6 +7,13 @@ using NUnit.Framework;
 namespace bsn.GoldParser.Parser {
 	[TestFixture]
 	public class LalrProcessorTest: AssertionHelper {
+		private CompiledGrammar grammar;
+
+		[TestFixtureSetUp]
+		public void SetUp() {
+			grammar = CompiledGrammarTest.LoadTestGrammar();
+		}
+
 		private int CountTokens(IToken currentToken) {
 			int result = 1;
 			Reduction reduction = currentToken as Reduction;
@@ -26,7 +33,6 @@ namespace bsn.GoldParser.Parser {
 
 		[Test]
 		public void ParseTreeWithTrim() {
-			CompiledGrammar grammar = CompiledGrammarTest.LoadTestGrammar();
 			using (TestStringReader reader = TokenizerTest.GetReader()) {
 				Tokenizer tokenizer = new Tokenizer(reader, grammar);
 				LalrProcessor processor = new LalrProcessor(tokenizer, true);
@@ -105,7 +111,6 @@ namespace bsn.GoldParser.Parser {
 
 		[Test]
 		public void ParseTreeWithoutTrim() {
-			CompiledGrammar grammar = CompiledGrammarTest.LoadTestGrammar();
 			using (TestStringReader reader = TokenizerTest.GetReader()) {
 				Tokenizer tokenizer = new Tokenizer(reader, grammar);
 				LalrProcessor processor = new LalrProcessor(tokenizer);
@@ -200,9 +205,11 @@ namespace bsn.GoldParser.Parser {
 				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(Reduction)));
 				Expect(processor.Parse(), EqualTo(ParseMessage.Reduction));
 				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(Reduction)));
+				Expect(processor.Parse(), EqualTo(ParseMessage.Reduction));
+				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(Reduction)));
 				Expect(processor.Parse(), EqualTo(ParseMessage.Accept));
-				Expect(processor.CurrentToken.Symbol.Name, EqualTo("Expression"));
-				Expect(CountTokens(processor.CurrentToken), EqualTo(39));
+				Expect(processor.CurrentToken.Symbol.Name, EqualTo("Root"));
+				Expect(CountTokens(processor.CurrentToken), EqualTo(40));
 			}
 		}
 	}
