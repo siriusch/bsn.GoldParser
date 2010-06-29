@@ -61,6 +61,11 @@ namespace bsn.GoldParser.Semantic {
 			return result;
 		}
 
+		internal void ApplyCommonBaseType(ref Type x, Type y) {
+			Debug.Assert(y != null);
+			x = (x == null) ? y : GetCommonBaseType(x, y);
+		}
+
 		protected Type GetSymbolTypeInternal(Symbol symbol, Type @default) {
 			if (symbol == null) {
 				throw new ArgumentNullException("symbol");
@@ -83,7 +88,7 @@ namespace bsn.GoldParser.Semantic {
 			return GetSymbolTypeInternal(symbol, typeof(T));
 		}
 
-		public void MemorizeTypeForSymbol(Symbol symbol, Type type) {
+		public void SetTypeForSymbol(Symbol symbol, Type type) {
 			if (symbol == null) {
 				throw new ArgumentNullException("symbol");
 			}

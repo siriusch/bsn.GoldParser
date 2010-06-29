@@ -19,6 +19,18 @@ namespace bsn.GoldParser.Grammar {
 			}
 		}
 
+		public bool Set(Symbol symbol) {
+			bool isSet;
+			if (entries.TryGetValue(symbol, out isSet)) {
+				if (!isSet) {
+					entries[symbol] = true;
+				}
+				return !isSet;
+			}
+			entries.Add(symbol, true);
+			return true;
+		}
+
 		public IEnumerator<Symbol> GetEnumerator() {
 			foreach (KeyValuePair<Symbol, bool> entry in entries) {
 				if (entry.Value) {

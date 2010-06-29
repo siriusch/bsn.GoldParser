@@ -16,6 +16,11 @@ namespace bsn.GoldParser.Semantic {
 		}
 
 		[Test]
+		public void Initialize() {
+			CreateSemanticActions().Initialize();
+		}
+
+		[Test]
 		[ExpectedException(typeof(ArgumentNullException))]
 		public void ConstructWithoutGrammar() {
 			new SemanticTypeActions<TestToken>(null);

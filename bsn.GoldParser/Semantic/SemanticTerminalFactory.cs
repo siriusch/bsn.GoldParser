@@ -20,11 +20,5 @@ namespace bsn.GoldParser.Semantic {
 		internal override sealed SemanticToken CreateInternal(string text) {
 			return Create(text);
 		}
-
-		public sealed override bool IsStaticOutputType {
-			get {
-				return true;
-			}
-		}
 	}
 }

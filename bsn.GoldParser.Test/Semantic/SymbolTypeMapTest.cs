@@ -64,8 +64,8 @@ namespace bsn.GoldParser.Semantic {
 			CompiledGrammar grammar = CompiledGrammarTest.LoadTestGrammar();
 			Symbol symbol = grammar.GetSymbolByName(Symbol.FormatTerminalSymbol("-"));
 			SymbolTypeMap<TestToken> symbolTypeMap = new SymbolTypeMap<TestToken>();
-			symbolTypeMap.MemorizeTypeForSymbol(symbol, typeof(TestAdd));
-			symbolTypeMap.MemorizeTypeForSymbol(symbol, typeof(TestSubtract));
+			symbolTypeMap.SetTypeForSymbol(symbol, typeof(TestAdd));
+			symbolTypeMap.SetTypeForSymbol(symbol, typeof(TestSubtract));
 			Expect(symbolTypeMap.GetSymbolType(symbol), EqualTo(typeof(TestOperation)));
 		}
 
@@ -75,10 +75,10 @@ namespace bsn.GoldParser.Semantic {
 			Symbol symbol = grammar.GetSymbolByName(Symbol.FormatTerminalSymbol("-"));
 			SymbolTypeMap<TestToken> symbolTypeMap = new SymbolTypeMap<TestToken>();
 			long version = symbolTypeMap.Version;
-			symbolTypeMap.MemorizeTypeForSymbol(symbol, typeof(TestAdd));
+			symbolTypeMap.SetTypeForSymbol(symbol, typeof(TestAdd));
 			Expect(symbolTypeMap.Version, GreaterThan(version));
 			version = symbolTypeMap.Version;
-			symbolTypeMap.MemorizeTypeForSymbol(symbol, typeof(TestSubtract));
+			symbolTypeMap.SetTypeForSymbol(symbol, typeof(TestSubtract));
 			Expect(symbolTypeMap.Version, GreaterThan(version));
 		}
 
@@ -89,10 +89,10 @@ namespace bsn.GoldParser.Semantic {
 			SymbolTypeMap<TestToken> parentSymbolTypeMap = new SymbolTypeMap<TestToken>();
 			SymbolTypeMap<TestToken> symbolTypeMap = new SymbolTypeMap<TestToken>(parentSymbolTypeMap);
 			long version = symbolTypeMap.Version;
-			symbolTypeMap.MemorizeTypeForSymbol(symbol, typeof(TestAdd));
+			symbolTypeMap.SetTypeForSymbol(symbol, typeof(TestAdd));
 			Expect(symbolTypeMap.Version, GreaterThan(version));
 			version = symbolTypeMap.Version;
-			parentSymbolTypeMap.MemorizeTypeForSymbol(symbol, typeof(TestAdd));
+			parentSymbolTypeMap.SetTypeForSymbol(symbol, typeof(TestAdd));
 			Expect(symbolTypeMap.Version, GreaterThan(version));
 		}
 
@@ -102,7 +102,7 @@ namespace bsn.GoldParser.Semantic {
 			Symbol symbol = grammar.GetSymbolByName(Symbol.FormatTerminalSymbol("-"));
 			SymbolTypeMap<TestToken> parentSymbolTypeMap = new SymbolTypeMap<TestToken>();
 			SymbolTypeMap<TestToken> symbolTypeMap = new SymbolTypeMap<TestToken>(parentSymbolTypeMap);
-			parentSymbolTypeMap.MemorizeTypeForSymbol(symbol, typeof(TestAdd));
+			parentSymbolTypeMap.SetTypeForSymbol(symbol, typeof(TestAdd));
 			Expect(symbolTypeMap.GetSymbolType(symbol), EqualTo(typeof(TestAdd)));
 		}
 
@@ -112,7 +112,7 @@ namespace bsn.GoldParser.Semantic {
 			Symbol symbol = grammar.GetSymbolByName(Symbol.FormatTerminalSymbol("-"));
 			SymbolTypeMap<TestToken> parentSymbolTypeMap = new SymbolTypeMap<TestToken>();
 			SymbolTypeMap<TestToken> symbolTypeMap = new SymbolTypeMap<TestToken>(parentSymbolTypeMap);
-			symbolTypeMap.MemorizeTypeForSymbol(symbol, typeof(TestAdd));
+			symbolTypeMap.SetTypeForSymbol(symbol, typeof(TestAdd));
 			Expect(symbolTypeMap.GetSymbolType(symbol), EqualTo(typeof(TestAdd)));
 		}
 
@@ -131,8 +131,8 @@ namespace bsn.GoldParser.Semantic {
 			Symbol symbol = grammar.GetSymbolByName(Symbol.FormatTerminalSymbol("-"));
 			SymbolTypeMap<TestToken> parentSymbolTypeMap = new SymbolTypeMap<TestToken>();
 			SymbolTypeMap<TestToken> symbolTypeMap = new SymbolTypeMap<TestToken>(parentSymbolTypeMap);
-			parentSymbolTypeMap.MemorizeTypeForSymbol(symbol, typeof(TestSubtract));
-			symbolTypeMap.MemorizeTypeForSymbol(symbol, typeof(TestAdd));
+			parentSymbolTypeMap.SetTypeForSymbol(symbol, typeof(TestSubtract));
+			symbolTypeMap.SetTypeForSymbol(symbol, typeof(TestAdd));
 			Expect(symbolTypeMap.GetSymbolType(symbol), EqualTo(typeof(TestOperation)));
 		}
 

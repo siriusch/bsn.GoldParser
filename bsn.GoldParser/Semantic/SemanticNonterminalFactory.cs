@@ -6,6 +6,8 @@ using bsn.GoldParser.Grammar;
 
 namespace bsn.GoldParser.Semantic {
 	public abstract class SemanticNonterminalFactory: SemanticTokenFactory {
+		internal protected abstract IEnumerable<Symbol> GetInputSymbols(Rule rule);
+
 		public abstract ReadOnlyCollection<Type> InputTypes {
 			get;
 		}
@@ -20,16 +22,17 @@ namespace bsn.GoldParser.Semantic {
 			}
 		}
 
+		protected internal override IEnumerable<Symbol> GetInputSymbols(Rule rule) {
+			if (rule == null) {
+				throw new ArgumentNullException("rule");
+			}
+			return rule;
+		}
+
 		public abstract T Create(Rule rule, ReadOnlyCollection<SemanticToken> tokens);
 
 		internal override sealed SemanticToken CreateInternal(Rule rule, ReadOnlyCollection<SemanticToken> tokens) {
 			return Create(rule, tokens);
-		}
-
-		public sealed override bool IsStaticOutputType {
-			get {
-				return true;
-			}
 		}
 	}
 }

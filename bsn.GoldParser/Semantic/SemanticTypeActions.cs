@@ -1,151 +1,45 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Reflection;
 
 using bsn.GoldParser.Grammar;
-using bsn.GoldParser.Parser;
 
 namespace bsn.GoldParser.Semantic {
 	public class SemanticTypeActions<T>: SemanticActions<T> where T: SemanticToken {
-		private class ExplicitTrimFactory: SemanticNonterminalFactory {
-			private readonly int handleIndex;
-			private readonly Symbol handleSymbol;
-			private readonly SemanticTypeActions<T> owner;
-			private int cacheVersion = int.MinValue;
-			private Type type;
-
-			public ExplicitTrimFactory(SemanticTypeActions<T> owner, Rule rule, int handleIndex) {
-				Debug.Assert(owner != null);
-				Debug.Assert(rule != null);
-				this.owner = owner;
-				this.handleIndex = handleIndex;
-				handleSymbol = rule[handleIndex];
-			}
-
-			public override ReadOnlyCollection<Type> InputTypes {
-				get {
-					UpdateCache();
-					return Array.AsReadOnly(new[] {type});
-				}
-			}
-
-			public override Type OutputType {
-				get {
-					UpdateCache();
-					return type;
-				}
-			}
-
-			internal override SemanticToken CreateInternal(Rule rule, ReadOnlyCollection<SemanticToken> tokens) {
-				SemanticToken result = tokens[handleIndex];
-				Debug.Assert(((IToken)result).Symbol == handleSymbol);
-				Debug.Assert(OutputType.IsAssignableFrom(result.GetType()));
-				return result;
-			}
-
-			private void UpdateCache() {
-				if (cacheVersion != owner.symbolTypeMap.Version) {
-					type = owner.GetOutputTypeOfSymbol(handleSymbol);
-					cacheVersion = owner.symbolTypeMap.Version;
-				}
-			}
-		}
-
-		private class ResolvedTypes: Dictionary<Symbol, Type> {
-			public static void Acquire(ref ResolvedTypes resolvedTypes) {
-				if (resolvedTypes == null) {
-					resolvedTypes = new ResolvedTypes();
-				} else {
-					resolvedTypes.usageCount++;
-				}
-			}
-
-			public static void Release(ref ResolvedTypes resolvedTypes) {
-				if (resolvedTypes == null) {
-					throw new ArgumentNullException("resolvedTypes");
-				}
-				resolvedTypes.usageCount--;
-				Debug.Assert(resolvedTypes.usageCount >= 0);
-				if (resolvedTypes.usageCount == 0) {
-					resolvedTypes = null;
-				}
-			}
-
-			private int usageCount;
-
-			private ResolvedTypes() {
-				usageCount = 1;
-			}
-		}
-
-		[ThreadStatic]
-		private static ResolvedTypes resolvedTypes;
-
 		private readonly SymbolTypeMap<T> symbolTypeMap = new SymbolTypeMap<T>();
-		private readonly object sync = new object();
-		private bool initialized;
 
 		public SemanticTypeActions(CompiledGrammar grammar): base(grammar) {
 			// then we go through all types which are candidates for carrying rule or terminal attributes and register those
 		}
 
-		public Type GetOutputTypeOfSymbol(Symbol symbol) {
-			Type result;
-			if (TryGetOutputTypeOfSymbol(symbol, out result)) {
-				return result;
-			}
-			return typeof(T);
-		}
-
-		public bool TryGetOutputTypeOfSymbol(Symbol symbol, out Type result) {
+		public override Type GetSymbolOutputType(Symbol symbol) {
 			if (symbol == null) {
 				throw new ArgumentNullException("symbol");
 			}
-			ResolvedTypes.Acquire(ref resolvedTypes);
-			try {
-				if (!resolvedTypes.TryGetValue(symbol, out result)) {
-					resolvedTypes.Add(symbol, null);
-					if (symbol.Kind == SymbolKind.Nonterminal) {
-						foreach (Rule rule in Grammar.GetRulesForSymbol(symbol)) {
-							Type ruleSymbolType = null;
-							SemanticNonterminalFactory factory;
-							if (TryGetNonterminalFactory(rule, out factory)) {
-								ruleSymbolType = factory.OutputType;
-							} else if (rule.ContainsOneNonterminal) {
-								TryGetOutputTypeOfSymbol(rule.RuleSymbol, out ruleSymbolType);
-							}
-							if (result == null) {
-								result = ruleSymbolType;
-							} else if (ruleSymbolType != null) {
-								result = symbolTypeMap.GetCommonBaseType(result, ruleSymbolType);
-							}
-						}
-					} else {
-						SemanticTerminalFactory factory;
-						if (TryGetTerminalFactory(symbol, out factory)) {
-							result = factory.OutputType;
+			if (symbol.Owner != Grammar) {
+				throw new ArgumentException("The given symbol belongs to another grammar", "symbol");
+			}
+			Queue<Symbol> pending = new Queue<Symbol>();
+			pending.Enqueue(symbol);
+			SymbolSet visited = new SymbolSet();
+			Type bestMatch = null;
+			while (pending.Count > 0) {
+				symbol = pending.Dequeue();
+				if (visited.Set(symbol)) {
+					foreach (SemanticTokenFactory factory in GetTokenFactoriesForSymbol(symbol)) {
+						Symbol redirectForOutputType = factory.RedirectForOutputType;
+						if (redirectForOutputType == null) {
+							symbolTypeMap.ApplyCommonBaseType(ref bestMatch, factory.OutputType);
+						} else {
+							pending.Enqueue(redirectForOutputType);
 						}
 					}
-					resolvedTypes[symbol] = result;
-				}
-				return result != null;
-			} finally {
-				ResolvedTypes.Release(ref resolvedTypes);
-			}
-		}
-
-		protected void Initialize() {
-			lock (sync) {
-				if (!initialized) {
-					InitializeInternal();
-					initialized = true;
 				}
 			}
+			return bestMatch ?? typeof(T);
 		}
 
-		protected virtual void InitializeInternal() {
+		protected override void InitializeInternal() {
 			foreach (Type type in typeof(T).Assembly.GetTypes()) {
 				if (typeof(T).IsAssignableFrom(type) && type.IsClass && (!type.IsAbstract) && (!type.IsGenericTypeDefinition)) {
 					foreach (TerminalAttribute terminalAttribute in type.GetCustomAttributes(typeof(TerminalAttribute), true)) {
@@ -172,7 +66,7 @@ namespace bsn.GoldParser.Semantic {
 				if (rule == null) {
 					throw new InvalidOperationException(string.Format("Nonterminal {0} not found in grammar", ruleTrimAttribute.Rule));
 				}
-				RegisterNonterminalFactory(rule, new ExplicitTrimFactory(this, rule, ruleTrimAttribute.TrimSymbolIndex));
+				RegisterNonterminalFactory(rule, new SemanticTrimFactory<T>(this, rule, ruleTrimAttribute.TrimSymbolIndex));
 			}
 		}
 
@@ -198,7 +92,7 @@ namespace bsn.GoldParser.Semantic {
 
 		private void MemorizeType(SemanticTokenFactory factory, Symbol symbol) {
 			if (factory.IsStaticOutputType) {
-				symbolTypeMap.MemorizeTypeForSymbol(symbol, factory.OutputType);
+				symbolTypeMap.SetTypeForSymbol(symbol, factory.OutputType);
 			}
 		}
 	}
