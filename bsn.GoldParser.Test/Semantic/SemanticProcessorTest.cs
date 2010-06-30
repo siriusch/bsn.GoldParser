@@ -14,6 +14,7 @@ namespace bsn.GoldParser.Semantic {
 		[TestFixtureSetUp]
 		public void SetUp() {
 			actions = new SemanticTypeActions<TestToken>(CompiledGrammarTest.LoadTestGrammar());
+			actions.Initialize();
 		}
 
 		[Test]
