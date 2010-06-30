@@ -1,29 +1,25 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Reflection;
 
 namespace bsn.GoldParser.Semantic {
 	public class SemanticTerminalTypeFactory<T>: SemanticTerminalFactory<T> where T: SemanticToken {
-#warning replace reflection with generated IL code
-		private readonly ConstructorInfo constructor;
-		private readonly bool defaultConstructor;
+		private readonly SemanticTerminalTypeFactoryHelper.Activator<T> activator;
 
 		public SemanticTerminalTypeFactory() {
-			constructor = typeof(T).GetConstructor(new[] {typeof(string)});
+			ConstructorInfo constructor = typeof(T).GetConstructor(new[] {typeof(string)});
 			if (constructor == null) {
 				constructor = typeof(T).GetConstructor(Type.EmptyTypes);
 				if (constructor == null) {
 					throw new InvalidOperationException("No matching constructor found");
 				}
-				defaultConstructor = true;
 			}
+			activator = SemanticTerminalTypeFactoryHelper.CreateActivator(this, constructor);
+			Debug.Assert(activator != null);
 		}
 
 		protected override T Create(string text) {
-			object[] args = null;
-			if (!defaultConstructor) {
-				args = new[] {text};
-			}
-			return (T)constructor.Invoke(args);
+			return activator(text);
 		}
 	}
 }

@@ -9,9 +9,7 @@ namespace bsn.GoldParser.Semantic {
 	public class SemanticTypeActions<T>: SemanticActions<T> where T: SemanticToken {
 		private readonly SymbolTypeMap<T> symbolTypeMap = new SymbolTypeMap<T>();
 
-		public SemanticTypeActions(CompiledGrammar grammar): base(grammar) {
-			// then we go through all types which are candidates for carrying rule or terminal attributes and register those
-		}
+		public SemanticTypeActions(CompiledGrammar grammar): base(grammar) {}
 
 		public override Type GetSymbolOutputType(Symbol symbol) {
 			if (symbol == null) {
@@ -95,8 +93,7 @@ namespace bsn.GoldParser.Semantic {
 									if (factoryType != type) {
 										nonterminalFactory = null; // don't keep generic factories
 									}
-								}
-								catch (InvalidOperationException ex) {
+								} catch (InvalidOperationException ex) {
 									errors.Add(string.Format("Rule {0} factory problem: {1}", rule, ex.Message));
 								}
 							}
@@ -130,12 +127,10 @@ namespace bsn.GoldParser.Semantic {
 		}
 
 		private SemanticNonterminalFactory CreateNonterminalFactory(Type type, ConstructorInfo constructor) {
-#warning maybe replace activator with generated IL code
 			return (SemanticNonterminalFactory)Activator.CreateInstance(typeof(SemanticNonterminalTypeFactory<>).MakeGenericType(type), constructor);
 		}
 
 		private SemanticTerminalFactory CreateTerminalFactory(Type type) {
-#warning maybe replace activator with generated IL code
 			return (SemanticTerminalFactory)Activator.CreateInstance(typeof(SemanticTerminalTypeFactory<>).MakeGenericType(type));
 		}
 

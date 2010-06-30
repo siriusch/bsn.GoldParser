@@ -1,21 +1,22 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Reflection;
 
 using bsn.GoldParser.Grammar;
 
 namespace bsn.GoldParser.Semantic {
 	public class SemanticNonterminalTypeFactory<T>: SemanticNonterminalFactory<T> where T: SemanticToken {
-#warning replace reflection with generated IL code
-		private readonly ConstructorInfo constructor;
+		private readonly SemanticNonterminalTypeFactoryHelper.Activator<T> activator;
 		private readonly ReadOnlyCollection<Type> inputTypes;
 
 		public SemanticNonterminalTypeFactory(ConstructorInfo constructor) {
 			if (constructor == null) {
 				throw new ArgumentNullException("constructor");
 			}
-			this.constructor = constructor;
 			inputTypes = Array.AsReadOnly(Array.ConvertAll(constructor.GetParameters(), input => input.ParameterType));
+			activator = SemanticNonterminalTypeFactoryHelper.CreateActivator(this, constructor);
+			Debug.Assert(activator != null);
 		}
 
 		public override ReadOnlyCollection<Type> InputTypes {
@@ -25,9 +26,8 @@ namespace bsn.GoldParser.Semantic {
 		}
 
 		public override T Create(Rule rule, ReadOnlyCollection<SemanticToken> tokens) {
-			SemanticToken[] args = new SemanticToken[tokens.Count];
-			tokens.CopyTo(args, 0);
-			return (T)constructor.Invoke(args);
+			Debug.Assert((tokens != null) && (tokens.Count == inputTypes.Count));
+			return activator(tokens);
 		}
 	}
 }
