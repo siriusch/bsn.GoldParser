@@ -85,9 +85,19 @@ namespace bsn.GoldParser.Semantic {
 		public void Initialize() {
 			lock (sync) {
 				if (!initialized) {
-					InitializeInternal();
+					List<string> errors = new List<string>();
+					InitializeInternal(errors);
 					initialized = true;
-					CheckConsistency();
+					CheckConsistency(errors);
+					// throw if errors were found
+					if (errors.Count > 0) {
+						StringBuilder result = new StringBuilder();
+						result.AppendLine("The semantic engine found errors:");
+						foreach (string error in errors) {
+							result.AppendLine(error);
+						}
+						throw new InvalidOperationException(result.ToString());
+					}
 				}
 			}
 		}
@@ -121,8 +131,7 @@ namespace bsn.GoldParser.Semantic {
 			}
 		}
 
-		protected void CheckConsistency() {
-			List<string> errors = new List<string>();
+		protected virtual void CheckConsistency(ICollection<string> errors) {
 			SymbolTypeMap<T> symbolTypes = new SymbolTypeMap<T>();
 			// step 1: check that all terminals have a factory and register their output type
 			for (int i = 0; i < grammar.SymbolCount; i++) {
@@ -163,15 +172,6 @@ namespace bsn.GoldParser.Semantic {
 					errors.Add(string.Format("The factory for the type {0} used by rule {1} has a mismatch of input symbol count ({2}) and type count ({3})", pair.Value.OutputType.FullName, pair.Key.Definition, index, inputTypes.Count));
 				}
 			}
-			// throw if errors were found
-			if (errors.Count > 0) {
-				StringBuilder result = new StringBuilder();
-				result.AppendLine("The semantic engine found errors:");
-				foreach (string error in errors) {
-					result.AppendLine(error);
-				}
-				throw new InvalidOperationException(result.ToString());
-			}
 		}
 
 		protected IEnumerable<SemanticTokenFactory> GetTokenFactoriesForSymbol(Symbol symbol) {
@@ -193,7 +193,7 @@ namespace bsn.GoldParser.Semantic {
 			}
 		}
 
-		protected abstract void InitializeInternal();
+		protected abstract void InitializeInternal(ICollection<string> errors);
 
 		protected virtual void RegisterNonterminalFactory(Rule rule, SemanticNonterminalFactory factory) {
 			if (rule == null) {

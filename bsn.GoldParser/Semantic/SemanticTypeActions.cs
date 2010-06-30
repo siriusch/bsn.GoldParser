@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection;
 
 using bsn.GoldParser.Grammar;
@@ -39,23 +40,66 @@ namespace bsn.GoldParser.Semantic {
 			return bestMatch ?? typeof(T);
 		}
 
-		protected override void InitializeInternal() {
+		protected override void InitializeInternal(ICollection<string> errors) {
 			foreach (Type type in typeof(T).Assembly.GetTypes()) {
-				if (typeof(T).IsAssignableFrom(type) && type.IsClass && (!type.IsAbstract) && (!type.IsGenericTypeDefinition)) {
+				if (typeof(T).IsAssignableFrom(type) && type.IsClass && (!type.IsAbstract)) {
+					SemanticTerminalFactory terminalFactory = null;
 					foreach (TerminalAttribute terminalAttribute in type.GetCustomAttributes(typeof(TerminalAttribute), true)) {
 						Symbol symbol = terminalAttribute.Bind(Grammar);
 						if (symbol == null) {
-							throw new InvalidOperationException(string.Format("Terminal {0} not found in grammar", terminalAttribute.SymbolName));
+							errors.Add(string.Format("Terminal {0} not found in grammar", terminalAttribute.SymbolName));
+						} else {
+							try {
+								Type factoryType = (terminalAttribute.IsGeneric) ? type.MakeGenericType(terminalAttribute.GenericTypes) : type;
+								if (terminalFactory == null) {
+									terminalFactory = CreateTerminalFactory(factoryType);
+								}
+								RegisterTerminalFactory(symbol, terminalFactory);
+								if (factoryType != type) {
+									terminalFactory = null; // don't keep generic factories
+								}
+							} catch (InvalidOperationException ex) {
+								errors.Add(string.Format("Terminal {0} factory problem: {1}", symbol, ex.Message));
+							}
 						}
-						RegisterTerminalFactory(symbol, CreateTerminalFactory(type));
 					}
 					foreach (ConstructorInfo constructor in type.GetConstructors()) {
+						SemanticNonterminalFactory nonterminalFactory = null;
 						foreach (RuleAttribute ruleAttribute in constructor.GetCustomAttributes(typeof(RuleAttribute), true)) {
 							Rule rule = ruleAttribute.Bind(Grammar);
 							if (rule == null) {
-								throw new InvalidOperationException(string.Format("Nonterminal {0} not found in grammar", ruleAttribute.Rule));
+								errors.Add(string.Format("Rule {0} not found in grammar", ruleAttribute.Rule));
+							} else {
+								try {
+									Type factoryType;
+									ConstructorInfo factoryConstructor = null;
+									if (ruleAttribute.IsGeneric) {
+										factoryType = type.MakeGenericType(ruleAttribute.GenericTypes);
+										foreach (ConstructorInfo genericConstructor in factoryType.GetConstructors()) {
+											foreach (RuleAttribute genericRuleAttribute in genericConstructor.GetCustomAttributes(typeof(RuleAttribute), true)) {
+												if (ruleAttribute.Equals(genericRuleAttribute)) {
+													factoryConstructor = genericConstructor;
+													break;
+												}
+											}
+											Debug.Assert(factoryConstructor != null);
+										}
+									} else {
+										factoryType = type;
+										factoryConstructor = constructor;
+									}
+									if (nonterminalFactory == null) {
+										nonterminalFactory = CreateNonterminalFactory(factoryType, factoryConstructor);
+									}
+									RegisterNonterminalFactory(rule, nonterminalFactory);
+									if (factoryType != type) {
+										nonterminalFactory = null; // don't keep generic factories
+									}
+								}
+								catch (InvalidOperationException ex) {
+									errors.Add(string.Format("Rule {0} factory problem: {1}", rule, ex.Message));
+								}
 							}
-							RegisterNonterminalFactory(rule, CreateNonterminalFactory(type, constructor));
 						}
 					}
 				}
@@ -64,9 +108,14 @@ namespace bsn.GoldParser.Semantic {
 			foreach (RuleTrimAttribute ruleTrimAttribute in typeof(T).Assembly.GetCustomAttributes(typeof(RuleTrimAttribute), false)) {
 				Rule rule = ruleTrimAttribute.Bind(Grammar);
 				if (rule == null) {
-					throw new InvalidOperationException(string.Format("Nonterminal {0} not found in grammar", ruleTrimAttribute.Rule));
+					errors.Add(string.Format("Rule {0} not found in grammar", ruleTrimAttribute.Rule));
+				} else {
+					try {
+						RegisterNonterminalFactory(rule, new SemanticTrimFactory<T>(this, rule, ruleTrimAttribute.TrimSymbolIndex));
+					} catch (InvalidOperationException ex) {
+						errors.Add(string.Format("Trim tule {0} factory problem: {1}", rule, ex.Message));
+					}
 				}
-				RegisterNonterminalFactory(rule, new SemanticTrimFactory<T>(this, rule, ruleTrimAttribute.TrimSymbolIndex));
 			}
 		}
 

@@ -33,6 +33,16 @@ namespace bsn.GoldParser.Semantic {
 		}
 
 		[Test]
+		public void ConstructWithGenericArgument() {
+			new RuleAttribute("<Negate Exp> ::= '-' <Value>", typeof(TestValue));
+		}
+
+		[Test]
+		public void ConstructWithGenericArgument2() {
+			new RuleAttribute("<Negate Exp> ::= '-' <Value>", typeof(TestValue), typeof(TestValue));
+		}
+
+		[Test]
 		public void ConstructWithString() {
 			new RuleAttribute("<Negate Exp> ::= '-' <Value>");
 		}

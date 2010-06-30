@@ -9,15 +9,19 @@ namespace bsn.GoldParser.Semantic {
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
 	public sealed class TerminalAttribute: Attribute {
+		private readonly Type[] genericTypes;
 		private static readonly Regex rxSpecialToken = new Regex(@"^\(.*\)$");
 
 		private readonly string symbolName;
 
-		public TerminalAttribute(string symbolName) {
+		public TerminalAttribute(string symbolName): this(symbolName, null) {}
+
+		public TerminalAttribute(string symbolName, params Type[] genericTypes) {
 			if (string.IsNullOrEmpty(symbolName)) {
 				throw new ArgumentNullException("symbolName");
 			}
 			this.symbolName = rxSpecialToken.IsMatch(symbolName) ? symbolName : Symbol.FormatTerminalSymbol(symbolName);
+			this.genericTypes = genericTypes ?? Type.EmptyTypes;
 		}
 
 		public Symbol Bind(CompiledGrammar grammar) {
@@ -27,6 +31,18 @@ namespace bsn.GoldParser.Semantic {
 			Symbol result;
 			grammar.TryGetSymbol(symbolName, out result);
 			return result;
+		}
+
+		public Type[] GenericTypes {
+			get {
+				return genericTypes;
+			}
+		}
+
+		public bool IsGeneric {
+			get {
+				return genericTypes.Length > 0;
+			}
 		}
 
 		public string SymbolName {

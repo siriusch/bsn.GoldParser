@@ -31,6 +31,16 @@ namespace bsn.GoldParser.Semantic {
 		}
 
 		[Test]
+		public void ConstructWithGenericArgument() {
+			new TerminalAttribute("Integer", typeof(TestValue));
+		}
+
+		[Test]
+		public void ConstructWithGenericArguments() {
+			new TerminalAttribute("Integer", typeof(TestValue), typeof(TestValue));
+		}
+
+		[Test]
 		[ExpectedException(typeof(ArgumentNullException))]
 		public void ConstructWithoutString() {
 			new TerminalAttribute(null);
