@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 
 namespace bsn.GoldParser.Semantic {
 	public class TestNegate: TestValue {
 		private readonly TestValue value;
 
-		[Rule("<Negate Exp> ::= '-' <Value>", ParameterMapping = new [] {1})]
+		[Rule("<Negate Exp> ::= '-' <Value>", ConstructorParameterMapping = new[] {1})]
 		public TestNegate(TestValue value) {
 			this.value = value;
 		}

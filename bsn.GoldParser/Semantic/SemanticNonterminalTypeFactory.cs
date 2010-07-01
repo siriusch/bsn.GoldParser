@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Reflection;
@@ -10,18 +10,31 @@ namespace bsn.GoldParser.Semantic {
 		private readonly SemanticNonterminalTypeFactoryHelper.Activator<T> activator;
 		private readonly ReadOnlyCollection<Type> inputTypes;
 
-		public SemanticNonterminalTypeFactory(ConstructorInfo constructor, int[] parameterMapping) {
+		public SemanticNonterminalTypeFactory(ConstructorInfo constructor, int[] parameterMapping, int handleCount, Type baseTokenType) {
 			if (constructor == null) {
 				throw new ArgumentNullException("constructor");
 			}
 			if (parameterMapping == null) {
 				throw new ArgumentNullException("parameterMapping");
 			}
+			if (baseTokenType == null) {
+				throw new ArgumentNullException("baseTokenType");
+			}
 			ParameterInfo[] parameters = constructor.GetParameters();
+			if (handleCount < parameters.Length) {
+				throw new ArgumentOutOfRangeException("handleCount");
+			}
 			if (parameterMapping.Length != parameters.Length) {
 				throw new ArgumentException("The parameter mapping must have exactly as many items as the constructor has parameters", "parameterMapping");
 			}
-			inputTypes = Array.AsReadOnly(Array.ConvertAll(parameters, input => input.ParameterType));
+			Type[] inputTypeBuilder = new Type[handleCount];
+			for (int i = 0; i < handleCount; i++) {
+				inputTypeBuilder[i] = baseTokenType;
+			}
+			foreach (ParameterInfo parameter in parameters) {
+				inputTypeBuilder[parameterMapping[parameter.Position]] = parameter.ParameterType;
+			}
+			inputTypes = Array.AsReadOnly(inputTypeBuilder);
 			activator = SemanticNonterminalTypeFactoryHelper.CreateActivator(this, constructor, parameterMapping);
 			Debug.Assert(activator != null);
 		}

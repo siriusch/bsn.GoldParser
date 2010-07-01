@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
@@ -56,6 +56,8 @@ namespace bsn.GoldParser.Semantic {
 								if (factoryType != type) {
 									terminalFactory = null; // don't keep generic factories
 								}
+							} catch (TargetInvocationException ex) {
+								errors.Add(string.Format("Terminal {0} factory problem: {1}", symbol, ex.InnerException.Message));
 							} catch (Exception ex) {
 								errors.Add(string.Format("Terminal {0} factory problem: {1}", symbol, ex.Message));
 							}
@@ -71,7 +73,7 @@ namespace bsn.GoldParser.Semantic {
 									Type factoryType;
 									ConstructorInfo factoryConstructor = null;
 									if (ruleAttribute.IsGeneric) {
-										factoryType = type.MakeGenericType(ruleAttribute.GenericTypes);
+										factoryType = type.MakeGenericType(ruleAttribute.GenericTypeParameters);
 										foreach (ConstructorInfo genericConstructor in factoryType.GetConstructors()) {
 											foreach (RuleAttribute genericRuleAttribute in genericConstructor.GetCustomAttributes(typeof(RuleAttribute), true)) {
 												if (ruleAttribute.Equals(genericRuleAttribute)) {
@@ -84,20 +86,22 @@ namespace bsn.GoldParser.Semantic {
 											}
 										}
 										Debug.Assert(factoryConstructor != null);
-									}
-									else {
+									} else {
 										factoryType = type;
 										factoryConstructor = constructor;
 									}
-									int[] parameterMapping = ruleAttribute.ParameterMapping;
+									int[] parameterMapping = ruleAttribute.ConstructorParameterMapping;
 									if (parameterMapping == null) {
-										parameterMapping = new int[ruleAttribute.AllowTruncation ? constructor.GetParameters().Length : rule.SymbolCount];
+										parameterMapping = new int[ruleAttribute.AllowTruncationForConstructor ? constructor.GetParameters().Length : rule.SymbolCount];
 										for (int i = 1; i < parameterMapping.Length; i++) {
 											parameterMapping[i] = i;
 										}
 									}
-									SemanticNonterminalFactory nonterminalFactory = CreateNonterminalFactory(factoryType, factoryConstructor, parameterMapping);;
+									SemanticNonterminalFactory nonterminalFactory = CreateNonterminalFactory(factoryType, factoryConstructor, parameterMapping, rule.SymbolCount);
+									;
 									RegisterNonterminalFactory(rule, nonterminalFactory);
+								} catch (TargetInvocationException ex) {
+									errors.Add(string.Format("Rule {0} factory problem: {1}", rule, ex.InnerException.Message));
 								} catch (Exception ex) {
 									errors.Add(string.Format("Rule {0} factory problem: {1}", rule, ex.Message));
 								}
@@ -131,9 +135,9 @@ namespace bsn.GoldParser.Semantic {
 			MemorizeType(factory, symbol);
 		}
 
-		private SemanticNonterminalFactory CreateNonterminalFactory(Type type, ConstructorInfo constructor, int[] parameterMapping) {
+		private SemanticNonterminalFactory CreateNonterminalFactory(Type type, ConstructorInfo constructor, int[] parameterMapping, int handleCount) {
 #warning maybe use someting more efficient than the Activator
-			return (SemanticNonterminalFactory)Activator.CreateInstance(typeof(SemanticNonterminalTypeFactory<>).MakeGenericType(type), constructor, parameterMapping);
+			return (SemanticNonterminalFactory)Activator.CreateInstance(typeof(SemanticNonterminalTypeFactory<>).MakeGenericType(type), constructor, parameterMapping, handleCount, typeof(T));
 		}
 
 		private SemanticTerminalFactory CreateTerminalFactory(Type type) {

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -25,15 +25,19 @@ namespace bsn.GoldParser.Semantic {
 				if (!dynamicMethods.TryGetValue(constructor, out result)) {
 					result = new DynamicMethod(string.Format("SemanticNonterminalTypeFactory<{0}>.Activator", constructor.DeclaringType.FullName), constructor.DeclaringType, new[] {typeof(int[]), typeof(ReadOnlyCollection<SemanticToken>)}, true);
 					ILGenerator il = result.GetILGenerator();
-					int parameterCount = constructor.GetParameters().Length;
-					for (int i = 0; i < parameterCount; i++) {
+					Dictionary<int, ParameterInfo> parameters = new Dictionary<int, ParameterInfo>();
+					foreach (ParameterInfo parameter in constructor.GetParameters()) {
+						parameters.Add(parameter.Position, parameter);
+					}
+					for (int i = 0; i < parameters.Count; i++) {
 						il.Emit(OpCodes.Ldarg_1); // load the ReadOnlyCollection<SemanticToken>
 						il.Emit(OpCodes.Ldarg_0); // load the int[]
 						il.Emit(OpCodes.Ldc_I4, i); // load the parameter index
 						il.Emit(OpCodes.Ldelem_I4); // get the indirection index
 						il.Emit(OpCodes.Callvirt, readOnlyCollectionGetItem); // get the item
+						il.Emit(OpCodes.Castclass, parameters[i].ParameterType); // make the verifier happy by casting the reference
 					}
-					il.Emit(OpCodes.Newobj, constructor);
+					il.Emit(OpCodes.Newobj, constructor); // invoke constructor
 					il.Emit(OpCodes.Ret);
 					dynamicMethods.Add(constructor, result);
 				}
