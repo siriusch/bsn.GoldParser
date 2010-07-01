@@ -4,6 +4,8 @@ namespace bsn.GoldParser.Semantic {
 	[Terminal("NULL")]
 	public class TestEmpty: TestToken {
 		[Rule("<Empty> ::=")]
-		public TestEmpty() {}
+		[Rule("<Empty> ::= NULL", AllowTruncation = true)]
+		public TestEmpty() {
+		}
 	}
 }

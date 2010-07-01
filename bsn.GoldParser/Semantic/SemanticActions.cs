@@ -162,9 +162,11 @@ namespace bsn.GoldParser.Semantic {
 				ReadOnlyCollection<Type> inputTypes = pair.Value.InputTypes;
 				int index = 0;
 				foreach (Symbol inputSymbol in pair.Value.GetInputSymbols(pair.Key)) {
-					Type handleType = symbolTypes.GetSymbolType(inputSymbol);
-					if (!inputTypes[index].IsAssignableFrom(handleType)) {
-						errors.Add(string.Format("The factory for the type {0} used by rule {1} expects a {2} on index {3}, but receives a {4}", pair.Value.OutputType.FullName, pair.Key.Definition, inputTypes[index].FullName, index, handleType.FullName));
+					if (index < inputTypes.Count) {
+						Type handleType = symbolTypes.GetSymbolType(inputSymbol);
+						if (!inputTypes[index].IsAssignableFrom(handleType)) {
+							errors.Add(string.Format("The factory for the type {0} used by rule {1} expects a {2} on index {3}, but receives a {4}", pair.Value.OutputType.FullName, pair.Key.Definition, inputTypes[index].FullName, index, handleType.FullName));
+						}
 					}
 					index++;
 				}

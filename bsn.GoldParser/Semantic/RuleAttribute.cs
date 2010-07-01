@@ -4,6 +4,8 @@ namespace bsn.GoldParser.Semantic {
 	[AttributeUsage(AttributeTargets.Constructor, AllowMultiple = true, Inherited = false)]
 	public sealed class RuleAttribute: RuleAttributeBase, IEquatable<RuleAttribute> {
 		private readonly Type[] genericTypes;
+		private bool allowTruncation;
+		private int[] parameterMapping;
 
 		public RuleAttribute(string rule): this(rule, null) {}
 
@@ -20,6 +22,24 @@ namespace bsn.GoldParser.Semantic {
 		public bool IsGeneric {
 			get {
 				return genericTypes.Length > 0;
+			}
+		}
+
+		public bool AllowTruncation {
+			get {
+				return allowTruncation;
+			}
+			set {
+				allowTruncation = value;
+			}
+		}
+
+		public int[] ParameterMapping {
+			get {
+				return parameterMapping;
+			}
+			set {
+				parameterMapping = value;
 			}
 		}
 
