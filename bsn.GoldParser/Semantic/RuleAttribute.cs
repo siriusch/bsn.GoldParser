@@ -3,18 +3,14 @@ using System;
 namespace bsn.GoldParser.Semantic {
 	[AttributeUsage(AttributeTargets.Constructor, AllowMultiple = true, Inherited = false)]
 	public sealed class RuleAttribute: RuleAttributeBase, IEquatable<RuleAttribute> {
+		private readonly Type[] genericTypeParameters;
 		private bool allowTruncationForConstructor;
 		private int[] constructorParameterMapping;
-		private Type[] genericTypeParameters;
 
 		public RuleAttribute(string rule): base(rule) {}
 
 		public RuleAttribute(string rule, params Type[] genericTypeParameters): this(rule) {
 			this.genericTypeParameters = genericTypeParameters;
-		}
-
-		public RuleAttribute(string rule, params int[] constructorParameterMapping): this(rule) {
-			this.constructorParameterMapping = constructorParameterMapping;
 		}
 
 		public bool AllowTruncationForConstructor {
@@ -38,9 +34,6 @@ namespace bsn.GoldParser.Semantic {
 		public Type[] GenericTypeParameters {
 			get {
 				return genericTypeParameters ?? Type.EmptyTypes;
-			}
-			set {
-				genericTypeParameters = value;
 			}
 		}
 
