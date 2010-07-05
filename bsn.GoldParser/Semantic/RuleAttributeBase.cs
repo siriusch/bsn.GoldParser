@@ -12,7 +12,7 @@ namespace bsn.GoldParser.Semantic {
 				throw new ArgumentNullException("rule");
 			}
 			if (!RuleDeclarationParser.TryParse(rule, out parsedRule)) {
-				throw new ArgumentException("The given rule contains a syntax error", "rule");
+				throw new ArgumentException(string.Format("The rule {0} contains a syntax error", rule), "rule");
 			}
 		}
 
