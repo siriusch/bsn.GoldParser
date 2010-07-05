@@ -1,5 +1,5 @@
-"Name"     = Text Calculator Grammar
-"Author"   = Robert van Loenhout and Ars?ne von Wyss
+﻿"Name"     = Text Calculator Grammar
+"Author"   = Robert van Loenhout and Arsène von Wyss
 "Version"  = 1.1
 "About"    = 'Example for testing Gold Parser Engine'
 

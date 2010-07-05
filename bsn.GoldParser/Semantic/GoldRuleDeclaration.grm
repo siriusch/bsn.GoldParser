@@ -1,6 +1,6 @@
-"Name"         = 'GOLD Meta-Language Rule Declaration'
+﻿"Name"         = 'GOLD Meta-Language Rule Declaration'
 "Version"      = '2.6.0'
-"Author"       = 'Arsene von Wyss'
+"Author"       = 'Arsène von Wyss'
 "About"        = 'This grammar defines rule declarations as used in the GOLD Meta-Language.'
 
 "Start Symbol" = <Rule Decl>

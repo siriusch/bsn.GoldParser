@@ -4,7 +4,7 @@
 ; 
 ; Original code is written in VB by Devin Cook (GOLDParser@DevinCook.com)
 ;
-; This translation is done by Arsène von Wyss
+; This translation is done by Arsène von Wyss (avw@gmx.ch)
 ; 
 ; The translation is inspired by the other engine translations:
 ; C# engiine by Vladimir Morozov (vmoroz@hotmail.com)
