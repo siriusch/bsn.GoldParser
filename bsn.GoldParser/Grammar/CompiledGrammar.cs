@@ -247,7 +247,7 @@ namespace bsn.GoldParser.Grammar {
 		/// Gets the dfa charset count.
 		/// </summary>
 		/// <value>The dfa charset count.</value>
-		protected internal int DfaCharsetCount {
+		public int DfaCharsetCount {
 			get {
 				return charSetTable.Length;
 			}
@@ -257,7 +257,7 @@ namespace bsn.GoldParser.Grammar {
 		/// Gets the dfa state count.
 		/// </summary>
 		/// <value>The dfa state count.</value>
-		protected internal int DfaStateCount {
+		public int DfaStateCount {
 			get {
 				return dfaStateTable.Length;
 			}
@@ -267,7 +267,7 @@ namespace bsn.GoldParser.Grammar {
 		/// Gets the lalr state count.
 		/// </summary>
 		/// <value>The lalr state count.</value>
-		protected internal int LalrStateCount {
+		public int LalrStateCount {
 			get {
 				return lalrStateTable.Length;
 			}
@@ -277,7 +277,7 @@ namespace bsn.GoldParser.Grammar {
 		/// Gets the rule count.
 		/// </summary>
 		/// <value>The rule count.</value>
-		protected internal int RuleCount {
+		public int RuleCount {
 			get {
 				return ruleTable.Length;
 			}
@@ -287,7 +287,7 @@ namespace bsn.GoldParser.Grammar {
 		/// Gets the symbol count.
 		/// </summary>
 		/// <value>The symbol count.</value>
-		protected internal int SymbolCount {
+		public int SymbolCount {
 			get {
 				return symbolTable.Length;
 			}
@@ -360,7 +360,7 @@ namespace bsn.GoldParser.Grammar {
 		/// </summary>
 		/// <param name="charSetIndex">Index of the char set.</param>
 		/// <returns></returns>
-		protected internal string GetDfaCharset(int charSetIndex) {
+		public string GetDfaCharset(int charSetIndex) {
 			return charSetTable[charSetIndex];
 		}
 
@@ -369,7 +369,7 @@ namespace bsn.GoldParser.Grammar {
 		/// </summary>
 		/// <param name="index">The index.</param>
 		/// <returns></returns>
-		protected internal DfaState GetDfaState(int index) {
+		public DfaState GetDfaState(int index) {
 			return dfaStateTable[index];
 		}
 
@@ -378,7 +378,7 @@ namespace bsn.GoldParser.Grammar {
 		/// </summary>
 		/// <param name="index">The index.</param>
 		/// <returns></returns>
-		protected internal LalrState GetLalrState(int index) {
+		public LalrState GetLalrState(int index) {
 			return lalrStateTable[index];
 		}
 
@@ -387,7 +387,7 @@ namespace bsn.GoldParser.Grammar {
 		/// </summary>
 		/// <param name="index">The index.</param>
 		/// <returns></returns>
-		protected internal Rule GetRule(int index) {
+		public Rule GetRule(int index) {
 			return ruleTable[index];
 		}
 
@@ -396,7 +396,7 @@ namespace bsn.GoldParser.Grammar {
 		/// </summary>
 		/// <param name="symbolIndex">Index of the symbol.</param>
 		/// <returns></returns>
-		protected internal Symbol GetSymbol(int symbolIndex) {
+		public Symbol GetSymbol(int symbolIndex) {
 			return symbolTable[symbolIndex];
 		}
 
