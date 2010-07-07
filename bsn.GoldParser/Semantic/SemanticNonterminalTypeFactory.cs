@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Reflection;
@@ -21,18 +22,27 @@ namespace bsn.GoldParser.Semantic {
 				throw new ArgumentNullException("baseTokenType");
 			}
 			ParameterInfo[] parameters = constructor.GetParameters();
-			if (handleCount < parameters.Length) {
-				throw new ArgumentOutOfRangeException("handleCount");
-			}
 			if (parameterMapping.Length != parameters.Length) {
 				throw new ArgumentException("The parameter mapping must have exactly as many items as the constructor has parameters", "parameterMapping");
+			}
+			int requiredHandles = 0;
+			foreach (int i in parameterMapping) {
+				if (i >= 0) {
+					requiredHandles++;
+				}
+			}
+			if (handleCount < requiredHandles) {
+				throw new ArgumentOutOfRangeException("handleCount");
 			}
 			Type[] inputTypeBuilder = new Type[handleCount];
 			for (int i = 0; i < handleCount; i++) {
 				inputTypeBuilder[i] = baseTokenType;
 			}
 			foreach (ParameterInfo parameter in parameters) {
-				inputTypeBuilder[parameterMapping[parameter.Position]] = parameter.ParameterType;
+				int tokenIndex = parameterMapping[parameter.Position];
+				if (tokenIndex != -1) {
+					inputTypeBuilder[tokenIndex] = parameter.ParameterType;
+				}
 			}
 			inputTypes = Array.AsReadOnly(inputTypeBuilder);
 			activator = SemanticNonterminalTypeFactoryHelper.CreateActivator(this, constructor, parameterMapping);
