@@ -33,7 +33,7 @@ namespace bsn.GoldParser.Grammar {
 		[Test]
 		public void CheckDfaCharsetCount() {
 			CompiledGrammar grammar = LoadTestGrammar();
-			Expect(grammar.DfaCharsetCount, EqualTo(14));
+			Expect(grammar.DfaCharsetCount, EqualTo(16));
 		}
 
 		[Test]
@@ -67,7 +67,7 @@ namespace bsn.GoldParser.Grammar {
 		[Test]
 		public void CheckLalrStateCount() {
 			CompiledGrammar grammar = LoadTestGrammar();
-			Expect(grammar.LalrStateCount, EqualTo(23));
+			Expect(grammar.LalrStateCount, EqualTo(24));
 		}
 
 		[Test]
@@ -79,7 +79,7 @@ namespace bsn.GoldParser.Grammar {
 		[Test]
 		public void CheckRuleCount() {
 			CompiledGrammar grammar = LoadTestGrammar();
-			Expect(grammar.RuleCount, EqualTo(15));
+			Expect(grammar.RuleCount, EqualTo(16));
 			for (int i = 0; i < grammar.RuleCount; i++) {
 				Trace.WriteLine(grammar.GetRule(i).Definition, i.ToString());
 			}
@@ -88,7 +88,7 @@ namespace bsn.GoldParser.Grammar {
 		[Test]
 		public void CheckSymbolCount() {
 			CompiledGrammar grammar = LoadTestGrammar();
-			Expect(grammar.SymbolCount, EqualTo(21));
+			Expect(grammar.SymbolCount, EqualTo(22));
 			for (int i = 0; i < grammar.SymbolCount; i++) {
 				Trace.WriteLine(grammar.GetSymbol(i).Name, i.ToString());
 			}

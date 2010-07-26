@@ -39,6 +39,21 @@ namespace bsn.GoldParser.Parser {
 		}
 
 		[Test]
+		public void BlockCommentWithInvalidInnerSymbol() {
+			using (TestStringReader reader = new TestStringReader("/* don't */ 'do this'")) {
+				Tokenizer tokenizer = new Tokenizer(reader, grammar);
+				Token token;
+				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.CommentBlockRead));
+				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
+				Expect(token.Symbol.Kind, EqualTo(SymbolKind.WhiteSpace));
+				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
+				Expect(token.Symbol.Kind, EqualTo(SymbolKind.Terminal));
+				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
+				Expect(token.Symbol.Kind, EqualTo(SymbolKind.End));
+			}
+		}
+
+		[Test]
 		public void CheckTokens() {
 			using (TestStringReader reader = GetReader()) {
 				Tokenizer tokenizer = new Tokenizer(reader, grammar);

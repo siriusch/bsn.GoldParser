@@ -15,8 +15,11 @@ Comment Line  = '--'
 
 ! ------------------------------------------------- Terminals
 
+{String Ch} = {All Valid} - {Control Codes} - ['']
+
 Integer = {Digit}+
 Float = {Digit}*'.'{Digit}+([Ee][+-]?{Digit}+)?
+String = (''{String Ch}*'')+
 
 ! ------------------------------------------------- Rules
 
@@ -24,6 +27,7 @@ Float = {Digit}*'.'{Digit}+([Ee][+-]?{Digit}+)?
                 | <Empty>
 
 <Empty>       ::= NULL
+                | String
                 |
 
 <Expression>  ::= <Expression> '+' <Mult Exp>

@@ -10,7 +10,7 @@ namespace bsn.GoldParser.Grammar {
 		public bool this[Symbol symbol] {
 			get {
 				bool result;
-				return entries.TryGetValue(symbol, out result) && result;
+				return (symbol != null) && entries.TryGetValue(symbol, out result) && result;
 			}
 			set {
 				if (value || entries.ContainsKey(symbol)) {

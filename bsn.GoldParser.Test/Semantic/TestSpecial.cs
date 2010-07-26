@@ -8,6 +8,7 @@ namespace bsn.GoldParser.Semantic {
 	[Terminal("(Comment End)")]
 	[Terminal("(Comment Line)")]
 	[Terminal("(Comment Start)")]
+	[Terminal("String")]
 	public class TestSpecial: TestToken {
 		private readonly string text;
 
