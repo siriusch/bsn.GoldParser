@@ -88,6 +88,10 @@ namespace bsn.GoldParser.Parser {
 		/// </summary>
 		/// <returns>Token symbol which was read.</returns>
 		public ParseMessage NextToken(out T token) {
+			return NextToken(out token, false);
+		}
+
+		private ParseMessage NextToken(out T token, bool blockComment) {
 			using (CharBuffer.Mark mark = buffer.CreateMark()) {
 				using (CharBuffer.Mark acceptMark = buffer.CreateMark()) {
 					ParseMessage result;
@@ -123,12 +127,16 @@ namespace bsn.GoldParser.Parser {
 							}
 							break;
 						}
-						// This code checks whether the target state accepts a token. If so, it sets the
-						// appropiate variables so when the algorithm in done, it can return the proper
-						// token and number of characters.
-						if (state.AcceptSymbol != null) {
-							acceptMark.MoveToReadPosition();
-							tokenSymbol = state.AcceptSymbol;
+						if (blockComment && (!grammar.BlockCommentStates.Contains(state))) {
+							state = grammar.DfaInitialState;
+						} else {
+							// This code checks whether the target state accepts a token. If so, it sets the
+							// appropiate variables so when the algorithm in done, it can return the proper
+							// token and number of characters.
+							if (state.AcceptSymbol != null) {
+								acceptMark.MoveToReadPosition();
+								tokenSymbol = state.AcceptSymbol;
+							}
 						}
 					}
 					if (tokenSymbol == null) {
@@ -146,7 +154,7 @@ namespace bsn.GoldParser.Parser {
 					case SymbolKind.CommentStart:
 						SymbolKind kind;
 						do {
-							kind = NextToken(out token) != ParseMessage.None ? token.Symbol.Kind : SymbolKind.Error;
+							kind = NextToken(out token, true) != ParseMessage.None ? token.Symbol.Kind : SymbolKind.Error;
 						} while ((kind != SymbolKind.End) && (kind != SymbolKind.CommentEnd));
 						result = (kind == SymbolKind.CommentEnd) ? ParseMessage.CommentBlockRead : ParseMessage.CommentError;
 						break;

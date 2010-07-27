@@ -1,6 +1,7 @@
 // (C) 2010 Arsène von Wyss / bsn
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace bsn.GoldParser.Grammar {
 	/// <summary>
@@ -36,6 +37,22 @@ namespace bsn.GoldParser.Grammar {
 				return result;
 			}
 			return null;
+		}
+
+		/// <summary>
+		/// Gets the transition destination states.
+		/// </summary>
+		/// <returns></returns>
+		public ICollection<DfaState> GetTransitionStates() {
+			return transitionVector.Values;
+		}
+
+		/// <summary>
+		/// Gets the transition origin states.
+		/// </summary>
+		/// <returns></returns>
+		public ICollection<DfaState> GetOriginStates() {
+			return Owner.GetStateOrigins(this);
 		}
 
 		internal void Initialize(CompiledGrammar owner, Symbol acceptSymbol, CompiledGrammar.DfaEdge[] edges) {

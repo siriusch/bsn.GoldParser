@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Text;
@@ -102,11 +103,6 @@ namespace bsn.GoldParser.Grammar {
 				return reader.PeekChar() != -1;
 			}
 
-			/// <summary>
-			/// Reads boolean entry from the grammar file.
-			/// </summary>
-			/// <param name="context"></param>
-			/// <returns>Boolean entry content.</returns>
 			public bool ReadBoolEntry() {
 				if (ReadEntryType() != EntryType.Boolean) {
 					throw new FileLoadException("Boolean entry expected");
@@ -115,10 +111,6 @@ namespace bsn.GoldParser.Grammar {
 				return reader.ReadBoolean();
 			}
 
-			/// <summary>
-			/// Reads empty entry from the grammar file.
-			/// </summary>
-			/// <param name="context"></param>
 			public void ReadEmptyEntry() {
 				if (ReadEntryType() != EntryType.Empty) {
 					throw new FileLoadException("Empty entry expected");
@@ -133,11 +125,6 @@ namespace bsn.GoldParser.Grammar {
 				return ReadString();
 			}
 
-			/// <summary>
-			/// Reads Int16 entry from the grammar file.
-			/// </summary>
-			/// <param name="context"></param>
-			/// <returns>Int16 entry content.</returns>
 			public int ReadInt16Entry() {
 				if (ReadEntryType() != EntryType.Integer) {
 					throw new FileLoadException("Integer entry expected");
@@ -146,11 +133,6 @@ namespace bsn.GoldParser.Grammar {
 				return reader.ReadUInt16();
 			}
 
-			/// <summary>
-			/// Reads the next record in the binary grammar file.
-			/// </summary>
-			/// <param name="context"></param>
-			/// <returns>Read record type.</returns>
 			public RecordType ReadNextRecord() {
 				char recordType = (char)reader.ReadByte();
 				//Structure below is ready for future expansion
@@ -164,11 +146,6 @@ namespace bsn.GoldParser.Grammar {
 				}
 			}
 
-			/// <summary>
-			/// Reads string entry from the grammar file.
-			/// </summary>
-			/// <param name="context"></param>
-			/// <returns>String entry content.</returns>
 			public string ReadStringEntry() {
 				if (ReadEntryType() != EntryType.String) {
 					throw new FileLoadException("String entry expected");
@@ -177,11 +154,6 @@ namespace bsn.GoldParser.Grammar {
 				return ReadString();
 			}
 
-			/// <summary>
-			/// Reads byte entry from the grammar file.
-			/// </summary>
-			/// <param name="context"></param>
-			/// <returns>Byte entry content.</returns>
 			private byte ReadByteEntry() {
 				if (ReadEntryType() != EntryType.Byte) {
 					throw new FileLoadException("Byte entry expected");
@@ -190,11 +162,6 @@ namespace bsn.GoldParser.Grammar {
 				return reader.ReadByte();
 			}
 
-			/// <summary>
-			/// Reads entry type.
-			/// </summary>
-			/// <param name="context"></param>
-			/// <returns>Entry type.</returns>
 			private EntryType ReadEntryType() {
 				if (entryCount <= 0) {
 					throw new FileLoadException("No entry found");
@@ -273,13 +240,10 @@ namespace bsn.GoldParser.Grammar {
 		}
 
 		private readonly object sync = new object();
-
-		// Grammar header information
 		private string about; // Grammar description
 		private string author; // Author of the grammar
+		private ICollection<DfaState> blockCommentStates;
 		private bool caseSensitive; // Grammar is case sensitive or not
-
-		// Tables read from the binary grammar file
 		private String[] charSetTable; // Charset table
 		private DfaState dfaInitialState; // DFA initial state 
 		private DfaState[] dfaStateTable; // DFA state table
@@ -291,9 +255,8 @@ namespace bsn.GoldParser.Grammar {
 		private Rule[] ruleTable; // Rule table
 		private Dictionary<Symbol, ReadOnlyCollection<Rule>> rules;
 		private Symbol startSymbol;
+		private Dictionary<DfaState, ReadOnlyCollection<DfaState>> stateOrigins;
 		private Symbol[] symbolTable; // Symbol table
-
-		// helper data structures for optimized access/query
 		private Dictionary<string, Symbol> symbols;
 		private string version; // Version of the grammar
 
@@ -323,6 +286,12 @@ namespace bsn.GoldParser.Grammar {
 		public string Author {
 			get {
 				return author;
+			}
+		}
+
+		public ICollection<DfaState> BlockCommentStates {
+			get {
+				return blockCommentStates;
 			}
 		}
 
@@ -467,6 +436,44 @@ namespace bsn.GoldParser.Grammar {
 			return dfaStateTable[index];
 		}
 
+		public ICollection<DfaState> GetDfaStatesOfSymbols(Predicate<Symbol> filter) {
+			int symbolsFound = 0;
+			SymbolSet acceptSymbols = new SymbolSet();
+			for (int i = 0; i < SymbolCount; i++) {
+				Symbol symbol = GetSymbol(i);
+				switch (symbol.Kind) {
+				case SymbolKind.CommentStart:
+				case SymbolKind.CommentEnd:
+					acceptSymbols[symbol] = true;
+					symbolsFound++;
+					break;
+				}
+			}
+			if (symbolsFound != 0) {
+				Queue<DfaState> stateQueue = new Queue<DfaState>();
+				for (int i = 0; i < DfaStateCount; i++) {
+					DfaState state = GetDfaState(i);
+					if (acceptSymbols[state.AcceptSymbol]) {
+						stateQueue.Enqueue(state);
+					}
+				}
+				Debug.Assert(stateQueue.Count >= symbolsFound);
+				Dictionary<DfaState, int> allowedStates = new Dictionary<DfaState, int>();
+				do {
+					DfaState state = stateQueue.Dequeue();
+					int count;
+					if (!allowedStates.TryGetValue(state, out count)) {
+						foreach (DfaState originState in state.GetOriginStates()) {
+							stateQueue.Enqueue(originState);
+						}
+					}
+					allowedStates[state] = count+1;
+				} while (stateQueue.Count > 0);
+				return allowedStates.Keys;
+			}
+			return new DfaState[0];
+		}
+
 		/// <summary>
 		/// Gets the state of the lalr.
 		/// </summary>
@@ -560,31 +567,21 @@ namespace bsn.GoldParser.Grammar {
 			return symbols.TryGetValue(symbolName, out symbol);
 		}
 
-		private void InitializeCommentHandling() {
-			SymbolSet acceptSymbols = new SymbolSet();
-			for (int i = 0; i < SymbolCount; i++) {
-				Symbol symbol = GetSymbol(i);
-				switch (symbol.Kind) {
-				case SymbolKind.CommentStart:
-				case SymbolKind.CommentEnd:
-					acceptSymbols[symbol] = true;
-					break;
-				}
+		/// <summary>
+		/// Gets the state transition origin states.
+		/// </summary>
+		/// <param name="state">The state to get the transitions origin vectors for.</param>
+		/// <returns></returns>
+		internal ReadOnlyCollection<DfaState> GetStateOrigins(DfaState state) {
+			if (state == null) {
+				throw new ArgumentNullException("state");
 			}
-			Queue<DfaState> stateQueue = new Queue<DfaState>();
-			for (int i = 0; i < DfaStateCount; i++) {
-				DfaState state = GetDfaState(i);
-				if (acceptSymbols[state.AcceptSymbol]) {
-					stateQueue.Enqueue(state);
-				}
+			InitializeStateOriginLookup();
+			ReadOnlyCollection<DfaState> result;
+			if (!stateOrigins.TryGetValue(state, out result)) {
+				throw new ArgumentException("The state is not valid", "state");
 			}
-			Dictionary<DfaState, int> allowedStates = new Dictionary<DfaState, int>();
-			do {
-				DfaState state = stateQueue.Dequeue();
-				int count;
-				if (!allowedStates.TryGetValue(state, out count)) {}
-				allowedStates[state] = count+1;
-			} while (stateQueue.Count > 0);
+			return result;
 		}
 
 		private void InitializeRuleLookup() {
@@ -602,6 +599,35 @@ namespace bsn.GoldParser.Grammar {
 					rules = new Dictionary<Symbol, ReadOnlyCollection<Rule>>(ruleTemp.Count);
 					foreach (KeyValuePair<Symbol, List<Rule>> pair in ruleTemp) {
 						rules.Add(pair.Key, Array.AsReadOnly(pair.Value.ToArray()));
+					}
+				}
+			}
+		}
+
+		private void InitializeStateOriginLookup() {
+			lock (sync) {
+				if (stateOrigins == null) {
+					Dictionary<DfaState, List<DfaState>> stateOriginTemp = new Dictionary<DfaState, List<DfaState>>(dfaStateTable.Length);
+					foreach (DfaState state in dfaStateTable) {
+						foreach (DfaState transitionState in state.GetTransitionStates()) {
+							List<DfaState> originList;
+							if (!stateOriginTemp.TryGetValue(transitionState, out originList)) {
+								originList = new List<DfaState>();
+								stateOriginTemp.Add(transitionState, originList);
+							}
+							originList.Add(state);
+						}
+					}
+					stateOrigins = new Dictionary<DfaState, ReadOnlyCollection<DfaState>>(dfaStateTable.Length);
+					foreach (DfaState state in dfaStateTable) {
+						DfaState[] origins;
+						List<DfaState> originList;
+						if (stateOriginTemp.TryGetValue(state, out originList)) {
+							origins = originList.ToArray();
+						} else {
+							origins = new DfaState[0];
+						}
+						stateOrigins.Add(state, Array.AsReadOnly(origins));
 					}
 				}
 			}
@@ -659,7 +685,7 @@ namespace bsn.GoldParser.Grammar {
 			dfaInitialState = dfaStateTable[context.DfaInitialStateIndex];
 			startSymbol = symbolTable[context.StartSymbolIndex];
 			lalrInitialState = lalrStateTable[context.LrInitialState];
-//			InitializeCommentHandling();
+			blockCommentStates = GetDfaStatesOfSymbols(symbol => (symbol.Kind == SymbolKind.CommentStart) || (symbol.Kind == SymbolKind.CommentEnd));
 		}
 
 		/// <summary>
