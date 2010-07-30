@@ -6,4 +6,4 @@ using System.Threading;
 
 using bsn.GoldParser.Semantic;
 
-[assembly: RuleTrim("<Value> ::= '(' <Expression> ')'", "<Expression>")]
+[assembly: RuleTrim("<Value> ::= '(' <Expression> ')'", "<Expression>", SemanticTokenType = typeof(TestToken))]

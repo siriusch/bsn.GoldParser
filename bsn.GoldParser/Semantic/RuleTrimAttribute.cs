@@ -7,9 +7,19 @@ namespace bsn.GoldParser.Semantic {
 		private delegate ArgumentException ArgumentExceptionDelegate();
 
 		private readonly int trimSymbolIndex;
+		private Type semanticTokenType;
 
 		public RuleTrimAttribute(string rule, string trimSymbol)
 			: this(rule, -1, trimSymbol, SymbolNotFoundException) {
+		}
+
+		public Type SemanticTokenType {
+			get {
+				return semanticTokenType;
+			}
+			set {
+				semanticTokenType = value;
+			}
 		}
 
 		private static ArgumentException SymbolNotFoundException() {

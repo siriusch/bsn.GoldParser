@@ -112,14 +112,16 @@ namespace bsn.GoldParser.Semantic {
 			}
 			// finally we look for all trim rules in the assembly
 			foreach (RuleTrimAttribute ruleTrimAttribute in typeof(T).Assembly.GetCustomAttributes(typeof(RuleTrimAttribute), false)) {
-				Rule rule = ruleTrimAttribute.Bind(Grammar);
-				if (rule == null) {
-					errors.Add(string.Format("Rule {0} not found in grammar", ruleTrimAttribute.Rule));
-				} else {
-					try {
-						RegisterNonterminalFactory(rule, new SemanticTrimFactory<T>(this, rule, ruleTrimAttribute.TrimSymbolIndex));
-					} catch (InvalidOperationException ex) {
-						errors.Add(string.Format("Trim tule {0} factory problem: {1}", rule, ex.Message));
+				if ((ruleTrimAttribute.SemanticTokenType == null) || typeof(T).Equals(ruleTrimAttribute.SemanticTokenType)) {
+					Rule rule = ruleTrimAttribute.Bind(Grammar);
+					if (rule == null) {
+						errors.Add(string.Format("Rule {0} not found in grammar", ruleTrimAttribute.Rule));
+					} else {
+						try {
+							RegisterNonterminalFactory(rule, new SemanticTrimFactory<T>(this, rule, ruleTrimAttribute.TrimSymbolIndex));
+						} catch (InvalidOperationException ex) {
+							errors.Add(string.Format("Trim tule {0} factory problem: {1}", rule, ex.Message));
+						}
 					}
 				}
 			}
@@ -136,12 +138,10 @@ namespace bsn.GoldParser.Semantic {
 		}
 
 		private SemanticNonterminalFactory CreateNonterminalFactory(Type type, ConstructorInfo constructor, int[] parameterMapping, int handleCount) {
-#warning maybe use someting more efficient than the Activator
 			return (SemanticNonterminalFactory)Activator.CreateInstance(typeof(SemanticNonterminalTypeFactory<>).MakeGenericType(type), constructor, parameterMapping, handleCount, typeof(T));
 		}
 
 		private SemanticTerminalFactory CreateTerminalFactory(Type type) {
-#warning maybe use someting more efficient than the Activator
 			return (SemanticTerminalFactory)Activator.CreateInstance(typeof(SemanticTerminalTypeFactory<>).MakeGenericType(type));
 		}
 
