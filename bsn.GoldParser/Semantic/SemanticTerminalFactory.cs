@@ -10,7 +10,7 @@ namespace bsn.GoldParser.Semantic {
 
 		internal abstract SemanticToken CreateInternal(string text);
 	}
-
+	
 	/// <summary>
 	/// The abstract generic case class for semantic terminal tokens. This class is usually not directly inherited.
 	/// </summary>

@@ -34,7 +34,7 @@ namespace bsn.GoldParser.Grammar {
 		/// <param name="name">Name of the symbol.</param>
 		/// <param name="kind">Type of the symbol.</param>
 		internal Symbol(CompiledGrammar owner, int index, string name, SymbolKind kind): base(owner, index) {
-			this.name = name;
+			this.name = string.Intern(name);
 			this.kind = kind;
 		}
 
