@@ -30,12 +30,26 @@ namespace bsn.GoldParser.Semantic {
 						parameters.Add(parameter.Position, parameter);
 					}
 					for (int i = 0; i < parameters.Count; i++) {
+						if (parameters[i].ParameterType.IsValueType) {
+							throw new InvalidOperationException("Constructor arguments cannot be value types");
+						}
+						Label loadNull = il.DefineLabel();
+						Label end = il.DefineLabel();
 						il.Emit(OpCodes.Ldarg_1); // load the ReadOnlyCollection<SemanticToken>
 						il.Emit(OpCodes.Ldarg_0); // load the int[]
 						il.Emit(OpCodes.Ldc_I4, i); // load the parameter index
 						il.Emit(OpCodes.Ldelem_I4); // get the indirection index
-						il.Emit(OpCodes.Callvirt, readOnlyCollectionGetItem); // get the item
+						il.Emit(OpCodes.Dup); // copy the indicrection index
+						il.Emit(OpCodes.Ldc_I4_M1); // and load a -1
+						il.Emit(OpCodes.Beq_S, loadNull); // compare the stored indicrection index and the stored -1, if equal we need to load a null
+						il.Emit(OpCodes.Callvirt, readOnlyCollectionGetItem); // otherwise get the item
 						il.Emit(OpCodes.Castclass, parameters[i].ParameterType); // make the verifier happy by casting the reference
+						il.Emit(OpCodes.Br_S, end); // jump to end
+						il.MarkLabel(loadNull);
+						il.Emit(OpCodes.Pop); // pop the unused indirection index
+						il.Emit(OpCodes.Pop); // pop the unused reference to the ReadOnlyCollection<SemanticToken>
+						il.Emit(OpCodes.Ldnull); // load a null reference instead
+						il.MarkLabel(end);
 					}
 					il.Emit(OpCodes.Newobj, constructor); // invoke constructor
 					il.Emit(OpCodes.Ret);
