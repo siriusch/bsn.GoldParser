@@ -21,7 +21,7 @@ namespace bsn.GoldParser.Parser {
 			}
 			this.symbol = symbol;
 			this.position = position;
-			this.text = this.symbol.Name.Equals(text, StringComparison.OrdinalIgnoreCase) ? this.symbol.Name : text; // "intern" the strings which are equal to the terminal name
+			this.text = this.symbol.Name.Equals(text, StringComparison.Ordinal) ? this.symbol.Name : text; // "intern" short strings which are equal to the terminal name
 		}
 
 		public override Symbol Symbol {

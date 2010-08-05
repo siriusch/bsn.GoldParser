@@ -24,6 +24,14 @@ namespace bsn.GoldParser.Parser {
 			get;
 		}
 
+		public bool NameIs(string name) {
+			if (name == null) {
+				throw new ArgumentNullException("name");
+			}
+			Symbol symbol = Symbol;
+			return (symbol != null) && name.Equals(symbol.Name, StringComparison.Ordinal);
+		}
+
 		public virtual string Text {
 			get {
 				return string.Empty;

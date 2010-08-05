@@ -20,5 +20,12 @@ namespace bsn.GoldParser.Parser {
 		LineInfo Position {
 			get;
 		}
+
+		/// <summary>
+		/// Checks if the symbol name is the given name.
+		/// </summary>
+		/// <param name="name">The name to check.</param>
+		/// <returns><c>true</c> if the name match, false otherwise</returns>
+		bool NameIs(string name);
 	}
 }

@@ -24,6 +24,13 @@ namespace bsn.GoldParser.Semantic {
 			}
 		}
 
+		bool IToken.NameIs(string name) {
+			if (name == null) {
+				throw new ArgumentNullException("name");
+			}
+			return (symbol != null) && name.Equals(symbol.Name, StringComparison.Ordinal);
+		}
+
 		Symbol IToken.Symbol {
 			get {
 				return symbol;
