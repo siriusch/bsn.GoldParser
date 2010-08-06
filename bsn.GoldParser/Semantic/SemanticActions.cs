@@ -84,12 +84,16 @@ namespace bsn.GoldParser.Semantic {
 		public abstract Type GetSymbolOutputType(Symbol symbol);
 
 		public void Initialize() {
+			Initialize(false);
+		}
+
+		public void Initialize(bool trace) {
 			lock (sync) {
 				if (!initialized) {
 					List<string> errors = new List<string>();
-					InitializeInternal(errors);
+					InitializeInternal(errors, trace);
 					initialized = true;
-					CheckConsistency(errors);
+					CheckConsistency(errors, trace);
 					// throw if errors were found
 					if (errors.Count > 0) {
 						StringBuilder result = new StringBuilder();
@@ -132,7 +136,7 @@ namespace bsn.GoldParser.Semantic {
 			}
 		}
 
-		protected virtual void CheckConsistency(ICollection<string> errors) {
+		protected virtual void CheckConsistency(ICollection<string> errors, bool trace) {
 			SymbolTypeMap<T> symbolTypes = new SymbolTypeMap<T>();
 			// step 1: check that all terminals have a factory and register their output type
 			for (int i = 0; i < grammar.SymbolCount; i++) {
@@ -141,8 +145,8 @@ namespace bsn.GoldParser.Semantic {
 					SemanticTerminalFactory factory;
 					if (TryGetTerminalFactory(symbol, out factory)) {
 						//						Debug.WriteLine(factory.OutputType.FullName, symbol.ToString());
-						if (symbolTypes.SetTypeForSymbol(symbol, factory.OutputType)) {
-							Debug.WriteLine(string.Format("Terminal {0} yields type {1}", symbol, symbolTypes.GetSymbolType(symbol)));
+						if (symbolTypes.SetTypeForSymbol(symbol, factory.OutputType) && trace) {
+							Trace.WriteLine(string.Format("Terminal {0} yields type {1}", symbol, symbolTypes.GetSymbolType(symbol)));
 						}
 					} else {
 						errors.Add(String.Format("Semantic token is missing for terminal {0}", symbol));
@@ -155,8 +159,8 @@ namespace bsn.GoldParser.Semantic {
 				SemanticNonterminalFactory factory;
 				if (TryGetNonterminalFactory(rule, out factory)) {
 					//					Debug.WriteLine(factory.OutputType.FullName, rule.RuleSymbol.ToString());
-					if (symbolTypes.SetTypeForSymbol(rule.RuleSymbol, factory.OutputType)) {
-						Debug.WriteLine(string.Format("Rule {0} yields type {1} (static: {2})", rule, symbolTypes.GetSymbolType(rule.RuleSymbol), factory.IsStaticOutputType));
+					if (symbolTypes.SetTypeForSymbol(rule.RuleSymbol, factory.OutputType) && trace) {
+						Trace.WriteLine(string.Format("Rule {0} yields type {1} (static: {2})", rule, symbolTypes.GetSymbolType(rule.RuleSymbol), factory.IsStaticOutputType));
 					}
 				} else {
 					errors.Add(String.Format("Semantic token is missing for rule {0}", rule));
@@ -200,7 +204,7 @@ namespace bsn.GoldParser.Semantic {
 			}
 		}
 
-		protected abstract void InitializeInternal(ICollection<string> errors);
+		protected abstract void InitializeInternal(ICollection<string> errors, bool trace);
 
 		protected virtual void RegisterNonterminalFactory(Rule rule, SemanticNonterminalFactory factory) {
 			if (rule == null) {

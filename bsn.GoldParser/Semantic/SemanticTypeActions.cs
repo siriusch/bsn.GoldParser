@@ -38,7 +38,7 @@ namespace bsn.GoldParser.Semantic {
 			return bestMatch ?? typeof(T);
 		}
 
-		protected override void InitializeInternal(ICollection<string> errors) {
+		protected override void InitializeInternal(ICollection<string> errors, bool trace) {
 			foreach (Type type in typeof(T).Assembly.GetTypes()) {
 				if (typeof(T).IsAssignableFrom(type) && type.IsClass && (!type.IsAbstract)) {
 					SemanticTerminalFactory terminalFactory = null;
@@ -98,7 +98,6 @@ namespace bsn.GoldParser.Semantic {
 										}
 									}
 									SemanticNonterminalFactory nonterminalFactory = CreateNonterminalFactory(factoryType, factoryConstructor, parameterMapping, rule.SymbolCount);
-									;
 									RegisterNonterminalFactory(rule, nonterminalFactory);
 								} catch (TargetInvocationException ex) {
 									errors.Add(string.Format("Rule {0} factory problem: {1}", rule, ex.InnerException.Message));
