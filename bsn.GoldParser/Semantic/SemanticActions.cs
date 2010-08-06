@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 
@@ -140,7 +141,9 @@ namespace bsn.GoldParser.Semantic {
 					SemanticTerminalFactory factory;
 					if (TryGetTerminalFactory(symbol, out factory)) {
 						//						Debug.WriteLine(factory.OutputType.FullName, symbol.ToString());
-						symbolTypes.SetTypeForSymbol(symbol, factory.OutputType);
+						if (symbolTypes.SetTypeForSymbol(symbol, factory.OutputType)) {
+							Debug.WriteLine(string.Format("Terminal {0} yields type {1}", symbol, symbolTypes.GetSymbolType(symbol)));
+						}
 					} else {
 						errors.Add(String.Format("Semantic token is missing for terminal {0}", symbol));
 					}
@@ -152,7 +155,9 @@ namespace bsn.GoldParser.Semantic {
 				SemanticNonterminalFactory factory;
 				if (TryGetNonterminalFactory(rule, out factory)) {
 					//					Debug.WriteLine(factory.OutputType.FullName, rule.RuleSymbol.ToString());
-					symbolTypes.SetTypeForSymbol(rule.RuleSymbol, factory.OutputType);
+					if (symbolTypes.SetTypeForSymbol(rule.RuleSymbol, factory.OutputType)) {
+						Debug.WriteLine(string.Format("Rule {0} yields type {1} (static: {2})", rule, symbolTypes.GetSymbolType(rule.RuleSymbol), factory.IsStaticOutputType));
+					}
 				} else {
 					errors.Add(String.Format("Semantic token is missing for rule {0}", rule));
 				}

@@ -72,20 +72,25 @@ namespace bsn.GoldParser.Semantic {
 			return GetSymbolTypeInternal(symbol, typeof(T));
 		}
 
-		public void SetTypeForSymbol(Symbol symbol, Type type) {
+		public bool SetTypeForSymbol(Symbol symbol, Type type) {
 			if (symbol == null) {
 				throw new ArgumentNullException("symbol");
 			}
 			if (type == null) {
 				throw new ArgumentNullException("type");
 			}
+			bool result;
 			Type currentType;
 			if (symbolType.TryGetValue(symbol, out currentType)) {
-				symbolType[symbol] = GetCommonBaseType(currentType, type);
+				Type commonBaseType = GetCommonBaseType(currentType, type);
+				symbolType[symbol] = commonBaseType;
+				result = commonBaseType != currentType;
 			} else {
 				symbolType.Add(symbol, type);
+				result = true;
 			}
 			version++;
+			return result;
 		}
 
 		protected Type GetSymbolTypeInternal(Symbol symbol, Type @default) {
