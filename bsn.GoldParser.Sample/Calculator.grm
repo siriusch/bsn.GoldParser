@@ -1,0 +1,24 @@
+"Name"     = 'Enter the name of the grammar'
+"Author"   = 'Enter your name'
+"Version"  = 'The version of the grammar and/or language'
+"About"    = 'A short description of the grammar'
+
+"Start Symbol" = <Expression>
+
+Integer = {Digit}+
+Float = {Digit}*'.'{Digit}+([Ee][+-]?{Digit}+)?
+
+<Expression>  ::= <Expression> '+' <Mult Exp> 
+               |  <Expression> '-' <Mult Exp> 
+               |  <Mult Exp> 
+
+<Mult Exp>    ::= <Mult Exp> '*' <Negate Exp> 
+               |  <Mult Exp> '/' <Negate Exp> 
+               |  <Negate Exp> 
+
+<Negate Exp>  ::= '-' <Value> 
+               |  <Value> 
+
+<Value>       ::= Integer
+               |  Float
+               |  '(' <Expression> ')'
