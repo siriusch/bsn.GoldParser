@@ -16,8 +16,7 @@ namespace bsn.GoldParser.Sample {
 			try {
 				actions.Initialize(true);
 			} catch (InvalidOperationException ex) {
-				Console.WriteLine("Failed to initialize:");
-				Console.WriteLine(ex.Message);
+				Console.Write(ex.Message);
 				Console.ReadKey(true);
 				return;
 			}
