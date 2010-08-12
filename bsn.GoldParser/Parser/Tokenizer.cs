@@ -1,4 +1,32 @@
-// (C) 2010 Arsène von Wyss / bsn
+// bsn GoldParser .NET Engine
+// --------------------------
+// 
+// Copyright 2009, 2010 by Arsène von Wyss - avw@gmx.ch
+// 
+// Development has been supported by Sirius Technologies AG, Basel
+// 
+// Source:
+// 
+// https://bsn-goldparser.googlecode.com/hg/
+// 
+// License:
+// 
+// The library is distributed under the GNU Lesser General Public License:
+// http://www.gnu.org/licenses/lgpl.html
+// 
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+// 
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// 
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,8 +41,8 @@ namespace bsn.GoldParser.Parser {
 	/// A pull-model is used for the tokenizer.
 	/// </remarks>
 	public abstract class Tokenizer<T>: ITokenizer<T> where T: IToken {
-		private readonly CompiledGrammar grammar;
 		private readonly CharBuffer buffer; // Buffer to keep current characters.
+		private readonly CompiledGrammar grammar;
 		private int lineNumber;
 		private int linePosition;
 
@@ -37,6 +65,16 @@ namespace bsn.GoldParser.Parser {
 		}
 
 		/// <summary>
+		/// Gets the index of the input.
+		/// </summary>
+		/// <value>The index of the input.</value>
+		public int InputIndex {
+			get {
+				return buffer.Position;
+			}
+		}
+
+		/// <summary>
 		/// Gets current line number. It is 1-based.
 		/// </summary>
 		public int LineNumber {
@@ -55,16 +93,6 @@ namespace bsn.GoldParser.Parser {
 		}
 
 		/// <summary>
-		/// Gets the index of the input.
-		/// </summary>
-		/// <value>The index of the input.</value>
-		public int InputIndex {
-			get {
-				return buffer.Position;
-			}
-		}
-
-		/// <summary>
 		/// Gets source of parsed data.
 		/// </summary>
 		public TextReader TextReader {
@@ -73,23 +101,7 @@ namespace bsn.GoldParser.Parser {
 			}
 		}
 
-		/// <summary>
-		/// Gets the grammar.
-		/// </summary>
-		/// <value>The grammar.</value>
-		public CompiledGrammar Grammar {
-			get {
-				return grammar;
-			}
-		}
-
-		/// <summary>
-		/// Reads next token from the input stream.
-		/// </summary>
-		/// <returns>Token symbol which was read.</returns>
-		public ParseMessage NextToken(out T token) {
-			return NextToken(out token, false);
-		}
+		protected abstract T CreateToken(Symbol tokenSymbol, LineInfo tokenPosition, string text);
 
 		private ParseMessage NextToken(out T token, bool blockComment) {
 			using (CharBuffer.Mark mark = buffer.CreateMark()) {
@@ -186,7 +198,23 @@ namespace bsn.GoldParser.Parser {
 			}
 		}
 
-		protected abstract T CreateToken(Symbol tokenSymbol, LineInfo tokenPosition, string text);
+		/// <summary>
+		/// Gets the grammar.
+		/// </summary>
+		/// <value>The grammar.</value>
+		public CompiledGrammar Grammar {
+			get {
+				return grammar;
+			}
+		}
+
+		/// <summary>
+		/// Reads next token from the input stream.
+		/// </summary>
+		/// <returns>Token symbol which was read.</returns>
+		public ParseMessage NextToken(out T token) {
+			return NextToken(out token, false);
+		}
 	}
 
 	/// <summary>

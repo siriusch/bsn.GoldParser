@@ -1,4 +1,32 @@
-﻿// (C) 2010 Arsène von Wyss / bsn
+﻿// bsn GoldParser .NET Engine
+// --------------------------
+// 
+// Copyright 2009, 2010 by Arsène von Wyss - avw@gmx.ch
+// 
+// Development has been supported by Sirius Technologies AG, Basel
+// 
+// Source:
+// 
+// https://bsn-goldparser.googlecode.com/hg/
+// 
+// License:
+// 
+// The library is distributed under the GNU Lesser General Public License:
+// http://www.gnu.org/licenses/lgpl.html
+// 
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+// 
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// 
 using System;
 using System.Globalization;
 
@@ -8,8 +36,8 @@ namespace bsn.GoldParser.Parser {
 	/// </summary>
 	public struct LineInfo: IEquatable<LineInfo>, IComparable<LineInfo> {
 		private readonly int column;
-		private readonly int line;
 		private readonly int index;
+		private readonly int line;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="LineInfo"/> struct.
@@ -24,22 +52,22 @@ namespace bsn.GoldParser.Parser {
 		}
 
 		/// <summary>
-		/// Gets the character index.
-		/// </summary>
-		/// <value>The character index.</value>
-		public int Index {
-			get {
-				return index;
-			}
-		}
-
-		/// <summary>
 		/// Gets the column.
 		/// </summary>
 		/// <value>The column.</value>
 		public int Column {
 			get {
 				return column;
+			}
+		}
+
+		/// <summary>
+		/// Gets the character index.
+		/// </summary>
+		/// <value>The character index.</value>
+		public int Index {
+			get {
+				return index;
 			}
 		}
 
@@ -51,10 +79,6 @@ namespace bsn.GoldParser.Parser {
 			get {
 				return line;
 			}
-		}
-
-		public bool Equals(LineInfo other) {
-			return (other.line == line) && (other.column == column) && (other.index == column);
 		}
 
 		public override bool Equals(object obj) {
@@ -73,12 +97,16 @@ namespace bsn.GoldParser.Parser {
 			}
 		}
 
+		public override string ToString() {
+			return string.Format(CultureInfo.InvariantCulture, "{0}:{1}", line, column);
+		}
+
 		public int CompareTo(LineInfo other) {
 			return index-other.index;
 		}
 
-		public override string ToString() {
-			return string.Format(CultureInfo.InvariantCulture, "{0}:{1}", line, column);
+		public bool Equals(LineInfo other) {
+			return (other.line == line) && (other.column == column) && (other.index == column);
 		}
 	}
 }
