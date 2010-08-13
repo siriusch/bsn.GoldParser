@@ -83,7 +83,7 @@ namespace bsn.GoldParser.Xml {
 		private readonly string tPrefix;
 		private readonly string terminalNs;
 		private ActiveAttribute activeAttribute;
-		private IToken current;
+		private Token current;
 		private ElementPosition elementPosition;
 		private bool onAttributeValue;
 		private ReadState readState;
@@ -93,7 +93,7 @@ namespace bsn.GoldParser.Xml {
 		/// </summary>
 		/// <param name="nametable">The nametable (optional, may be <c>null</c>) to be used.</param>
 		/// <param name="root">The root (if <c>null</c>, no nodes are returned from the reader).</param>
-		public TokenXmlReader(XmlNameTable nametable, IToken root) {
+		public TokenXmlReader(XmlNameTable nametable, Token root) {
 			this.nametable = nametable ?? new NameTable();
 			terminalNs = this.nametable.Add(TerminalNS);
 			nonterminalNs = this.nametable.Add(NonterminalNS);
