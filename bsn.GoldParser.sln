@@ -5,6 +5,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "bsn.GoldParser", "bsn.GoldP
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "bsn.GoldParser.Test", "bsn.GoldParser.Test\bsn.GoldParser.Test.csproj", "{68DC267E-76A4-4B7A-A397-95302BB5D64F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "bsn.GoldParser.Sample", "bsn.GoldParser.Sample\bsn.GoldParser.Sample.csproj", "{29D1406B-902F-4747-81B1-8BC0AD1330A7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -19,6 +21,10 @@ Global
 		{68DC267E-76A4-4B7A-A397-95302BB5D64F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{68DC267E-76A4-4B7A-A397-95302BB5D64F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{68DC267E-76A4-4B7A-A397-95302BB5D64F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{29D1406B-902F-4747-81B1-8BC0AD1330A7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{29D1406B-902F-4747-81B1-8BC0AD1330A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{29D1406B-902F-4747-81B1-8BC0AD1330A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{29D1406B-902F-4747-81B1-8BC0AD1330A7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
