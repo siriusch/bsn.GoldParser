@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 
 using bsn.GoldParser.Grammar;
 using bsn.GoldParser.Parser;

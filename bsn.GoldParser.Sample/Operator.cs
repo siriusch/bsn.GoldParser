@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 
 namespace bsn.GoldParser.Sample {
 	public abstract class Operator: CalculatorToken {

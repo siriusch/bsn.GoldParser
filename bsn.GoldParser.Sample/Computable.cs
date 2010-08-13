@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 
 using bsn.GoldParser.Sample;
 using bsn.GoldParser.Semantic;
