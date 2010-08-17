@@ -212,7 +212,7 @@ namespace bsn.GoldParser.Parser {
 		/// Reads next token from the input stream.
 		/// </summary>
 		/// <returns>Token symbol which was read.</returns>
-		public ParseMessage NextToken(out T token) {
+		public virtual ParseMessage NextToken(out T token) {
 			return NextToken(out token, false);
 		}
 	}
