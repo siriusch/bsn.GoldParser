@@ -152,8 +152,7 @@ namespace bsn.GoldParser.Parser {
 						}
 					}
 					if (tokenSymbol == null) {
-						acceptMark.MoveToReadPosition();
-						tokenSymbol = grammar.EndSymbol;
+						tokenSymbol = (acceptMark.Distance == 0) ? grammar.EndSymbol : grammar.ErrorSymbol;
 					}
 					switch (tokenSymbol.Kind) {
 					case SymbolKind.CommentLine:

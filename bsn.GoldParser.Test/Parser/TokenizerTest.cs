@@ -48,6 +48,19 @@ namespace bsn.GoldParser.Parser {
 		}
 
 		[Test]
+		public void EndOfDataWithUnfinishedTerminal() {
+			using (TestStringReader reader = new TestStringReader("0 'zero")) {
+				Tokenizer tokenizer = new Tokenizer(reader, grammar);
+				Token token;
+				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
+				Expect(token.Symbol.Kind, EqualTo(SymbolKind.Terminal));
+				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
+				Expect(token.Symbol.Kind, EqualTo(SymbolKind.WhiteSpace));
+				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.LexicalError));
+			}
+		}
+
+		[Test]
 		public void BlockCommentWithNestedUnclosedString() {
 			using (TestStringReader reader = new TestStringReader("/* don't /*** 'do ***/ this */ 0")) {
 				Tokenizer tokenizer = new Tokenizer(reader, grammar);
