@@ -30,8 +30,10 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 
 using bsn.GoldParser.Grammar;
+using bsn.GoldParser.Parser;
 
 namespace bsn.GoldParser.Semantic {
 	/// <summary>
@@ -45,7 +47,7 @@ namespace bsn.GoldParser.Semantic {
 
 		protected internal abstract IEnumerable<Symbol> GetInputSymbols(Rule rule);
 
-		internal abstract TBase CreateInternal(Rule rule, IList<TBase> tokens);
+		public abstract TBase CreateAndInitialize(Rule rule, IList<TBase> tokens);
 	}
 
 	/// <summary>
@@ -69,8 +71,12 @@ namespace bsn.GoldParser.Semantic {
 			return rule;
 		}
 
-		internal override sealed TBase CreateInternal(Rule rule, IList<TBase> tokens) {
-			return Create(rule, tokens);
+		public override sealed TBase CreateAndInitialize(Rule rule, IList<TBase> tokens) {
+			Debug.Assert(rule != null);
+			TOutput result = Create(rule, tokens);
+			Debug.Assert(result != null);
+			result.Initialize(rule.RuleSymbol, (tokens.Count > 0) ? ((IToken)tokens[0]).Position : default(LineInfo));
+			return result;
 		}
 	}
 }

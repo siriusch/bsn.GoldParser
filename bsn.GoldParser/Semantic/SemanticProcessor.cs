@@ -59,9 +59,7 @@ namespace bsn.GoldParser.Semantic {
 			SemanticNonterminalFactory<T> factory;
 			if (actions.TryGetNonterminalFactory(rule, out factory)) {
 				Debug.Assert(factory != null);
-				T result = factory.CreateInternal(rule, children);
-				result.Initialize(rule.RuleSymbol, (children.Count > 0) ? ((IToken)children[0]).Position : default(LineInfo));
-				return result;
+				return factory.CreateAndInitialize(rule, children);
 			}
 			throw new InvalidOperationException(string.Format("Missing a token type for the rule {0}", rule.Definition));
 		}

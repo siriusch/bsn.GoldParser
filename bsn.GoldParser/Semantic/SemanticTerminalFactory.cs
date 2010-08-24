@@ -28,6 +28,10 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // 
 using System;
+using System.Diagnostics;
+
+using bsn.GoldParser.Grammar;
+using bsn.GoldParser.Parser;
 
 namespace bsn.GoldParser.Semantic {
 	/// <summary>
@@ -37,7 +41,7 @@ namespace bsn.GoldParser.Semantic {
 	public abstract class SemanticTerminalFactory<TBase>: SemanticTokenFactory<TBase> where TBase: SemanticToken {
 		internal SemanticTerminalFactory() {}
 
-		internal abstract TBase CreateInternal(string text);
+		public abstract TBase CreateAndInitialize(Symbol symbol, LineInfo position, string text);
 	}
 
 	/// <summary>
@@ -54,8 +58,12 @@ namespace bsn.GoldParser.Semantic {
 
 		protected abstract TOutput Create(string text);
 
-		internal override sealed TBase CreateInternal(string text) {
-			return Create(text);
+		public override sealed TBase CreateAndInitialize(Symbol symbol, LineInfo position, string text) {
+			Debug.Assert(symbol != null);
+			TOutput result = Create(text);
+			Debug.Assert(result != null);
+			result.Initialize(symbol, position);
+			return result;
 		}
 	}
 }

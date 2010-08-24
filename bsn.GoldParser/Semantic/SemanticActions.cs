@@ -289,9 +289,7 @@ namespace bsn.GoldParser.Semantic {
 		}
 
 		private T CreateTerminalToken(Symbol tokenSymbol, LineInfo tokenPosition, string text) {
-			T result = terminalFactories[tokenSymbol].CreateInternal(text);
-			result.Initialize(tokenSymbol, tokenPosition);
-			return result;
+			return terminalFactories[tokenSymbol].CreateAndInitialize(tokenSymbol, tokenPosition, text);
 		}
 	}
 }
