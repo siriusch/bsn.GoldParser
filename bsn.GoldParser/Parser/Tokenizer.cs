@@ -45,6 +45,7 @@ namespace bsn.GoldParser.Parser {
 		private readonly CompiledGrammar grammar;
 		private int lineNumber;
 		private int linePosition;
+		private bool mergeLexicalErrors;
 
 		/// <summary>
 		/// Initializes new instance of Parser class.
@@ -93,6 +94,19 @@ namespace bsn.GoldParser.Parser {
 		}
 
 		/// <summary>
+		/// Gets or sets a value indicating whether lexical errors are merged (so that they contain more than one character).
+		/// </summary>
+		/// <value><c>true</c> if lexical errors are to be merged; otherwise, <c>false</c>.</value>
+		public bool MergeLexicalErrors {
+			get {
+				return mergeLexicalErrors;
+			}
+			set {
+				mergeLexicalErrors = value;
+			}
+		}
+
+		/// <summary>
 		/// Gets source of parsed data.
 		/// </summary>
 		public TextReader TextReader {
@@ -103,7 +117,7 @@ namespace bsn.GoldParser.Parser {
 
 		protected abstract T CreateToken(Symbol tokenSymbol, LineInfo tokenPosition, string text);
 
-		private ParseMessage NextToken(out T token, bool blockComment) {
+		private ParseMessage NextToken(out T token, bool blockComment, bool mergeErrors) {
 			using (CharBuffer.Mark mark = buffer.CreateMark()) {
 				using (CharBuffer.Mark acceptMark = buffer.CreateMark()) {
 					ParseMessage result;
@@ -133,6 +147,14 @@ namespace bsn.GoldParser.Parser {
 								acceptMark.MoveToReadPosition();
 								buffer.MoveToMark(mark);
 								buffer.TryReadChar(out ch);
+								if (mergeErrors) {
+									using (CharBuffer.Mark errorMark = buffer.CreateMark()) {
+										while (NextToken(out token, false, false) == ParseMessage.LexicalError) {
+											errorMark.MoveToReadPosition();
+										}
+										buffer.MoveToMark(errorMark);
+									}
+								}
 								tokenSymbol = grammar.ErrorSymbol;
 							} else {
 								buffer.StepBack(1);
@@ -163,11 +185,18 @@ namespace bsn.GoldParser.Parser {
 						result = ParseMessage.CommentLineRead;
 						break;
 					case SymbolKind.CommentStart:
-						SymbolKind kind;
+						result = ParseMessage.None;
 						do {
-							kind = NextToken(out token, true) != ParseMessage.None ? token.Symbol.Kind : SymbolKind.Error;
-						} while ((kind != SymbolKind.End) && (kind != SymbolKind.CommentEnd));
-						result = (kind == SymbolKind.CommentEnd) ? ParseMessage.CommentBlockRead : ParseMessage.CommentError;
+							NextToken(out token, true, false);
+							switch (token.Symbol.Kind) {
+							case SymbolKind.End:
+								result = ParseMessage.CommentError;
+								break;
+							case SymbolKind.CommentEnd:
+								result = ParseMessage.CommentBlockRead;
+								break;
+							}
+						} while (result == ParseMessage.None);
 						break;
 					case SymbolKind.Error:
 						result = ParseMessage.LexicalError;
@@ -212,7 +241,7 @@ namespace bsn.GoldParser.Parser {
 		/// </summary>
 		/// <returns>Token symbol which was read.</returns>
 		public virtual ParseMessage NextToken(out T token) {
-			return NextToken(out token, false);
+			return NextToken(out token, false, mergeLexicalErrors);
 		}
 	}
 

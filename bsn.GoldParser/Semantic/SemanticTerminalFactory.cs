@@ -56,8 +56,6 @@ namespace bsn.GoldParser.Semantic {
 			}
 		}
 
-		protected abstract TOutput Create(string text);
-
 		public override sealed TBase CreateAndInitialize(Symbol symbol, LineInfo position, string text) {
 			Debug.Assert(symbol != null);
 			TOutput result = Create(text);
@@ -65,5 +63,7 @@ namespace bsn.GoldParser.Semantic {
 			result.Initialize(symbol, position);
 			return result;
 		}
+
+		protected abstract TOutput Create(string text);
 	}
 }

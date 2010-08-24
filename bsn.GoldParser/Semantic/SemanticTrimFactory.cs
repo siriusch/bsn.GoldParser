@@ -33,7 +33,6 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 
 using bsn.GoldParser.Grammar;
-using bsn.GoldParser.Parser;
 
 namespace bsn.GoldParser.Semantic {
 	public sealed class SemanticTrimFactory<TBase>: SemanticNonterminalFactory<TBase> where TBase: SemanticToken {
@@ -74,15 +73,15 @@ namespace bsn.GoldParser.Semantic {
 			}
 		}
 
-		protected internal override IEnumerable<Symbol> GetInputSymbols(Rule rule) {
-			yield return GetTrimSymbol();
-		}
-
 		public override TBase CreateAndInitialize(Rule rule, IList<TBase> tokens) {
 			Debug.Assert(this.rule == rule);
 			TBase result = tokens[handleIndex];
 			Debug.Assert(OutputType.IsAssignableFrom(result.GetType()));
 			return result;
+		}
+
+		protected internal override IEnumerable<Symbol> GetInputSymbols(Rule rule) {
+			yield return GetTrimSymbol();
 		}
 
 		private Type GetRuleType() {

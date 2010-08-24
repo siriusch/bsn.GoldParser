@@ -45,9 +45,8 @@ namespace bsn.GoldParser.Semantic {
 			get;
 		}
 
-		protected internal abstract IEnumerable<Symbol> GetInputSymbols(Rule rule);
-
 		public abstract TBase CreateAndInitialize(Rule rule, IList<TBase> tokens);
+		protected internal abstract IEnumerable<Symbol> GetInputSymbols(Rule rule);
 	}
 
 	/// <summary>
@@ -64,19 +63,19 @@ namespace bsn.GoldParser.Semantic {
 
 		public abstract TOutput Create(Rule rule, IList<TBase> tokens);
 
-		protected internal override IEnumerable<Symbol> GetInputSymbols(Rule rule) {
-			if (rule == null) {
-				throw new ArgumentNullException("rule");
-			}
-			return rule;
-		}
-
 		public override sealed TBase CreateAndInitialize(Rule rule, IList<TBase> tokens) {
 			Debug.Assert(rule != null);
 			TOutput result = Create(rule, tokens);
 			Debug.Assert(result != null);
 			result.Initialize(rule.RuleSymbol, (tokens.Count > 0) ? ((IToken)tokens[0]).Position : default(LineInfo));
 			return result;
+		}
+
+		protected internal override IEnumerable<Symbol> GetInputSymbols(Rule rule) {
+			if (rule == null) {
+				throw new ArgumentNullException("rule");
+			}
+			return rule;
 		}
 	}
 }

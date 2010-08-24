@@ -121,43 +121,6 @@ namespace bsn.GoldParser.Semantic {
 			}
 		}
 
-		private void PerformInitialization(int initializationState, bool trace) {
-			switch (initializationState) {
-			case 0:
-				initializingThread = Thread.CurrentThread.ManagedThreadId;
-				List<string> errors = new List<string>();
-				try {
-					InitializeInternal(errors, trace);
-				} finally {
-					Interlocked.Increment(ref initialized);
-					initializingThread = -1;
-				}
-				if (errors.Count == 0) {
-					CheckConsistency(errors, trace);
-				}
-				// throw if errors were found
-				if (errors.Count > 0) {
-					StringBuilder result = new StringBuilder();
-					result.AppendLine("The semantic engine found errors:");
-					foreach (string error in errors) {
-						result.AppendLine(error);
-					}
-					throw new InvalidOperationException(result.ToString());
-				}
-				break;
-			case 1:
-				// Initialization is already ongoing, therefore block the tread until we're done initializing
-				if (initializingThread == Thread.CurrentThread.ManagedThreadId) {
-					Debug.Fail("Recursive semantic actions initialization call");
-					return;
-				}
-				while (!Initialized) {
-					Thread.Sleep(0);
-				}
-				break;
-			}
-		}
-
 		public bool TryGetNonterminalFactory(Rule rule, out SemanticNonterminalFactory<T> factory) {
 			Initialize();
 			if (nonterminalFactories.TryGetValue(rule, out factory)) {
@@ -290,6 +253,43 @@ namespace bsn.GoldParser.Semantic {
 
 		private T CreateTerminalToken(Symbol tokenSymbol, LineInfo tokenPosition, string text) {
 			return terminalFactories[tokenSymbol].CreateAndInitialize(tokenSymbol, tokenPosition, text);
+		}
+
+		private void PerformInitialization(int initializationState, bool trace) {
+			switch (initializationState) {
+			case 0:
+				initializingThread = Thread.CurrentThread.ManagedThreadId;
+				List<string> errors = new List<string>();
+				try {
+					InitializeInternal(errors, trace);
+				} finally {
+					Interlocked.Increment(ref initialized);
+					initializingThread = -1;
+				}
+				if (errors.Count == 0) {
+					CheckConsistency(errors, trace);
+				}
+				// throw if errors were found
+				if (errors.Count > 0) {
+					StringBuilder result = new StringBuilder();
+					result.AppendLine("The semantic engine found errors:");
+					foreach (string error in errors) {
+						result.AppendLine(error);
+					}
+					throw new InvalidOperationException(result.ToString());
+				}
+				break;
+			case 1:
+				// Initialization is already ongoing, therefore block the tread until we're done initializing
+				if (initializingThread == Thread.CurrentThread.ManagedThreadId) {
+					Debug.Fail("Recursive semantic actions initialization call");
+					return;
+				}
+				while (!Initialized) {
+					Thread.Sleep(0);
+				}
+				break;
+			}
 		}
 	}
 }
