@@ -40,11 +40,12 @@ namespace bsn.GoldParser.Parser {
 	/// <remarks>
 	/// A pull-model is used for the tokenizer.
 	/// </remarks>
-	public abstract class Tokenizer<T>: ITokenizer<T> where T: IToken {
+	public abstract class Tokenizer<T>: ITokenizer<T> where T: class, IToken {
 		private readonly CharBuffer buffer; // Buffer to keep current characters.
 		private readonly CompiledGrammar grammar;
 		private int lineNumber;
 		private int linePosition;
+		private int trackingPosition;
 		private bool mergeLexicalErrors;
 
 		/// <summary>
@@ -117,7 +118,7 @@ namespace bsn.GoldParser.Parser {
 
 		protected abstract T CreateToken(Symbol tokenSymbol, LineInfo tokenPosition, string text);
 
-		private ParseMessage NextToken(out T token, bool blockComment, bool mergeErrors) {
+		private ParseMessage NextToken(out T token, bool blockComment, bool createToken) {
 			using (CharBuffer.Mark mark = buffer.CreateMark()) {
 				using (CharBuffer.Mark acceptMark = buffer.CreateMark()) {
 					ParseMessage result;
@@ -144,16 +145,14 @@ namespace bsn.GoldParser.Parser {
 							// end has been reached
 							if (tokenSymbol == null) {
 								//Tokenizer cannot recognize symbol
-								acceptMark.MoveToReadPosition();
 								buffer.MoveToMark(mark);
 								buffer.TryReadChar(out ch);
-								if (mergeErrors) {
-									using (CharBuffer.Mark errorMark = buffer.CreateMark()) {
-										while (NextToken(out token, false, false) == ParseMessage.LexicalError) {
-											errorMark.MoveToReadPosition();
-										}
-										buffer.MoveToMark(errorMark);
+								acceptMark.MoveToReadPosition();
+								if (MergeLexicalErrors && createToken && (!blockComment)) {
+									while (NextToken(out token, false, false) == ParseMessage.LexicalError) {
+										acceptMark.MoveToReadPosition();
 									}
+									buffer.MoveToMark(acceptMark);
 								}
 								tokenSymbol = grammar.ErrorSymbol;
 							} else {
@@ -187,7 +186,7 @@ namespace bsn.GoldParser.Parser {
 					case SymbolKind.CommentStart:
 						result = ParseMessage.None;
 						do {
-							NextToken(out token, true, false);
+							NextToken(out token, true, true);
 							switch (token.Symbol.Kind) {
 							case SymbolKind.End:
 								result = ParseMessage.CommentError;
@@ -209,7 +208,7 @@ namespace bsn.GoldParser.Parser {
 					bool updateLine = true;
 					if (lineBreakPositions != null) {
 						foreach (int lineBreakPosition in lineBreakPositions) {
-							if (lineBreakPosition <= buffer.Position) {
+							if (lineBreakPosition <= trackingPosition) {
 								lineNumber++;
 								linePosition = (buffer.Position-lineBreakPosition)+1;
 								updateLine = false;
@@ -218,9 +217,10 @@ namespace bsn.GoldParser.Parser {
 					}
 					if (updateLine) {
 						// no linebreak was encountered, so we need to move the column
-						linePosition += mark.Distance;
+						linePosition += (buffer.Position-trackingPosition);
 					}
-					token = CreateToken(tokenSymbol, tokenPosition, mark.Text);
+					trackingPosition = buffer.Position;
+					token = (createToken) ? CreateToken(tokenSymbol, tokenPosition, mark.Text) : null;
 					return result;
 				}
 			}
@@ -241,7 +241,7 @@ namespace bsn.GoldParser.Parser {
 		/// </summary>
 		/// <returns>Token symbol which was read.</returns>
 		public virtual ParseMessage NextToken(out T token) {
-			return NextToken(out token, false, mergeLexicalErrors);
+			return NextToken(out token, false, true);
 		}
 	}
 
