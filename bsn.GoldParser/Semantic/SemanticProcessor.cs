@@ -28,6 +28,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // 
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
@@ -52,14 +53,14 @@ namespace bsn.GoldParser.Semantic {
 		}
 
 		protected override bool CanTrim(Rule rule) {
-			SemanticNonterminalFactory dummy;
-			return !actions.TryGetNonterminalFactory(rule, out dummy);
+			return false;
 		}
 
-		protected override SemanticToken CreateReduction(Rule rule, ReadOnlyCollection<SemanticToken> children) {
+		protected override SemanticToken CreateReduction(Rule rule, IList<SemanticToken> childrenEnum) {
 			SemanticNonterminalFactory factory;
 			if (actions.TryGetNonterminalFactory(rule, out factory)) {
 				Debug.Assert(factory != null);
+				ReadOnlyCollection<SemanticToken> children = new List<SemanticToken>(childrenEnum).AsReadOnly();
 				SemanticToken result = factory.CreateInternal(rule, children);
 				result.Initialize(rule.RuleSymbol, (children.Count > 0) ? ((IToken)children[0]).Position : default(LineInfo));
 				return result;

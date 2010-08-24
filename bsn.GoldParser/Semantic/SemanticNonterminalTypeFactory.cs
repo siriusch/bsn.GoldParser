@@ -28,6 +28,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // 
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Reflection;
@@ -83,7 +84,7 @@ namespace bsn.GoldParser.Semantic {
 			}
 		}
 
-		public override T Create(Rule rule, ReadOnlyCollection<SemanticToken> tokens) {
+		public override T Create(Rule rule, IList<SemanticToken> tokens) {
 			Debug.Assert((tokens != null) && (tokens.Count == inputTypes.Count));
 			return activator(tokens);
 		}

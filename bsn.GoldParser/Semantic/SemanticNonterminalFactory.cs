@@ -44,7 +44,7 @@ namespace bsn.GoldParser.Semantic {
 
 		protected internal abstract IEnumerable<Symbol> GetInputSymbols(Rule rule);
 
-		internal abstract SemanticToken CreateInternal(Rule rule, ReadOnlyCollection<SemanticToken> tokens);
+		internal abstract SemanticToken CreateInternal(Rule rule, IList<SemanticToken> tokens);
 	}
 
 	/// <summary>
@@ -58,7 +58,7 @@ namespace bsn.GoldParser.Semantic {
 			}
 		}
 
-		public abstract T Create(Rule rule, ReadOnlyCollection<SemanticToken> tokens);
+		public abstract T Create(Rule rule, IList<SemanticToken> tokens);
 
 		protected internal override IEnumerable<Symbol> GetInputSymbols(Rule rule) {
 			if (rule == null) {
@@ -67,7 +67,7 @@ namespace bsn.GoldParser.Semantic {
 			return rule;
 		}
 
-		internal override sealed SemanticToken CreateInternal(Rule rule, ReadOnlyCollection<SemanticToken> tokens) {
+		internal override sealed SemanticToken CreateInternal(Rule rule, IList<SemanticToken> tokens) {
 			return Create(rule, tokens);
 		}
 	}

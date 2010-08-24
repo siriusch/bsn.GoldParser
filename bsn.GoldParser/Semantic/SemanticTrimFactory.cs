@@ -78,7 +78,7 @@ namespace bsn.GoldParser.Semantic {
 			yield return GetTrimSymbol();
 		}
 
-		internal override SemanticToken CreateInternal(Rule rule, ReadOnlyCollection<SemanticToken> tokens) {
+		internal override SemanticToken CreateInternal(Rule rule, IList<SemanticToken> tokens) {
 			Debug.Assert(this.rule == rule);
 			SemanticToken result = tokens[handleIndex];
 			Debug.Assert(((IToken)result).Symbol == GetTrimSymbol());

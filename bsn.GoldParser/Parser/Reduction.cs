@@ -28,6 +28,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // 
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Text;
@@ -42,7 +43,7 @@ namespace bsn.GoldParser.Parser {
 		private readonly Rule rule;
 		private readonly ReadOnlyCollection<Token> tokens;
 
-		internal Reduction(Rule rule, ReadOnlyCollection<Token> tokens): base() {
+		internal Reduction(Rule rule, IList<Token> tokens): base() {
 			if (rule == null) {
 				throw new ArgumentNullException("rule");
 			}
@@ -50,7 +51,9 @@ namespace bsn.GoldParser.Parser {
 				throw new ArgumentNullException("tokens");
 			}
 			this.rule = rule;
-			this.tokens = tokens;
+			Token[] tokenArray = new Token[tokens.Count];
+			tokens.CopyTo(tokenArray, 0);
+			this.tokens = Array.AsReadOnly(tokenArray);
 		}
 
 		public ReadOnlyCollection<Token> Children {
