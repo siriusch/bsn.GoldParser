@@ -33,20 +33,21 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using System.Threading;
 
 using bsn.GoldParser.Grammar;
 using bsn.GoldParser.Parser;
 
 namespace bsn.GoldParser.Semantic {
 	public abstract class SemanticActions<T> where T: SemanticToken {
-		private class SemanticTokenizer: Tokenizer<SemanticToken> {
+		private class SemanticTokenizer: Tokenizer<T> {
 			private readonly SemanticActions<T> actions;
 
 			public SemanticTokenizer(TextReader textReader, SemanticActions<T> actions): base(textReader, actions.Grammar) {
 				this.actions = actions;
 			}
 
-			protected override SemanticToken CreateToken(Symbol tokenSymbol, LineInfo tokenPosition, string text) {
+			protected override T CreateToken(Symbol tokenSymbol, LineInfo tokenPosition, string text) {
 				return actions.CreateTerminalToken(tokenSymbol, tokenPosition, text);
 			}
 		}
@@ -59,11 +60,12 @@ namespace bsn.GoldParser.Semantic {
 		}
 
 		private readonly CompiledGrammar grammar;
-		private readonly Dictionary<Rule, SemanticNonterminalFactory> nonterminalFactories = new Dictionary<Rule, SemanticNonterminalFactory>();
+		private readonly Dictionary<Rule, SemanticNonterminalFactory<T>> nonterminalFactories = new Dictionary<Rule, SemanticNonterminalFactory<T>>();
 		private readonly object sync = new object();
-		private readonly Dictionary<Symbol, SemanticTerminalFactory> terminalFactories = new Dictionary<Symbol, SemanticTerminalFactory>();
+		private readonly Dictionary<Symbol, SemanticTerminalFactory<T>> terminalFactories = new Dictionary<Symbol, SemanticTerminalFactory<T>>();
 		private readonly Dictionary<Rule, SemanticTrimFactory<T>> trimFactories = new Dictionary<Rule, SemanticTrimFactory<T>>();
-		private bool initialized;
+		private int initialized; // 0 = not initialized, 1 = initializing, 2 = initialized
+		private int initializingThread = -1;
 
 		protected SemanticActions(CompiledGrammar grammar) {
 			if (grammar == null) {
@@ -78,12 +80,12 @@ namespace bsn.GoldParser.Semantic {
 			}
 		}
 
-		public IEnumerable<SemanticTokenFactory> AllTokenFactories {
+		public IEnumerable<SemanticTokenFactory<T>> AllTokenFactories {
 			get {
-				foreach (KeyValuePair<Symbol, SemanticTerminalFactory> terminalFactory in terminalFactories) {
+				foreach (KeyValuePair<Symbol, SemanticTerminalFactory<T>> terminalFactory in terminalFactories) {
 					yield return terminalFactory.Value;
 				}
-				foreach (KeyValuePair<Rule, SemanticNonterminalFactory> nonterminalFactory in nonterminalFactories) {
+				foreach (KeyValuePair<Rule, SemanticNonterminalFactory<T>> nonterminalFactory in nonterminalFactories) {
 					yield return nonterminalFactory.Value;
 				}
 				foreach (KeyValuePair<Rule, SemanticTrimFactory<T>> trimFactory in trimFactories) {
@@ -102,13 +104,7 @@ namespace bsn.GoldParser.Semantic {
 
 		protected internal bool Initialized {
 			get {
-				return initialized;
-			}
-		}
-
-		protected object SyncRoot {
-			get {
-				return sync;
+				return Interlocked.CompareExchange(ref initialized, 2, 2) == 2;
 			}
 		}
 
@@ -119,26 +115,50 @@ namespace bsn.GoldParser.Semantic {
 		}
 
 		public void Initialize(bool trace) {
-			lock (sync) {
-				if (!initialized) {
-					List<string> errors = new List<string>();
-					InitializeInternal(errors, trace);
-					initialized = true;
-					CheckConsistency(errors, trace);
-					// throw if errors were found
-					if (errors.Count > 0) {
-						StringBuilder result = new StringBuilder();
-						result.AppendLine("The semantic engine found errors:");
-						foreach (string error in errors) {
-							result.AppendLine(error);
-						}
-						throw new InvalidOperationException(result.ToString());
-					}
-				}
+			int initializationState = Interlocked.CompareExchange(ref initialized, 1, 0);
+			if (initializationState < 2) {
+				PerformInitialization(initializationState, trace);
 			}
 		}
 
-		public bool TryGetNonterminalFactory(Rule rule, out SemanticNonterminalFactory factory) {
+		private void PerformInitialization(int initializationState, bool trace) {
+			switch (initializationState) {
+			case 0:
+				initializingThread = Thread.CurrentThread.ManagedThreadId;
+				List<string> errors = new List<string>();
+				try {
+					InitializeInternal(errors, trace);
+				} finally {
+					Interlocked.Increment(ref initialized);
+					initializingThread = -1;
+				}
+				if (errors.Count == 0) {
+					CheckConsistency(errors, trace);
+				}
+				// throw if errors were found
+				if (errors.Count > 0) {
+					StringBuilder result = new StringBuilder();
+					result.AppendLine("The semantic engine found errors:");
+					foreach (string error in errors) {
+						result.AppendLine(error);
+					}
+					throw new InvalidOperationException(result.ToString());
+				}
+				break;
+			case 1:
+				// Initialization is already ongoing, therefore block the tread until we're done initializing
+				if (initializingThread == Thread.CurrentThread.ManagedThreadId) {
+					Debug.Fail("Recursive semantic actions initialization call");
+					return;
+				}
+				while (!Initialized) {
+					Thread.Sleep(0);
+				}
+				break;
+			}
+		}
+
+		public bool TryGetNonterminalFactory(Rule rule, out SemanticNonterminalFactory<T> factory) {
 			Initialize();
 			if (nonterminalFactories.TryGetValue(rule, out factory)) {
 				return true;
@@ -151,18 +171,18 @@ namespace bsn.GoldParser.Semantic {
 			return false;
 		}
 
-		public bool TryGetTerminalFactory(Symbol symbol, out SemanticTerminalFactory factory) {
+		public bool TryGetTerminalFactory(Symbol symbol, out SemanticTerminalFactory<T> factory) {
 			Initialize();
 			return terminalFactories.TryGetValue(symbol, out factory);
 		}
 
-		protected internal virtual ITokenizer<SemanticToken> CreateTokenizer(TextReader reader) {
+		protected internal virtual ITokenizer<T> CreateTokenizer(TextReader reader) {
 			Initialize();
 			return new SemanticTokenizer(reader, this);
 		}
 
 		protected void AssertNotInitialized() {
-			if (initialized) {
+			if (Initialized) {
 				throw new InvalidOperationException("The object is already initialized");
 			}
 		}
@@ -173,7 +193,7 @@ namespace bsn.GoldParser.Semantic {
 			for (int i = 0; i < grammar.SymbolCount; i++) {
 				Symbol symbol = grammar.GetSymbol(i);
 				if (symbol.Kind != SymbolKind.Nonterminal) {
-					SemanticTerminalFactory factory;
+					SemanticTerminalFactory<T> factory;
 					if (TryGetTerminalFactory(symbol, out factory)) {
 						//						Debug.WriteLine(factory.OutputType.FullName, symbol.ToString());
 						if (symbolTypes.SetTypeForSymbol(symbol, factory.OutputType) && trace) {
@@ -187,7 +207,7 @@ namespace bsn.GoldParser.Semantic {
 			// step 2: check that all rules have a factory and register their output type
 			for (int i = 0; i < grammar.RuleCount; i++) {
 				Rule rule = grammar.GetRule(i);
-				SemanticNonterminalFactory factory;
+				SemanticNonterminalFactory<T> factory;
 				if (TryGetNonterminalFactory(rule, out factory)) {
 					//					Debug.WriteLine(factory.OutputType.FullName, rule.RuleSymbol.ToString());
 					if (symbolTypes.SetTypeForSymbol(rule.RuleSymbol, factory.OutputType) && trace) {
@@ -198,7 +218,7 @@ namespace bsn.GoldParser.Semantic {
 				}
 			}
 			// step 3: check the input types of all rules
-			foreach (KeyValuePair<Rule, SemanticNonterminalFactory> pair in nonterminalFactories) {
+			foreach (KeyValuePair<Rule, SemanticNonterminalFactory<T>> pair in nonterminalFactories) {
 				ReadOnlyCollection<Type> inputTypes = pair.Value.InputTypes;
 				int index = 0;
 				foreach (Symbol inputSymbol in pair.Value.GetInputSymbols(pair.Key)) {
@@ -216,19 +236,19 @@ namespace bsn.GoldParser.Semantic {
 			}
 		}
 
-		protected IEnumerable<SemanticTokenFactory> GetTokenFactoriesForSymbol(Symbol symbol) {
+		protected IEnumerable<SemanticTokenFactory<T>> GetTokenFactoriesForSymbol(Symbol symbol) {
 			if (symbol == null) {
 				throw new ArgumentNullException("symbol");
 			}
 			if (symbol.Kind == SymbolKind.Nonterminal) {
 				foreach (Rule rule in grammar.GetRulesForSymbol(symbol)) {
-					SemanticNonterminalFactory nonterminalFactory;
+					SemanticNonterminalFactory<T> nonterminalFactory;
 					if (TryGetNonterminalFactory(rule, out nonterminalFactory)) {
 						yield return nonterminalFactory;
 					}
 				}
 			} else {
-				SemanticTerminalFactory terminalFactory;
+				SemanticTerminalFactory<T> terminalFactory;
 				if (TryGetTerminalFactory(symbol, out terminalFactory)) {
 					yield return terminalFactory;
 				}
@@ -237,7 +257,7 @@ namespace bsn.GoldParser.Semantic {
 
 		protected abstract void InitializeInternal(ICollection<string> errors, bool trace);
 
-		protected virtual void RegisterNonterminalFactory(Rule rule, SemanticNonterminalFactory factory) {
+		protected virtual void RegisterNonterminalFactory(Rule rule, SemanticNonterminalFactory<T> factory) {
 			if (rule == null) {
 				throw new ArgumentNullException("rule");
 			}
@@ -251,7 +271,7 @@ namespace bsn.GoldParser.Semantic {
 			nonterminalFactories.Add(rule, factory);
 		}
 
-		protected virtual void RegisterTerminalFactory(Symbol symbol, SemanticTerminalFactory factory) {
+		protected virtual void RegisterTerminalFactory(Symbol symbol, SemanticTerminalFactory<T> factory) {
 			if (symbol == null) {
 				throw new ArgumentNullException("symbol");
 			}
@@ -268,8 +288,8 @@ namespace bsn.GoldParser.Semantic {
 			terminalFactories.Add(symbol, factory);
 		}
 
-		private SemanticToken CreateTerminalToken(Symbol tokenSymbol, LineInfo tokenPosition, string text) {
-			SemanticToken result = terminalFactories[tokenSymbol].CreateInternal(text);
+		private T CreateTerminalToken(Symbol tokenSymbol, LineInfo tokenPosition, string text) {
+			T result = terminalFactories[tokenSymbol].CreateInternal(text);
 			result.Initialize(tokenSymbol, tokenPosition);
 			return result;
 		}

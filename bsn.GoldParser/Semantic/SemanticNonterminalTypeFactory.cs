@@ -36,8 +36,8 @@ using System.Reflection;
 using bsn.GoldParser.Grammar;
 
 namespace bsn.GoldParser.Semantic {
-	public class SemanticNonterminalTypeFactory<T>: SemanticNonterminalFactory<T> where T: SemanticToken {
-		private readonly SemanticNonterminalTypeFactoryHelper.Activator<T> activator;
+	public class SemanticNonterminalTypeFactory<TBase, TOutput>: SemanticNonterminalFactory<TBase, TOutput> where TBase: SemanticToken where TOutput: TBase {
+		private readonly SemanticNonterminalTypeFactoryHelper<TBase>.Activator<TOutput> activator;
 		private readonly ReadOnlyCollection<Type> inputTypes;
 
 		public SemanticNonterminalTypeFactory(ConstructorInfo constructor, int[] parameterMapping, int handleCount, Type baseTokenType) {
@@ -74,7 +74,7 @@ namespace bsn.GoldParser.Semantic {
 				}
 			}
 			inputTypes = Array.AsReadOnly(inputTypeBuilder);
-			activator = SemanticNonterminalTypeFactoryHelper.CreateActivator(this, constructor, parameterMapping);
+			activator = SemanticNonterminalTypeFactoryHelper<TBase>.CreateActivator(this, constructor, parameterMapping);
 			Debug.Assert(activator != null);
 		}
 
@@ -84,7 +84,7 @@ namespace bsn.GoldParser.Semantic {
 			}
 		}
 
-		public override T Create(Rule rule, IList<SemanticToken> tokens) {
+		public override TOutput Create(Rule rule, IList<TBase> tokens) {
 			Debug.Assert((tokens != null) && (tokens.Count == inputTypes.Count));
 			return activator(tokens);
 		}

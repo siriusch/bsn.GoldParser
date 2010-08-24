@@ -54,7 +54,7 @@ namespace bsn.GoldParser.Semantic {
 			while (pending.Count > 0) {
 				symbol = pending.Dequeue();
 				if (visited.Set(symbol)) {
-					foreach (SemanticTokenFactory factory in GetTokenFactoriesForSymbol(symbol)) {
+					foreach (SemanticTokenFactory<T> factory in GetTokenFactoriesForSymbol(symbol)) {
 						Symbol redirectForOutputType = factory.RedirectForOutputType;
 						if (redirectForOutputType == null) {
 							symbolTypeMap.ApplyCommonBaseType(ref bestMatch, factory.OutputType);
@@ -70,7 +70,7 @@ namespace bsn.GoldParser.Semantic {
 		protected override void InitializeInternal(ICollection<string> errors, bool trace) {
 			foreach (Type type in typeof(T).Assembly.GetTypes()) {
 				if (typeof(T).IsAssignableFrom(type) && type.IsClass && (!type.IsAbstract)) {
-					SemanticTerminalFactory terminalFactory = null;
+					SemanticTerminalFactory<T> terminalFactory = null;
 					foreach (TerminalAttribute terminalAttribute in type.GetCustomAttributes(typeof(TerminalAttribute), true)) {
 						Symbol symbol = terminalAttribute.Bind(Grammar);
 						if (symbol == null) {
@@ -126,7 +126,7 @@ namespace bsn.GoldParser.Semantic {
 											parameterMapping[i] = i;
 										}
 									}
-									SemanticNonterminalFactory nonterminalFactory = CreateNonterminalFactory(factoryType, factoryConstructor, parameterMapping, rule.SymbolCount);
+									SemanticNonterminalFactory<T> nonterminalFactory = CreateNonterminalFactory(factoryType, factoryConstructor, parameterMapping, rule.SymbolCount);
 									RegisterNonterminalFactory(rule, nonterminalFactory);
 								} catch (TargetInvocationException ex) {
 									errors.Add(string.Format("Rule {0} factory problem: {1}", rule, ex.InnerException.Message));
@@ -155,25 +155,25 @@ namespace bsn.GoldParser.Semantic {
 			}
 		}
 
-		protected override void RegisterNonterminalFactory(Rule rule, SemanticNonterminalFactory factory) {
+		protected override void RegisterNonterminalFactory(Rule rule, SemanticNonterminalFactory<T> factory) {
 			base.RegisterNonterminalFactory(rule, factory);
 			MemorizeType(factory, rule.RuleSymbol);
 		}
 
-		protected override void RegisterTerminalFactory(Symbol symbol, SemanticTerminalFactory factory) {
+		protected override void RegisterTerminalFactory(Symbol symbol, SemanticTerminalFactory<T> factory) {
 			base.RegisterTerminalFactory(symbol, factory);
 			MemorizeType(factory, symbol);
 		}
 
-		private SemanticNonterminalFactory CreateNonterminalFactory(Type type, ConstructorInfo constructor, int[] parameterMapping, int handleCount) {
-			return (SemanticNonterminalFactory)Activator.CreateInstance(typeof(SemanticNonterminalTypeFactory<>).MakeGenericType(type), constructor, parameterMapping, handleCount, typeof(T));
+		private SemanticNonterminalFactory<T> CreateNonterminalFactory(Type type, ConstructorInfo constructor, int[] parameterMapping, int handleCount) {
+			return (SemanticNonterminalFactory<T>)Activator.CreateInstance(typeof(SemanticNonterminalTypeFactory<,>).MakeGenericType(typeof(T), type), constructor, parameterMapping, handleCount, typeof(T));
 		}
 
-		private SemanticTerminalFactory CreateTerminalFactory(Type type) {
-			return (SemanticTerminalFactory)Activator.CreateInstance(typeof(SemanticTerminalTypeFactory<>).MakeGenericType(type));
+		private SemanticTerminalFactory<T> CreateTerminalFactory(Type type) {
+			return (SemanticTerminalFactory<T>)Activator.CreateInstance(typeof(SemanticTerminalTypeFactory<,>).MakeGenericType(typeof(T), type));
 		}
 
-		private void MemorizeType(SemanticTokenFactory factory, Symbol symbol) {
+		private void MemorizeType(SemanticTokenFactory<T> factory, Symbol symbol) {
 			if (factory.IsStaticOutputType) {
 				symbolTypeMap.SetTypeForSymbol(symbol, factory.OutputType);
 			}

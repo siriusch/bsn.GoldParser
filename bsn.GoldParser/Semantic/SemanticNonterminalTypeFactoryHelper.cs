@@ -34,14 +34,14 @@ using System.Reflection;
 using System.Reflection.Emit;
 
 namespace bsn.GoldParser.Semantic {
-	internal static class SemanticNonterminalTypeFactoryHelper {
-		public delegate T Activator<T>(IList<SemanticToken> tokens);
+	internal static class SemanticNonterminalTypeFactoryHelper<TBase> where TBase: SemanticToken {
+		public delegate T Activator<T>(IList<TBase> tokens);
 
 		private static readonly Dictionary<ConstructorInfo, DynamicMethod> dynamicMethods = new Dictionary<ConstructorInfo, DynamicMethod>();
 		private static readonly MethodInfo iListGetItem = GetIListGetItemMethod();
 
 		private static MethodInfo GetIListGetItemMethod() {
-			MethodInfo result = typeof(IList<SemanticToken>).GetProperty("Item").GetGetMethod();
+			MethodInfo result = typeof(IList<TBase>).GetProperty("Item").GetGetMethod();
 			Debug.Assert(result != null);
 			return result;
 		}
@@ -51,7 +51,7 @@ namespace bsn.GoldParser.Semantic {
 			lock (dynamicMethods) {
 				DynamicMethod result;
 				if (!dynamicMethods.TryGetValue(constructor, out result)) {
-					result = new DynamicMethod(string.Format("SemanticNonterminalTypeFactory<{0}>.Activator", constructor.DeclaringType.FullName), constructor.DeclaringType, new[] {typeof(int[]), typeof(IList<SemanticToken>)}, true);
+					result = new DynamicMethod(string.Format("SemanticNonterminalTypeFactory<{0}>.Activator", constructor.DeclaringType.FullName), constructor.DeclaringType, new[] {typeof(int[]), typeof(IList<TBase>)}, true);
 					ILGenerator il = result.GetILGenerator();
 					Dictionary<int, ParameterInfo> parameters = new Dictionary<int, ParameterInfo>();
 					foreach (ParameterInfo parameter in constructor.GetParameters()) {
@@ -63,7 +63,7 @@ namespace bsn.GoldParser.Semantic {
 						}
 						Label loadNull = il.DefineLabel();
 						Label end = il.DefineLabel();
-						il.Emit(OpCodes.Ldarg_1); // load the IList<SemanticToken>
+						il.Emit(OpCodes.Ldarg_1); // load the IList<TBase>
 						il.Emit(OpCodes.Ldarg_0); // load the int[]
 						il.Emit(OpCodes.Ldc_I4, i); // load the parameter index
 						il.Emit(OpCodes.Ldelem_I4); // get the indirection index
@@ -75,7 +75,7 @@ namespace bsn.GoldParser.Semantic {
 						il.Emit(OpCodes.Br_S, end); // jump to end
 						il.MarkLabel(loadNull);
 						il.Emit(OpCodes.Pop); // pop the unused indirection index
-						il.Emit(OpCodes.Pop); // pop the unused reference to the IList<SemanticToken>
+						il.Emit(OpCodes.Pop); // pop the unused reference to the IList<TBase>
 						il.Emit(OpCodes.Ldnull); // load a null reference instead
 						il.MarkLabel(end);
 					}
@@ -87,7 +87,7 @@ namespace bsn.GoldParser.Semantic {
 			}
 		}
 
-		public static Activator<T> CreateActivator<T>(SemanticNonterminalTypeFactory<T> target, ConstructorInfo constructor, int[] parameterMapping) where T: SemanticToken {
+		public static Activator<T> CreateActivator<T>(SemanticNonterminalTypeFactory<TBase, T> target, ConstructorInfo constructor, int[] parameterMapping) where T: TBase {
 			if (target == null) {
 				throw new ArgumentNullException("target");
 			}

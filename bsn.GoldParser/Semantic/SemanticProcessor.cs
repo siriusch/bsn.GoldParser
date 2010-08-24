@@ -29,7 +29,6 @@
 // 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 
@@ -37,12 +36,12 @@ using bsn.GoldParser.Grammar;
 using bsn.GoldParser.Parser;
 
 namespace bsn.GoldParser.Semantic {
-	public class SemanticProcessor<T>: LalrProcessor<SemanticToken> where T: SemanticToken {
+	public class SemanticProcessor<T>: LalrProcessor<T> where T: SemanticToken {
 		private readonly SemanticActions<T> actions;
 
 		public SemanticProcessor(TextReader reader, SemanticActions<T> actions): this(actions.CreateTokenizer(reader), actions) {}
 
-		public SemanticProcessor(ITokenizer<SemanticToken> tokenizer, SemanticActions<T> actions): base(tokenizer) {
+		public SemanticProcessor(ITokenizer<T> tokenizer, SemanticActions<T> actions): base(tokenizer) {
 			if (actions == null) {
 				throw new ArgumentNullException("actions");
 			}
@@ -56,12 +55,11 @@ namespace bsn.GoldParser.Semantic {
 			return false;
 		}
 
-		protected override SemanticToken CreateReduction(Rule rule, IList<SemanticToken> childrenEnum) {
-			SemanticNonterminalFactory factory;
+		protected override T CreateReduction(Rule rule, IList<T> children) {
+			SemanticNonterminalFactory<T> factory;
 			if (actions.TryGetNonterminalFactory(rule, out factory)) {
 				Debug.Assert(factory != null);
-				ReadOnlyCollection<SemanticToken> children = new List<SemanticToken>(childrenEnum).AsReadOnly();
-				SemanticToken result = factory.CreateInternal(rule, children);
+				T result = factory.CreateInternal(rule, children);
 				result.Initialize(rule.RuleSymbol, (children.Count > 0) ? ((IToken)children[0]).Position : default(LineInfo));
 				return result;
 			}

@@ -35,7 +35,7 @@ namespace bsn.GoldParser.Semantic {
 	/// <summary>
 	/// The abstract base class for all seamntic token factories.
 	/// </summary>
-	public abstract class SemanticTokenFactory {
+	public abstract class SemanticTokenFactory<TBase> where TBase: SemanticToken {
 		/// <summary>
 		/// Gets a value indicating whether the type created by this factory can vary or not. Typically, all factories but trim factories will return a static output type.
 		/// </summary>

@@ -34,8 +34,8 @@ using System.Reflection;
 using System.Reflection.Emit;
 
 namespace bsn.GoldParser.Semantic {
-	internal static class SemanticTerminalTypeFactoryHelper {
-		public delegate T Activator<T>(string text);
+	internal static class SemanticTerminalTypeFactoryHelper<TBase> where TBase: SemanticToken {
+		public delegate T Activator<T>(string text) where T: TBase;
 
 		private static readonly Dictionary<ConstructorInfo, DynamicMethod> dynamicMethods = new Dictionary<ConstructorInfo, DynamicMethod>();
 
@@ -44,7 +44,7 @@ namespace bsn.GoldParser.Semantic {
 			lock (dynamicMethods) {
 				DynamicMethod result;
 				if (!dynamicMethods.TryGetValue(constructor, out result)) {
-					Type ownerType = typeof(SemanticTerminalFactory<>).MakeGenericType(constructor.DeclaringType);
+					Type ownerType = typeof(SemanticTerminalFactory<,>).MakeGenericType(typeof(TBase), constructor.DeclaringType);
 					result = new DynamicMethod(string.Format("SemanticTerminalTypeFactory<{0}>.Activator", constructor.DeclaringType.FullName), constructor.DeclaringType, new[] {ownerType, typeof(string)}, ownerType, true);
 					ILGenerator il = result.GetILGenerator();
 					foreach (ParameterInfo parameterInfo in constructor.GetParameters()) {
@@ -61,7 +61,7 @@ namespace bsn.GoldParser.Semantic {
 			}
 		}
 
-		public static Activator<T> CreateActivator<T>(SemanticTerminalTypeFactory<T> target, ConstructorInfo constructor) where T: SemanticToken {
+		public static Activator<T> CreateActivator<T>(SemanticTerminalTypeFactory<TBase, T> target, ConstructorInfo constructor) where T: TBase {
 			if (target == null) {
 				throw new ArgumentNullException("target");
 			}

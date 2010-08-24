@@ -37,28 +37,30 @@ namespace bsn.GoldParser.Semantic {
 	/// <summary>
 	/// The abstract nongeneric case class for semantic nonterminal tokens. This class is for internal use only.
 	/// </summary>
-	public abstract class SemanticNonterminalFactory: SemanticTokenFactory {
+	/// <typeparam name="TBase">The base type of the semantic token.</typeparam>
+	public abstract class SemanticNonterminalFactory<TBase>: SemanticTokenFactory<TBase> where TBase: SemanticToken {
 		public abstract ReadOnlyCollection<Type> InputTypes {
 			get;
 		}
 
 		protected internal abstract IEnumerable<Symbol> GetInputSymbols(Rule rule);
 
-		internal abstract SemanticToken CreateInternal(Rule rule, IList<SemanticToken> tokens);
+		internal abstract TBase CreateInternal(Rule rule, IList<TBase> tokens);
 	}
 
 	/// <summary>
 	/// The abstract generic case class for semantic nonterminal tokens. This class is usually not directly inherited.
 	/// </summary>
-	/// <typeparam name="T">The type of the nonterminal token.</typeparam>
-	public abstract class SemanticNonterminalFactory<T>: SemanticNonterminalFactory where T: SemanticToken {
+	/// <typeparam name="TBase">The base type of the semantic token.</typeparam>
+	/// <typeparam name="TOutput">The type of the nonterminal token.</typeparam>
+	public abstract class SemanticNonterminalFactory<TBase, TOutput>: SemanticNonterminalFactory<TBase> where TBase: SemanticToken where TOutput: TBase {
 		public override sealed Type OutputType {
 			get {
-				return typeof(T);
+				return typeof(TOutput);
 			}
 		}
 
-		public abstract T Create(Rule rule, IList<SemanticToken> tokens);
+		public abstract TOutput Create(Rule rule, IList<TBase> tokens);
 
 		protected internal override IEnumerable<Symbol> GetInputSymbols(Rule rule) {
 			if (rule == null) {
@@ -67,7 +69,7 @@ namespace bsn.GoldParser.Semantic {
 			return rule;
 		}
 
-		internal override sealed SemanticToken CreateInternal(Rule rule, IList<SemanticToken> tokens) {
+		internal override sealed TBase CreateInternal(Rule rule, IList<TBase> tokens) {
 			return Create(rule, tokens);
 		}
 	}

@@ -33,26 +33,28 @@ namespace bsn.GoldParser.Semantic {
 	/// <summary>
 	/// The abstract nongeneric case class for semantic terminal tokens. This class is for internal use only.
 	/// </summary>
-	public abstract class SemanticTerminalFactory: SemanticTokenFactory {
+	/// <typeparam name="TBase">The base type of the semantic token.</typeparam>
+	public abstract class SemanticTerminalFactory<TBase>: SemanticTokenFactory<TBase> where TBase: SemanticToken {
 		internal SemanticTerminalFactory() {}
 
-		internal abstract SemanticToken CreateInternal(string text);
+		internal abstract TBase CreateInternal(string text);
 	}
 
 	/// <summary>
 	/// The abstract generic case class for semantic terminal tokens. This class is usually not directly inherited.
 	/// </summary>
-	/// <typeparam name="T">The type of the terminal token.</typeparam>
-	public abstract class SemanticTerminalFactory<T>: SemanticTerminalFactory where T: SemanticToken {
+	/// <typeparam name="TBase">The base type of the semantic token.</typeparam>
+	/// <typeparam name="TOutput">The type of the terminal token.</typeparam>
+	public abstract class SemanticTerminalFactory<TBase, TOutput>: SemanticTerminalFactory<TBase> where TBase: SemanticToken where TOutput: TBase {
 		public override sealed Type OutputType {
 			get {
-				return typeof(T);
+				return typeof(TOutput);
 			}
 		}
 
-		protected abstract T Create(string text);
+		protected abstract TOutput Create(string text);
 
-		internal override sealed SemanticToken CreateInternal(string text) {
+		internal override sealed TBase CreateInternal(string text) {
 			return Create(text);
 		}
 	}

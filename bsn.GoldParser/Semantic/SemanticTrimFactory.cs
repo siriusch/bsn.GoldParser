@@ -36,12 +36,12 @@ using bsn.GoldParser.Grammar;
 using bsn.GoldParser.Parser;
 
 namespace bsn.GoldParser.Semantic {
-	public class SemanticTrimFactory<T>: SemanticNonterminalFactory where T: SemanticToken {
+	public class SemanticTrimFactory<TBase>: SemanticNonterminalFactory<TBase> where TBase: SemanticToken {
 		private readonly int handleIndex;
-		private readonly SemanticActions<T> owner;
+		private readonly SemanticActions<TBase> owner;
 		private readonly Rule rule;
 
-		internal SemanticTrimFactory(SemanticActions<T> owner, Rule rule, int handleIndex) {
+		internal SemanticTrimFactory(SemanticActions<TBase> owner, Rule rule, int handleIndex) {
 			if (owner == null) {
 				throw new ArgumentNullException("owner");
 			}
@@ -78,9 +78,9 @@ namespace bsn.GoldParser.Semantic {
 			yield return GetTrimSymbol();
 		}
 
-		internal override SemanticToken CreateInternal(Rule rule, IList<SemanticToken> tokens) {
+		internal override TBase CreateInternal(Rule rule, IList<TBase> tokens) {
 			Debug.Assert(this.rule == rule);
-			SemanticToken result = tokens[handleIndex];
+			TBase result = tokens[handleIndex];
 			Debug.Assert(((IToken)result).Symbol == GetTrimSymbol());
 			Debug.Assert(OutputType.IsAssignableFrom(result.GetType()));
 			return result;
@@ -90,7 +90,7 @@ namespace bsn.GoldParser.Semantic {
 			if (owner.Initialized) {
 				return owner.GetSymbolOutputType(GetTrimSymbol());
 			}
-			return typeof(T);
+			return typeof(TBase);
 		}
 
 		private Symbol GetTrimSymbol() {
