@@ -38,9 +38,9 @@ using bsn.GoldParser.Grammar;
 namespace bsn.GoldParser.Parser {
 	internal class LalrStack<T> where T: class, IToken {
 		private class RangePop: IList<T> {
+			private readonly int bottomIndex;
 			private readonly KeyValuePair<T, LalrState>[] items;
 			private readonly int topIndex;
-			private readonly int bottomIndex;
 
 			public RangePop(KeyValuePair<T, LalrState>[] items, int topIndex, int bottomIndex) {
 				Debug.Assert(items != null);
@@ -51,7 +51,7 @@ namespace bsn.GoldParser.Parser {
 			}
 
 			public IEnumerator<T> GetEnumerator() {
-				for (int i = bottomIndex+1; i <=topIndex; i++) {
+				for (int i = bottomIndex+1; i <= topIndex; i++) {
 					yield return items[i].Key;
 				}
 			}
@@ -73,7 +73,7 @@ namespace bsn.GoldParser.Parser {
 			}
 
 			public void CopyTo(T[] array, int arrayIndex) {
-				for (int i = bottomIndex+1; i <=topIndex; i++) {
+				for (int i = bottomIndex+1; i <= topIndex; i++) {
 					array[arrayIndex++] = items[i].Key;
 				}
 			}
@@ -96,7 +96,7 @@ namespace bsn.GoldParser.Parser {
 
 			public int IndexOf(T item) {
 				if (item != null) {
-					for (int i = bottomIndex+1; i <=topIndex; i++) {
+					for (int i = bottomIndex+1; i <= topIndex; i++) {
 						if (item == items[i].Key) {
 							return i-(bottomIndex+1);
 						}
@@ -136,18 +136,6 @@ namespace bsn.GoldParser.Parser {
 			items[0] = new KeyValuePair<T, LalrState>(default(T), initialState);
 		}
 
-		public void Push(T token, LalrState state) {
-			if ((topIndex-1) == items.Length) {
-				Array.Resize(ref items, items.Length*2);
-			}
-			items[++topIndex] = new KeyValuePair<T, LalrState>(token, state);
-		}
-
-		public T Pop() {
-			Debug.Assert(topIndex >= 0);
-			return items[topIndex--].Key;
-		}
-
 		public LalrState GetTopState() {
 			return items[topIndex].Value;
 		}
@@ -156,11 +144,23 @@ namespace bsn.GoldParser.Parser {
 			return items[topIndex].Key;
 		}
 
+		public T Pop() {
+			Debug.Assert(topIndex >= 0);
+			return items[topIndex--].Key;
+		}
+
 		public IList<T> PopRange(int count) {
 			Debug.Assert(count >= 0);
 			int oldTopIndex = topIndex;
 			topIndex -= count;
 			return new RangePop(items, oldTopIndex, topIndex);
+		}
+
+		public void Push(T token, LalrState state) {
+			if ((topIndex-1) == items.Length) {
+				Array.Resize(ref items, items.Length*2);
+			}
+			items[++topIndex] = new KeyValuePair<T, LalrState>(token, state);
 		}
 	}
 
