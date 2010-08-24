@@ -61,7 +61,6 @@ namespace bsn.GoldParser.Semantic {
 
 		private readonly CompiledGrammar grammar;
 		private readonly Dictionary<Rule, SemanticNonterminalFactory<T>> nonterminalFactories = new Dictionary<Rule, SemanticNonterminalFactory<T>>();
-		private readonly object sync = new object();
 		private readonly Dictionary<Symbol, SemanticTerminalFactory<T>> terminalFactories = new Dictionary<Symbol, SemanticTerminalFactory<T>>();
 		private readonly Dictionary<Rule, SemanticTrimFactory<T>> trimFactories = new Dictionary<Rule, SemanticTrimFactory<T>>();
 		private int initialized; // 0 = not initialized, 1 = initializing, 2 = initialized
