@@ -92,6 +92,7 @@ namespace bsn.GoldParser.Semantic {
 							}
 						}
 					}
+#pragma warning disable 612,618
 					foreach (ConstructorInfo constructor in type.GetConstructors()) {
 						foreach (RuleAttribute ruleAttribute in constructor.GetCustomAttributes(typeof(RuleAttribute), true)) {
 							Rule rule = ruleAttribute.Bind(Grammar);
@@ -119,12 +120,17 @@ namespace bsn.GoldParser.Semantic {
 										factoryType = type;
 										factoryConstructor = constructor;
 									}
-									int[] parameterMapping = ruleAttribute.ConstructorParameterMapping;
-									if (parameterMapping == null) {
-										parameterMapping = new int[ruleAttribute.AllowTruncationForConstructor ? constructor.GetParameters().Length : rule.SymbolCount];
-										for (int i = 1; i < parameterMapping.Length; i++) {
-											parameterMapping[i] = i;
+									int[] parameterMapping;
+									if (ruleAttribute.HasConstructorParameterMapping) {
+										parameterMapping = ruleAttribute.ConstructorParameterMapping;
+										if (parameterMapping == null) {
+											parameterMapping = new int[ruleAttribute.AllowTruncationForConstructor ? constructor.GetParameters().Length : rule.SymbolCount];
+											for (int i = 1; i < parameterMapping.Length; i++) {
+												parameterMapping[i] = i;
+											}
 										}
+									} else {
+										parameterMapping = RuleDeclarationParser.BindConstructor(ruleAttribute.ParsedRule, constructor, ruleAttribute.AllowTruncationForConstructor);
 									}
 									SemanticNonterminalFactory<T> nonterminalFactory = CreateNonterminalFactory(factoryType, factoryConstructor, parameterMapping, rule.SymbolCount);
 									RegisterNonterminalFactory(rule, nonterminalFactory);
@@ -136,6 +142,7 @@ namespace bsn.GoldParser.Semantic {
 							}
 						}
 					}
+#pragma warning restore 612,618
 				}
 			}
 			// finally we look for all trim rules in the assembly

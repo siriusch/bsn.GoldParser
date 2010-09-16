@@ -68,8 +68,8 @@ namespace bsn.GoldParser.Semantic {
 						il.Emit(OpCodes.Ldc_I4, i); // load the parameter index
 						il.Emit(OpCodes.Ldelem_I4); // get the indirection index
 						il.Emit(OpCodes.Dup); // copy the indicrection index
-						il.Emit(OpCodes.Ldc_I4_M1); // and load a -1
-						il.Emit(OpCodes.Beq_S, loadNull); // compare the stored indicrection index and the stored -1, if equal we need to load a null
+						il.Emit(OpCodes.Ldc_I4_0); // and load a 0
+						il.Emit(OpCodes.Blt_S, loadNull); // compare the stored indicrection index and the stored 0, if less (e.g. -1) we need to load a null
 						il.Emit(OpCodes.Callvirt, iListGetItem); // otherwise get the item
 						il.Emit(OpCodes.Castclass, parameters[i].ParameterType); // make the verifier happy by casting the reference
 						il.Emit(OpCodes.Br_S, end); // jump to end

@@ -36,7 +36,12 @@ namespace bsn.GoldParser.Semantic {
 	public abstract class RuleAttributeBase: Attribute {
 		private readonly Reduction parsedRule;
 
-		protected RuleAttributeBase(string rule) {
+		// This gets rid of the CLS compliance warning without introducing a security problem by inherited attributes
+		protected RuleAttributeBase() {
+			throw new NotSupportedException("This class is not intended to be inherited");
+		}
+
+		internal RuleAttributeBase(string rule) {
 			if (string.IsNullOrEmpty(rule)) {
 				throw new ArgumentNullException("rule");
 			}
@@ -62,7 +67,7 @@ namespace bsn.GoldParser.Semantic {
 				throw new ArgumentNullException("grammar");
 			}
 			Rule rule;
-			RuleDeclarationParser.TryBind(parsedRule, grammar, out rule);
+			RuleDeclarationParser.TryBindGrammar(parsedRule, grammar, out rule);
 			return rule;
 		}
 	}

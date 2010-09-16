@@ -48,7 +48,7 @@ namespace bsn.GoldParser.Semantic {
 	/// </remarks>
 	/// <seealso cref="TerminalAttribute"/>
 	/// <seealso cref="RuleTrimAttribute"/>
-	[AttributeUsage(AttributeTargets.Constructor, AllowMultiple = true, Inherited = false)]
+	[AttributeUsage(AttributeTargets.Constructor, AllowMultiple=true, Inherited=false)]
 	public sealed class RuleAttribute: RuleAttributeBase, IEquatable<RuleAttribute> {
 		private readonly Type[] genericTypeParameters;
 		private bool allowTruncationForConstructor;
@@ -65,6 +65,38 @@ namespace bsn.GoldParser.Semantic {
 		/// </summary>
 		/// <param name="rule">The rule (in the same form as in the grammar file, such as <c>&lt;List&gt; ::= Item ',' &lt;List&gt;</c>).</param>
 		/// <param name="genericTypeParameters">The type parameters to use for closing the generic type.</param>
+		public RuleAttribute(string rule, Type genericTypeParameter1): this(rule, new[] {genericTypeParameter1}) {}
+
+		/// <summary>
+		/// Define that the constructor where the attribute is applied shall be invoked on the closed generic type for the given reduction rule.
+		/// </summary>
+		/// <param name="rule">The rule (in the same form as in the grammar file, such as <c>&lt;List&gt; ::= Item ',' &lt;List&gt;</c>).</param>
+		/// <param name="genericTypeParameters">The type parameters to use for closing the generic type.</param>
+		public RuleAttribute(string rule, Type genericTypeParameter1, Type genericTypeParameter2)
+			: this(rule, new[] { genericTypeParameter1, genericTypeParameter2 }) {}
+
+		/// <summary>
+		/// Define that the constructor where the attribute is applied shall be invoked on the closed generic type for the given reduction rule.
+		/// </summary>
+		/// <param name="rule">The rule (in the same form as in the grammar file, such as <c>&lt;List&gt; ::= Item ',' &lt;List&gt;</c>).</param>
+		/// <param name="genericTypeParameters">The type parameters to use for closing the generic type.</param>
+		public RuleAttribute(string rule, Type genericTypeParameter1, Type genericTypeParameter2, Type genericTypeParameter3)
+			: this(rule, new[] { genericTypeParameter1, genericTypeParameter2, genericTypeParameter3 }) {}
+
+		/// <summary>
+		/// Define that the constructor where the attribute is applied shall be invoked on the closed generic type for the given reduction rule.
+		/// </summary>
+		/// <param name="rule">The rule (in the same form as in the grammar file, such as <c>&lt;List&gt; ::= Item ',' &lt;List&gt;</c>).</param>
+		/// <param name="genericTypeParameters">The type parameters to use for closing the generic type.</param>
+		public RuleAttribute(string rule, Type genericTypeParameter1, Type genericTypeParameter2, Type genericTypeParameter3, Type genericTypeParameter4)
+			: this(rule, new[] { genericTypeParameter1, genericTypeParameter2, genericTypeParameter3, genericTypeParameter4 }) {}
+
+		/// <summary>
+		/// Define that the constructor where the attribute is applied shall be invoked on the closed generic type for the given reduction rule.
+		/// </summary>
+		/// <param name="rule">The rule (in the same form as in the grammar file, such as <c>&lt;List&gt; ::= Item ',' &lt;List&gt;</c>).</param>
+		/// <param name="genericTypeParameters">The type parameters to use for closing the generic type.</param>
+		[CLSCompliant(false)]
 		public RuleAttribute(string rule, params Type[] genericTypeParameters): this(rule) {
 			this.genericTypeParameters = genericTypeParameters;
 		}
@@ -86,6 +118,7 @@ namespace bsn.GoldParser.Semantic {
 		/// <value>
 		/// 	<c>true</c> to allow truncation for the constructor, otherwise <c>false</c>.
 		/// </value>
+		[Obsolete("Use the extended rule syntax instead of automatic truncation: ~X (don't use X for constructor)", false)]
 		public bool AllowTruncationForConstructor {
 			get {
 				return allowTruncationForConstructor;
@@ -104,6 +137,7 @@ namespace bsn.GoldParser.Semantic {
 		/// Constructor: <c>MyList(MyList next, Item item)</c>
 		/// Mapping: <c>new int[] {2, 0}</c>
 		/// </example>
+		[Obsolete("To map the constructor arguments, use the extended rule syntax: 0:X (map X to index 0) or ~X (don't use X for constructor)", false)]
 		public int[] ConstructorParameterMapping {
 			get {
 				return constructorParameterMapping;

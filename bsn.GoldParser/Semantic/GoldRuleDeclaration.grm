@@ -15,12 +15,13 @@
 
 Nonterminal    = '<' {Nonterminal Ch}+ '>'
 Terminal       = {Terminal Ch}+  | '' {Literal Ch}* ''  
+Offset         = {Digit}+ {Whitespace}* ':' | '~'
 
 ! ====================================================================
 ! Line-Based Grammar Declarations
 ! ====================================================================
 
-{Whitespace Ch} = {Whitespace} - {CR} - {LF}
+{Whitespace Ch} = {Whitespace}
 
 Whitespace = {Whitespace Ch}+
 
@@ -30,8 +31,11 @@ Whitespace = {Whitespace Ch}+
 
 <Rule Decl> ::= Nonterminal '::=' <Handle>
 
-<Handle> ::= <Symbol> <Handle>
+<Handle> ::= <HandleSymbol> <Handle>
            |
+
+<HandleSymbol> ::= <Symbol>
+                 | Offset <Symbol>
 
 <Symbol> ::= Terminal
            | Nonterminal           

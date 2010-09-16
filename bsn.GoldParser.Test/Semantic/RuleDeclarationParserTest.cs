@@ -31,6 +31,7 @@ using System;
 using System.Diagnostics;
 
 using bsn.GoldParser.Grammar;
+using bsn.GoldParser.Parser;
 
 using NUnit.Framework;
 
@@ -62,8 +63,26 @@ namespace bsn.GoldParser.Semantic {
 		public void ValidRuleStringComplex() {
 			RuleDeclarationParser parser = new RuleDeclarationParser(grammar);
 			Rule rule;
-			Expect(parser.TryParse("<Value> ::= '(' <Expression> ')'", out rule), EqualTo(true));
+			Expect(parser.TryParse("<Value> ::= '(' <Expression> ')'", out rule), True);
 			Debug.WriteLine(rule.Definition);
+		}
+
+		[Test]
+		public void ValidRuleMap1() {
+			Reduction reduction;
+			Expect(RuleDeclarationParser.TryParse("<Value> ::= ~'(' <Expression> ~')'", out reduction), True);
+			foreach (int index in RuleDeclarationParser.GetRuleHandleIndexes(reduction)) {
+				Debug.WriteLine(index);
+			}
+		}
+
+		[Test]
+		public void ValidRuleMap2() {
+			Reduction reduction;
+			Expect(RuleDeclarationParser.TryParse("<Value> ::= ~'(' 1:<Expression> ')'", out reduction), True);
+			foreach (int index in RuleDeclarationParser.GetRuleHandleIndexes(reduction)) {
+				Debug.WriteLine(index);
+			}
 		}
 
 		[Test]

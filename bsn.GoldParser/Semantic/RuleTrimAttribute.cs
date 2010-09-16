@@ -36,7 +36,7 @@ namespace bsn.GoldParser.Semantic {
 	/// </summary>
 	/// <seealso cref="TerminalAttribute"/>
 	/// <seealso cref="RuleAttribute"/>
-	[AttributeUsage(AttributeTargets.Assembly|AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
+	[AttributeUsage(AttributeTargets.Assembly|AttributeTargets.Class, AllowMultiple=true, Inherited=false)]
 	public sealed class RuleTrimAttribute: RuleAttributeBase {
 		private delegate ArgumentException ArgumentExceptionDelegate();
 

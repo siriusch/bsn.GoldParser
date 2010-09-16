@@ -30,7 +30,10 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Globalization;
 using System.IO;
+using System.Reflection;
 
 using bsn.GoldParser.Grammar;
 using bsn.GoldParser.Parser;
@@ -62,7 +65,7 @@ namespace bsn.GoldParser.Semantic {
 			return false;
 		}
 
-		internal static bool TryBind(Reduction ruleDeclaration, CompiledGrammar grammar, out Rule rule) {
+		internal static bool TryBindGrammar(Reduction ruleDeclaration, CompiledGrammar grammar, out Rule rule) {
 			Symbol ruleSymbol;
 			if (grammar.TryGetSymbol(GetRuleSymbolName(ruleDeclaration), out ruleSymbol)) {
 				ReadOnlyCollection<Rule> rules;
@@ -90,6 +93,34 @@ namespace bsn.GoldParser.Semantic {
 			return false;
 		}
 
+		internal static int[] BindConstructor(Reduction ruleDeclaration, ConstructorInfo constructor, bool allowTruncation) {
+			ParameterInfo[] parameters = constructor.GetParameters();
+			int[] mapping = new int[parameters.Length];
+			for (int i = 0; i < mapping.Length; i++) {
+				mapping[i] = -1;
+				if (parameters[i].ParameterType.IsValueType) {
+					throw new InvalidOperationException("Only reference types are allowed as constructor parameters when binding to rules");
+				}
+			}
+			int index = 0;
+			foreach (int ruleHandleIndex in GetRuleHandleIndexes(ruleDeclaration)) {
+				if (ruleHandleIndex >= 0) {
+					if (ruleHandleIndex >= mapping.Length) {
+						if (!allowTruncation) {
+							throw new InvalidOperationException("The constructor parameter mapping is not allowed to be truncated");
+						}
+					} else {
+						if (mapping[ruleHandleIndex] >= 0) {
+							throw new InvalidOperationException("Only one handle can be assigned per constructor parameter");
+						}
+						mapping[ruleHandleIndex] = index;
+					}
+				}
+				index++;
+			}
+			return mapping;
+		}
+
 		internal static string GetRuleSymbolName(Reduction ruleDeclaration) {
 			if (ruleDeclaration == null) {
 				throw new ArgumentNullException("ruleDeclaration");
@@ -103,7 +134,37 @@ namespace bsn.GoldParser.Semantic {
 			}
 			Reduction handle = (Reduction)ruleDeclaration.Children[2];
 			while (handle.Children.Count == 2) {
-				yield return handle.Children[0].ToString();
+				Reduction handleSymbol = (Reduction)handle.Children[0];
+				yield return handleSymbol.Children[handleSymbol.Children.Count-1].ToString();
+				handle = (Reduction)handle.Children[1];
+			}
+		}
+
+		internal static IEnumerable<int> GetRuleHandleIndexes(Reduction ruleDeclaration) {
+			if (ruleDeclaration == null) {
+				throw new ArgumentNullException("ruleDeclaration");
+			}
+			Reduction handle = (Reduction)ruleDeclaration.Children[2];
+			int index = 0;
+			List<int> emittedIndexes = new List<int>();
+			while (handle.Children.Count == 2) {
+				Reduction handleSymbol = (Reduction)handle.Children[0];
+				TextToken offset = handleSymbol.Children[0] as TextToken;
+				if (offset != null) {
+					if (offset.Text == "~") {
+						yield return -1;
+					} else {
+						int result = int.Parse(offset.Text.TrimEnd(' ', ':'), NumberFormatInfo.InvariantInfo);
+						emittedIndexes.Add(result);
+						yield return result;
+					}
+				} else {
+					while (emittedIndexes.Contains(index)) {
+						index++;
+					}
+					emittedIndexes.Add(index);
+					yield return index++;
+				}
 				handle = (Reduction)handle.Children[1];
 			}
 		}
@@ -120,7 +181,7 @@ namespace bsn.GoldParser.Semantic {
 		public bool TryParse(string ruleDeclaration, out Rule rule) {
 			Reduction ruleToken;
 			if (TryParse(ruleDeclaration, out ruleToken)) {
-				return TryBind(ruleToken, grammar, out rule);
+				return TryBindGrammar(ruleToken, grammar, out rule);
 			}
 			rule = null;
 			return false;
