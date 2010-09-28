@@ -221,7 +221,7 @@ namespace bsn.GoldParser.Parser {
 		/// Executes next step of parser and returns parser currentState.
 		/// </summary>
 		/// <returns>Parser current currentState.</returns>
-		public ParseMessage Parse() {
+		public virtual ParseMessage Parse() {
 			while (true) {
 				T inputToken;
 				if (currentToken == null) {
