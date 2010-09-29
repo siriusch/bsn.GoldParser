@@ -251,7 +251,8 @@ namespace bsn.GoldParser.Parser {
 				default:
 					LalrAction action = currentState.GetActionBySymbol(inputToken.Symbol);
 					if (action == null) {
-						if (RetrySyntaxError(ref currentToken)) {
+						if (RetrySyntaxError(ref inputToken)) {
+							currentToken = inputToken;
 							continue;
 						}
 						return ParseMessage.SyntaxError;
