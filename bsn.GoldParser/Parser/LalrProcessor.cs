@@ -248,6 +248,9 @@ namespace bsn.GoldParser.Parser {
 				default:
 					LalrAction action = currentState.GetActionBySymbol(inputToken.Symbol);
 					if (action == null) {
+						if (RetrySyntaxError(ref currentToken)) {
+							continue;
+						}
 						return ParseMessage.SyntaxError;
 					}
 					// the Execute() is the ParseToken() equivalent
@@ -267,6 +270,10 @@ namespace bsn.GoldParser.Parser {
 					break;
 				}
 			}
+		}
+
+		protected virtual bool RetrySyntaxError(ref T currentToken) {
+			return false;
 		}
 
 		public ParseMessage ParseAll() {
