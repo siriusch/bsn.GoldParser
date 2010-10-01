@@ -29,6 +29,7 @@
 // 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 
 using bsn.GoldParser.Grammar;
@@ -43,6 +44,7 @@ namespace bsn.GoldParser.Parser {
 	public abstract class Tokenizer<T>: ITokenizer<T> where T: class, IToken {
 		private readonly CharBuffer buffer; // Buffer to keep current characters.
 		private readonly CompiledGrammar grammar;
+		private int lineBreakPosition;
 		private int lineNumber;
 		private int linePosition;
 		private bool mergeLexicalErrors;
@@ -214,19 +216,13 @@ namespace bsn.GoldParser.Parser {
 			}
 		}
 
-		private void UpdateLineInfo(List<int> lineBreakPositions) {
-			bool updateLine = true;
+		private void UpdateLineInfo(IList<int> lineBreakPositions) {
 			if (lineBreakPositions != null) {
-				foreach (int lineBreakPosition in lineBreakPositions) {
-					lineNumber++;
-					linePosition = (buffer.Position-lineBreakPosition)+1;
-					updateLine = false;
-				}
+				Debug.Assert(lineBreakPositions.Count > 0);
+				lineNumber += lineBreakPositions.Count;
+				lineBreakPosition = lineBreakPositions[lineBreakPositions.Count-1];
 			}
-			if (updateLine) {
-				// no linebreak was encountered, so we need to move the column
-				linePosition += (buffer.Position-linePosition);
-			}
+			linePosition = (buffer.Position-lineBreakPosition)+1;
 		}
 
 		/// <summary>
