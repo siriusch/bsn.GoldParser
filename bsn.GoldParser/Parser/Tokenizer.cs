@@ -45,7 +45,6 @@ namespace bsn.GoldParser.Parser {
 		private readonly CompiledGrammar grammar;
 		private int lineNumber;
 		private int linePosition;
-		private int trackingPosition;
 		private bool mergeLexicalErrors;
 
 		/// <summary>
@@ -149,6 +148,7 @@ namespace bsn.GoldParser.Parser {
 								buffer.TryReadChar(out ch);
 								acceptMark.MoveToReadPosition();
 								if (MergeLexicalErrors && createToken && (!blockComment)) {
+									UpdateLineInfo(lineBreakPositions);
 									while (NextToken(out token, false, false) == ParseMessage.LexicalError) {
 										acceptMark.MoveToReadPosition();
 									}
@@ -177,6 +177,7 @@ namespace bsn.GoldParser.Parser {
 					}
 					switch (tokenSymbol.Kind) {
 					case SymbolKind.CommentLine:
+						UpdateLineInfo(lineBreakPositions);
 						while (buffer.TryReadChar(out ch) && (ch != '\r') && (ch != '\n')) {}
 						if ((ch == '\r') || (ch == '\n')) {
 							buffer.StepBack(1);
@@ -185,6 +186,7 @@ namespace bsn.GoldParser.Parser {
 						break;
 					case SymbolKind.CommentStart:
 						result = ParseMessage.None;
+						UpdateLineInfo(lineBreakPositions);
 						do {
 							NextToken(out token, true, true);
 							switch (token.Symbol.Kind) {
@@ -202,27 +204,28 @@ namespace bsn.GoldParser.Parser {
 						break;
 					default:
 						buffer.MoveToMark(acceptMark);
+						UpdateLineInfo(lineBreakPositions);
 						result = ParseMessage.TokenRead;
 						break;
 					}
-					bool updateLine = true;
-					if (lineBreakPositions != null) {
-						foreach (int lineBreakPosition in lineBreakPositions) {
-							if (lineBreakPosition <= trackingPosition) {
-								lineNumber++;
-								linePosition = (buffer.Position-lineBreakPosition)+1;
-								updateLine = false;
-							}
-						}
-					}
-					if (updateLine) {
-						// no linebreak was encountered, so we need to move the column
-						linePosition += (buffer.Position-trackingPosition);
-					}
-					trackingPosition = buffer.Position;
 					token = (createToken) ? CreateToken(tokenSymbol, tokenPosition, mark.Text) : null;
 					return result;
 				}
+			}
+		}
+
+		private void UpdateLineInfo(List<int> lineBreakPositions) {
+			bool updateLine = true;
+			if (lineBreakPositions != null) {
+				foreach (int lineBreakPosition in lineBreakPositions) {
+					lineNumber++;
+					linePosition = (buffer.Position-lineBreakPosition)+1;
+					updateLine = false;
+				}
+			}
+			if (updateLine) {
+				// no linebreak was encountered, so we need to move the column
+				linePosition += (buffer.Position-linePosition);
 			}
 		}
 

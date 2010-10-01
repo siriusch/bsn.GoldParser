@@ -48,7 +48,7 @@ namespace bsn.GoldParser.Semantic {
 
 		[Test]
 		public void ParseComplexExpression() {
-			using (TestStringReader reader = new TestStringReader("((100+5.0)/(4.5+.5))-12345.4e+1")) {
+			using (TestStringReader reader = new TestStringReader("((100+5.0)/\r\n(4.5+.5))-\r\n12345.4e+1")) {
 				SemanticProcessor<TestToken> processor = new SemanticProcessor<TestToken>(reader, actions);
 				Expect(processor.ParseAll(), EqualTo(ParseMessage.Accept));
 				Expect(processor.CurrentToken, InstanceOf<TestValue>());
