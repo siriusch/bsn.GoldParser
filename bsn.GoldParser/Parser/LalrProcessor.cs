@@ -157,7 +157,7 @@ namespace bsn.GoldParser.Parser {
 		}
 
 		public void Push(T token, LalrState state) {
-			if ((topIndex-1) == items.Length) {
+			if ((topIndex-2) == items.Length) {
 				Array.Resize(ref items, items.Length*2);
 			}
 			items[++topIndex] = new KeyValuePair<T, LalrState>(token, state);
