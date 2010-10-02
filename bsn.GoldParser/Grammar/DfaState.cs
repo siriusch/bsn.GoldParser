@@ -39,6 +39,9 @@ namespace bsn.GoldParser.Grammar {
 	public sealed class DfaState: GrammarObject<DfaState> {
 		private readonly Dictionary<char, DfaState> transitionVector = new Dictionary<char, DfaState>();
 		private Symbol acceptSymbol;
+		private char sequenceEnd = char.MinValue;
+		private char sequenceStart = char.MaxValue;
+		private DfaState sequenceState;
 
 		/// <summary>
 		/// Creates a new instance of the <c>DfaState</c> class.
@@ -69,6 +72,9 @@ namespace bsn.GoldParser.Grammar {
 		/// <returns>The transition or null if there is not transition defined.</returns>
 		public DfaState GetTransition(char ch) {
 			DfaState result;
+			if ((ch >= sequenceStart) && (ch <= sequenceEnd)) {
+				return sequenceState;
+			}
 			if (transitionVector.TryGetValue(ch, out result)) {
 				return result;
 			}
@@ -79,33 +85,57 @@ namespace bsn.GoldParser.Grammar {
 		/// Gets the transition destination states.
 		/// </summary>
 		/// <returns></returns>
-		public ICollection<DfaState> GetTransitionStates() {
-			return transitionVector.Values;
+		public IEnumerable<DfaState> GetTransitionStates() {
+			Dictionary<DfaState, IntPtr> result = new Dictionary<DfaState, IntPtr>();
+			if (sequenceState != null) {
+				result.Add(sequenceState, IntPtr.Zero);
+			}
+			foreach (DfaState state in transitionVector.Values) {
+				result[state] = IntPtr.Zero;
+			}
+			return result.Keys;
 		}
 
-		internal void Initialize(CompiledGrammar owner, Symbol acceptSymbol, CompiledGrammar.DfaEdge[] edges) {
+		internal void Initialize(Symbol acceptSymbol, ICollection<CompiledGrammar.DfaEdge> edges) {
 			if (edges == null) {
 				throw new ArgumentNullException("edges");
 			}
-			if ((this.acceptSymbol != null) || (transitionVector.Count > 0)) {
+			if ((this.acceptSymbol != null) || (sequenceState != null) || (transitionVector.Count > 0)) {
 				throw new InvalidOperationException("The DfaState has already been initialized!");
 			}
 			this.acceptSymbol = acceptSymbol;
-			foreach (CompiledGrammar.DfaEdge edge in edges) {
-				DfaState targetDfaState = owner.GetDfaState(edge.TargetIndex);
-				int sequential = 0;
-				char lastChar = '\0';
-				foreach (char ch in owner.GetDfaCharset(edge.CharSetIndex).Characters) {
-					if (lastChar == ch-1) {
-						sequential++;
-					} else {
-						if(sequential > 3) {
-							Debug.WriteLine(sequential, "Charset sequence detected");
-						}
-						sequential = 0;
+			if (edges.Count == 0) {
+				Debug.Assert(acceptSymbol != null);
+				sequenceStart = char.MinValue;
+				sequenceEnd = char.MaxValue;
+				sequenceState = null;
+			} else {
+				DfaCharset sequence = null;
+				int sequenceLength = 0;
+				foreach (CompiledGrammar.DfaEdge edge in edges) {
+					DfaCharset charset = Owner.GetDfaCharset(edge.CharSetIndex);
+					if (charset.SequenceLength > sequenceLength) {
+						sequence = charset;
+						sequenceLength = charset.SequenceLength;
 					}
-					lastChar = ch;
-					transitionVector.Add(ch, targetDfaState);
+				}
+				Debug.Assert(sequence != null);
+				foreach (CompiledGrammar.DfaEdge edge in edges) {
+					DfaState targetDfaState = Owner.GetDfaState(edge.TargetIndex);
+					DfaCharset charset = Owner.GetDfaCharset(edge.CharSetIndex);
+					ICollection<char> characters;
+					if (ReferenceEquals(charset, sequence)) {
+						Debug.Assert(sequenceState == null);
+						characters = charset.CharactersExcludingSequence;
+						sequenceStart = charset.SequenceStart;
+						sequenceEnd = charset.SequenceEnd;
+						sequenceState = targetDfaState;
+					} else {
+						characters = charset.CharactersIncludingSequence;
+					}
+					foreach (char ch in characters) {
+						transitionVector.Add(ch, targetDfaState);
+					}
 				}
 			}
 		}

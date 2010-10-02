@@ -748,7 +748,7 @@ namespace bsn.GoldParser.Grammar {
 			}
 
 			// Create DFA state and store it in DFA state table
-			dfaState.Initialize(this, acceptSymbol, edges);
+			dfaState.Initialize(acceptSymbol, edges);
 		}
 
 		/// <summary>
