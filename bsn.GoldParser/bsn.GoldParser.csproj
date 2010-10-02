@@ -85,6 +85,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Grammar\DfaCharset.cs" />
     <Compile Include="Parser\IToken.cs" />
     <Compile Include="Parser\ITokenizer.cs" />
     <Compile Include="Semantic\RuleAttribute.cs" />

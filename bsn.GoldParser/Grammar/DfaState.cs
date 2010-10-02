@@ -29,6 +29,7 @@
 // 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace bsn.GoldParser.Grammar {
 	/// <summary>
@@ -92,7 +93,18 @@ namespace bsn.GoldParser.Grammar {
 			this.acceptSymbol = acceptSymbol;
 			foreach (CompiledGrammar.DfaEdge edge in edges) {
 				DfaState targetDfaState = owner.GetDfaState(edge.TargetIndex);
-				foreach (char ch in owner.GetDfaCharset(edge.CharSetIndex)) {
+				int sequential = 0;
+				char lastChar = '\0';
+				foreach (char ch in owner.GetDfaCharset(edge.CharSetIndex).Characters) {
+					if (lastChar == ch-1) {
+						sequential++;
+					} else {
+						if(sequential > 3) {
+							Debug.WriteLine(sequential, "Charset sequence detected");
+						}
+						sequential = 0;
+					}
+					lastChar = ch;
 					transitionVector.Add(ch, targetDfaState);
 				}
 			}

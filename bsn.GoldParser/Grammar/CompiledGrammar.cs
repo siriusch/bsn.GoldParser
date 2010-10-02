@@ -272,7 +272,7 @@ namespace bsn.GoldParser.Grammar {
 		private string author; // Author of the grammar
 		private ICollection<DfaState> blockCommentStates;
 		private bool caseSensitive; // Grammar is case sensitive or not
-		private String[] charSetTable; // Charset table
+		private DfaCharset[] charSetTable; // Charset table
 		private DfaState dfaInitialState; // DFA initial state 
 		private DfaState[] dfaStateTable; // DFA state table
 		private Symbol endSymbol;
@@ -451,7 +451,7 @@ namespace bsn.GoldParser.Grammar {
 		/// </summary>
 		/// <param name="charSetIndex">Index of the char set.</param>
 		/// <returns></returns>
-		public string GetDfaCharset(int charSetIndex) {
+		public DfaCharset GetDfaCharset(int charSetIndex) {
 			return charSetTable[charSetIndex];
 		}
 
@@ -721,7 +721,8 @@ namespace bsn.GoldParser.Grammar {
 		/// </summary>
 		/// <param name="context"></param>
 		private void ReadCharSets(LoadContext context) {
-			charSetTable[context.ReadInt16Entry()] = context.ReadStringEntry();
+			int index = context.ReadInt16Entry();
+			charSetTable[index] = new DfaCharset(this, index, context.ReadStringEntry());
 		}
 
 		/// <summary>
@@ -857,7 +858,7 @@ namespace bsn.GoldParser.Grammar {
 		private void ReadTableCounts(LoadContext context) {
 			// Initialize tables
 			symbolTable = new Symbol[context.ReadInt16Entry()];
-			charSetTable = new String[context.ReadInt16Entry()];
+			charSetTable = new DfaCharset[context.ReadInt16Entry()];
 			ruleTable = new Rule[context.ReadInt16Entry()];
 			for (int i = 0; i < ruleTable.Length; i++) {
 				ruleTable[i] = new Rule(this, i);
