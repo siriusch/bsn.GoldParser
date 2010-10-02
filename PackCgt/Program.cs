@@ -28,29 +28,27 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
+using System.IO.Compression;
 
 using bsn.GoldParser.Grammar;
 
 namespace PackCgt {
 	public class Program {
-		static void Main(string[] args) {
+		private static void Main(string[] args) {
 			Console.WriteLine("bsn GoldParser CGT packer");
 			Console.WriteLine("-------------------------");
 			Console.WriteLine("(C) 2010 Arsène von Wyss");
 			Console.WriteLine();
 			if (args.Length == 0) {
-				Console.WriteLine("Usage: PackCgt cgtfile");
+				Console.WriteLine("Usage: PackCgt cgtfile [/gzip]");
 				Environment.Exit(1);
-			} 
+			}
 			try {
 				using (FileStream file = new FileStream(args[0], FileMode.Open, FileAccess.ReadWrite, FileShare.Read)) {
 					using (MemoryStream packed = new MemoryStream()) {
-						CompiledGrammar.Pack(file, packed);
+						CompiledGrammar.Pack(file, packed, (args.Length > 1) && string.Equals(args[1], "/gzip", StringComparison.OrdinalIgnoreCase));
 						if (file.Length <= packed.Length) {
 							Console.WriteLine("The file size could not be reduced more");
 						} else {

@@ -32,6 +32,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Reflection;
 using System.Text;
 
@@ -106,9 +107,20 @@ namespace bsn.GoldParser.Grammar {
 		}
 
 		public static void Pack(Stream input, Stream output) {
-			BinaryWriter writer = new BinaryWriter(output);
-			Pack(new BinaryReader(input), writer);
-			writer.Flush();
+			Pack(input, output, false);
+		}
+
+		public static void Pack(Stream input, Stream output, bool gzip) {
+			if (gzip) {
+				using (MemoryStream buffer = new MemoryStream((input.CanSeek) ? (int)input.Length : 512000)) {
+					Pack(new BinaryReader(input), new BinaryWriter(buffer));
+					using (GZipStream compressedStream = new GZipStream(output, CompressionMode.Compress, true)) {
+						compressedStream.Write(buffer.GetBuffer(), 0, (int)buffer.Length);
+					}
+				}
+			} else {
+				Pack(new BinaryReader(input), new BinaryWriter(output));
+			}
 		}
 
 		public static void Pack(BinaryReader input, BinaryWriter output) {
@@ -152,6 +164,7 @@ namespace bsn.GoldParser.Grammar {
 					break;
 				}
 			}
+			output.Flush();
 		}
 
 		/// <summary>
@@ -162,6 +175,18 @@ namespace bsn.GoldParser.Grammar {
 		public static CompiledGrammar Load(Stream stream) {
 			if (stream == null) {
 				throw new ArgumentNullException("stream");
+			}
+			if (stream.CanSeek) {
+				long position = stream.Position;
+				try {
+					using (GZipStream packedStream = new GZipStream(stream, CompressionMode.Decompress, true)) {
+						return Load(new BinaryReader(packedStream));
+					}
+				} catch (InvalidDataException) {
+				} catch (FileLoadException) {
+					// not a compressed stream
+				}
+				stream.Seek(position, SeekOrigin.Begin);
 			}
 			return Load(new BinaryReader(stream));
 		}

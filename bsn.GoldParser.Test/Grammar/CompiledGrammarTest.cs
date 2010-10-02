@@ -180,7 +180,7 @@ namespace bsn.GoldParser.Grammar {
 					Expect(unpackedStream, Not.Null);
 					unpackedGrammar = CompiledGrammar.Load(unpackedStream);
 					unpackedStream.Seek(0, SeekOrigin.Begin);
-					CompiledGrammar.Pack(unpackedStream, packedStream);
+					CompiledGrammar.Pack(unpackedStream, packedStream, false);
 					Debug.WriteLine(string.Format("Packed length: {0} (original {1}, {2} times reduction)", packedStream.Length, unpackedStream.Length, (double)unpackedStream.Length/(double)packedStream.Length));
 					Expect(packedStream.Length < unpackedStream.Length);
 				}
