@@ -114,8 +114,14 @@ namespace bsn.GoldParser.Grammar {
 			if (gzip) {
 				using (MemoryStream buffer = new MemoryStream((input.CanSeek) ? (int)input.Length : 512000)) {
 					Pack(new BinaryReader(input), new BinaryWriter(buffer));
-					using (GZipStream compressedStream = new GZipStream(output, CompressionMode.Compress, true)) {
-						compressedStream.Write(buffer.GetBuffer(), 0, (int)buffer.Length);
+					using (MemoryStream bufferGZip = new MemoryStream((int)buffer.Length)) {
+						using (GZipStream compressedStream = new GZipStream(bufferGZip, CompressionMode.Compress, true)) {
+							compressedStream.Write(buffer.GetBuffer(), 0, (int)buffer.Length);
+						}
+						// due to hardcoded huffman trees in the .NET source code, the GZip'ed stream may be MUCH longer than the original, so we check that and take the shorter one
+						// see also: http://connect.microsoft.com/VisualStudio/feedback/ViewFeedback.aspx?FeedbackID=93636
+						MemoryStream shortestBuffer = (buffer.Length <= bufferGZip.Length) ? buffer : bufferGZip;
+						output.Write(shortestBuffer.GetBuffer(), 0, (int)shortestBuffer.Length);
 					}
 				}
 			} else {
