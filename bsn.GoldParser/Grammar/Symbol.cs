@@ -62,6 +62,9 @@ namespace bsn.GoldParser.Grammar {
 		/// <param name="name">Name of the symbol.</param>
 		/// <param name="kind">Type of the symbol.</param>
 		internal Symbol(CompiledGrammar owner, int index, string name, SymbolKind kind): base(owner, index) {
+			if (owner == null) {
+				throw new ArgumentNullException("owner");
+			}
 			this.name = string.IsInterned(name) ?? name;
 			this.kind = kind;
 		}

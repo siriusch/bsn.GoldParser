@@ -46,7 +46,11 @@ namespace bsn.GoldParser.Grammar {
 		/// <summary>
 		/// Creates a new instance of the <c>DfaState</c> class.
 		/// </summary>
-		internal DfaState(CompiledGrammar owner, int index): base(owner, index) {}
+		internal DfaState(CompiledGrammar owner, int index): base(owner, index) {
+			if (owner == null) {
+				throw new ArgumentNullException("owner");
+			}
+		}
 
 		/// <summary>
 		/// Gets the symbol which can be accepted in this DFA state.

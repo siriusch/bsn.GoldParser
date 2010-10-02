@@ -41,7 +41,11 @@ namespace bsn.GoldParser.Grammar {
 		/// Creates a new instance of the <c>LalrState</c> class
 		/// </summary>
 		/// <param name="index">Index of the LR state in the LR state table.</param>
-		internal LalrState(CompiledGrammar owner, int index): base(owner, index) {}
+		internal LalrState(CompiledGrammar owner, int index): base(owner, index) {
+			if (owner == null) {
+				throw new ArgumentNullException("owner");
+			}
+		}
 
 		/// <summary>
 		/// Gets LR state action count.

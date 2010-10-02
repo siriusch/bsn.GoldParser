@@ -44,9 +44,6 @@ namespace bsn.GoldParser.Grammar {
 		/// <param name="owner">The owner grammar.</param>
 		/// <param name="index">The index.</param>
 		protected GrammarObject(CompiledGrammar owner, int index) {
-			if (owner == null) {
-				throw new ArgumentNullException("owner");
-			}
 			this.owner = owner;
 			this.index = index;
 		}

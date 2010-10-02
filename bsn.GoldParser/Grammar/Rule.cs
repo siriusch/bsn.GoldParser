@@ -49,7 +49,11 @@ namespace bsn.GoldParser.Grammar {
 		/// Creates a new instance of <c>Rule</c> class.
 		/// </summary>
 		/// <param name="index">Index of the rule in the grammar rule table.</param>
-		internal Rule(CompiledGrammar grammar, int index): base(grammar, index) {}
+		internal Rule(CompiledGrammar owner, int index): base(owner, index) {
+			if (owner == null) {
+				throw new ArgumentNullException("owner");
+			}
+		}
 
 		/// <summary>
 		/// Gets symbol by its index.

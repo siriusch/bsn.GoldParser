@@ -170,5 +170,41 @@ namespace bsn.GoldParser.Grammar {
 			Expect(symbol, Not.Null);
 			Expect(symbol.Name, EqualTo("Float"));
 		}
+
+		[Test]
+		public void PackTest() {
+			CompiledGrammar unpackedGrammar;
+			CompiledGrammar packedGrammar;
+			using (MemoryStream packedStream = new MemoryStream()) {
+				using (Stream unpackedStream = typeof(CompiledGrammarTest).Assembly.GetManifestResourceStream(typeof(CompiledGrammarTest), "TestGrammar.cgt")) {
+					Expect(unpackedStream, Not.Null);
+					unpackedGrammar = CompiledGrammar.Load(unpackedStream);
+					unpackedStream.Seek(0, SeekOrigin.Begin);
+					CompiledGrammar.Pack(unpackedStream, packedStream);
+					Debug.WriteLine(string.Format("Packed length: {0} (original {1}, {2} times reduction)", packedStream.Length, unpackedStream.Length, (double)unpackedStream.Length/(double)packedStream.Length));
+					Expect(packedStream.Length < unpackedStream.Length);
+				}
+				packedStream.Seek(0, SeekOrigin.Begin);
+				packedGrammar = CompiledGrammar.Load(packedStream);
+			}
+			Expect(packedGrammar.About, EqualTo(unpackedGrammar.About));
+			Expect(packedGrammar.Author, EqualTo(unpackedGrammar.Author));
+			Expect(packedGrammar.CaseSensitive, EqualTo(unpackedGrammar.CaseSensitive));
+			Expect(packedGrammar.DfaCharsetCount, EqualTo(unpackedGrammar.DfaCharsetCount));
+			Expect(packedGrammar.DfaInitialState.Index, EqualTo(unpackedGrammar.DfaInitialState.Index));
+			Expect(packedGrammar.DfaStateCount, EqualTo(unpackedGrammar.DfaStateCount));
+			Expect(packedGrammar.EndSymbol.Index, EqualTo(unpackedGrammar.EndSymbol.Index));
+			Expect(packedGrammar.ErrorSymbol.Index, EqualTo(unpackedGrammar.ErrorSymbol.Index));
+			Expect(packedGrammar.InitialLRState.Index, EqualTo(unpackedGrammar.InitialLRState.Index));
+			Expect(packedGrammar.LalrStateCount, EqualTo(unpackedGrammar.LalrStateCount));
+			Expect(packedGrammar.Name, EqualTo(unpackedGrammar.Name));
+			Expect(packedGrammar.RuleCount, EqualTo(unpackedGrammar.RuleCount));
+			Expect(packedGrammar.StartSymbol.Index, EqualTo(unpackedGrammar.StartSymbol.Index));
+			Expect(packedGrammar.SymbolCount, EqualTo(unpackedGrammar.SymbolCount));
+			Expect(packedGrammar.Version, EqualTo(unpackedGrammar.Version));
+			for (int i = 0; i < packedGrammar.DfaCharsetCount; i++) {
+				Expect(new string(packedGrammar.GetDfaCharset(i).CharactersIncludingSequence), EqualTo(new string(unpackedGrammar.GetDfaCharset(i).CharactersIncludingSequence)));
+			}
+		}
 	}
 }

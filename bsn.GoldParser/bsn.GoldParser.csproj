@@ -85,6 +85,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Grammar\CgtEntryType.cs" />
+    <Compile Include="Grammar\CgtReader.cs" />
+    <Compile Include="Grammar\CgtRecordType.cs" />
+    <Compile Include="Grammar\CgtWriter.cs" />
     <Compile Include="Grammar\DfaCharset.cs" />
     <Compile Include="Parser\IToken.cs" />
     <Compile Include="Parser\ITokenizer.cs" />
