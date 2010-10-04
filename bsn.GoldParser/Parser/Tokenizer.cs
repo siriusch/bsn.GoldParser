@@ -221,6 +221,7 @@ namespace bsn.GoldParser.Parser {
 				Debug.Assert(lineBreakPositions.Count > 0);
 				lineNumber += lineBreakPositions.Count;
 				lineBreakPosition = lineBreakPositions[lineBreakPositions.Count-1];
+				lineBreakPositions.Clear();
 			}
 			linePosition = (buffer.Position-lineBreakPosition)+1;
 		}
