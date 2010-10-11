@@ -26,7 +26,7 @@
 // 
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-// 
+//  
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -188,8 +188,7 @@ namespace bsn.GoldParser.Grammar {
 					using (GZipStream packedStream = new GZipStream(stream, CompressionMode.Decompress, true)) {
 						return Load(new BinaryReader(packedStream));
 					}
-				} catch (InvalidDataException) {
-				} catch (FileLoadException) {
+				} catch (InvalidDataException) {} catch (FileLoadException) {
 					// not a compressed stream
 				}
 				stream.Seek(position, SeekOrigin.Begin);
@@ -703,14 +702,12 @@ namespace bsn.GoldParser.Grammar {
 				context.ReadIntegerEntry(); // Skip the entry.
 			}
 			context.ReadEmptyEntry();
-
 			// Read DFA edges
 			DfaEdge[] edges = new DfaEdge[context.EntryCount/3];
 			for (int i = 0; i < edges.Length; i++) {
 				edges[i] = new DfaEdge(context.ReadIntegerEntry(), context.ReadIntegerEntry());
 				context.ReadEmptyEntry();
 			}
-
 			// Create DFA state and store it in DFA state table
 			dfaState.Initialize(acceptSymbol, edges);
 		}

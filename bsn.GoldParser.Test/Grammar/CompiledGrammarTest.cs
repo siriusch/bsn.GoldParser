@@ -26,7 +26,7 @@
 // 
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-// 
+//  
 using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -181,7 +181,7 @@ namespace bsn.GoldParser.Grammar {
 					unpackedGrammar = CompiledGrammar.Load(unpackedStream);
 					unpackedStream.Seek(0, SeekOrigin.Begin);
 					CompiledGrammar.Pack(unpackedStream, packedStream, true);
-					Debug.WriteLine(string.Format("Packed length: {0} (original {1}, {2} times reduction)", packedStream.Length, unpackedStream.Length, (double)unpackedStream.Length/(double)packedStream.Length));
+					Debug.WriteLine(string.Format("Packed length: {0} (original {1}, {2} times reduction)", packedStream.Length, unpackedStream.Length, unpackedStream.Length/(double)packedStream.Length));
 					Expect(packedStream.Length < unpackedStream.Length);
 				}
 				packedStream.Seek(0, SeekOrigin.Begin);
