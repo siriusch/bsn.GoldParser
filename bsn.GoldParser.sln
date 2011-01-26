@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "bsn.GoldParser", "bsn.GoldParser\bsn.GoldParser.csproj", "{1A1A5AE9-7981-471C-9CC7-F7465E675A32}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "bsn.GoldParser.Test", "bsn.GoldParser.Test\bsn.GoldParser.Test.csproj", "{68DC267E-76A4-4B7A-A397-95302BB5D64F}"
