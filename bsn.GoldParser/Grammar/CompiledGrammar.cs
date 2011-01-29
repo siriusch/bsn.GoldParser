@@ -425,16 +425,16 @@ namespace bsn.GoldParser.Grammar {
 		}
 
 		public ICollection<DfaState> GetDfaStatesOfSymbols(Predicate<Symbol> filter) {
+			if (filter == null) {
+				throw new ArgumentNullException("filter");
+			}
 			int symbolsFound = 0;
 			SymbolSet acceptSymbols = new SymbolSet();
 			for (int i = 0; i < SymbolCount; i++) {
 				Symbol symbol = GetSymbol(i);
-				switch (symbol.Kind) {
-				case SymbolKind.CommentStart:
-				case SymbolKind.CommentEnd:
+				if (filter(symbol)) {
 					acceptSymbols[symbol] = true;
 					symbolsFound++;
-					break;
 				}
 			}
 			if (symbolsFound != 0) {
