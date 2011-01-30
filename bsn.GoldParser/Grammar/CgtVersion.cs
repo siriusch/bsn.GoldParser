@@ -27,20 +27,12 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //  
+using System;
+
 namespace bsn.GoldParser.Grammar {
-	/// <summary>
-	/// Record type byte in the binary grammar file.
-	/// </summary>
-	internal enum CgtRecordType {
-		Parameters = (int)'P', // 80
-		TableCounts = (int)'T', // 84
-		Initial = (int)'I', // 73
-		Symbols = (int)'S', // 83
-		Charsets = (int)'C', // 67
-		PackedCharsets = (int)'c',
-		Rules = (int)'R', // 82
-		DfaStates = (int)'D', // 68
-		LRStates = (int)'L', // 76
-		Comment = (int)'!' // 33
+	public enum CgtVersion {
+		None,
+		V1_0,
+		V4_2
 	}
 }

@@ -87,6 +87,7 @@
     <Compile Include="Grammar\CgtEntryType.cs" />
     <Compile Include="Grammar\CgtReader.cs" />
     <Compile Include="Grammar\CgtRecordType.cs" />
+    <Compile Include="Grammar\CgtVersion.cs" />
     <Compile Include="Grammar\CgtWriter.cs" />
     <Compile Include="Grammar\DfaCharset.cs" />
     <Compile Include="Parser\IToken.cs" />

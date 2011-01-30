@@ -79,23 +79,17 @@ namespace bsn.GoldParser.Grammar {
 		}
 
 		public bool ReadBoolEntry() {
-			if (ReadEntryType() != CgtEntryType.Boolean) {
-				throw new FileLoadException("Boolean entry expected");
-			}
+			ReadAndCheckEntryType(CgtEntryType.Boolean);
 			return reader.ReadBoolean();
 		}
 
 		public byte ReadByteEntry() {
-			if (ReadEntryType() != CgtEntryType.Byte) {
-				throw new FileLoadException("Byte entry expected");
-			}
+			ReadAndCheckEntryType(CgtEntryType.Byte);
 			return reader.ReadByte();
 		}
 
 		public void ReadEmptyEntry() {
-			if (ReadEntryType() != CgtEntryType.Empty) {
-				throw new FileLoadException("Empty entry expected");
-			}
+			ReadAndCheckEntryType(CgtEntryType.Empty);
 		}
 
 		public string ReadHeaderString() {
@@ -106,14 +100,12 @@ namespace bsn.GoldParser.Grammar {
 		}
 
 		public int ReadIntegerEntry() {
-			if (ReadEntryType() != CgtEntryType.Integer) {
-				throw new FileLoadException("Integer entry expected");
-			}
+			ReadAndCheckEntryType(CgtEntryType.Integer);
 			return reader.ReadUInt16();
 		}
 
 		public CgtRecordType ReadNextRecord() {
-			char recordType = (char)reader.ReadByte();
+			var recordType = (char)reader.ReadByte();
 			//Structure below is ready for future expansion
 			switch (recordType) {
 			case 'M':
@@ -126,10 +118,15 @@ namespace bsn.GoldParser.Grammar {
 		}
 
 		public string ReadStringEntry() {
-			if (ReadEntryType() != CgtEntryType.String) {
-				throw new FileLoadException("String entry expected");
-			}
+			ReadAndCheckEntryType(CgtEntryType.String);
 			return ReadString();
+		}
+
+		private void ReadAndCheckEntryType(CgtEntryType expectedEntryType) {
+			CgtEntryType entryType = ReadEntryType();
+			if (entryType != expectedEntryType) {
+				throw new FileLoadException(string.Format("{0} entry expected, but {1} entry found", expectedEntryType, entryType));
+			}
 		}
 
 		private CgtEntryType ReadEntryType() {
@@ -141,8 +138,8 @@ namespace bsn.GoldParser.Grammar {
 		}
 
 		private string ReadString() {
-			StringBuilder result = new StringBuilder();
-			char unicodeChar = (char)reader.ReadUInt16();
+			var result = new StringBuilder();
+			var unicodeChar = (char)reader.ReadUInt16();
 			while (unicodeChar != (char)0) {
 				result.Append(unicodeChar);
 				unicodeChar = (char)reader.ReadUInt16();
