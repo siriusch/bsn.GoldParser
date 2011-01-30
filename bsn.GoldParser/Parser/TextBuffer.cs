@@ -89,24 +89,28 @@ namespace bsn.GoldParser.Parser {
 				char current = buffer[bufferOffset++];
 				switch (current) {
 				case '\r':
-					if (previous != '\n') {
-						line++;
-						column = 1;
-					}
+					HandleNewline(current, '\n');
 					break;
 				case '\n':
-					if (previous != '\r') {
-						line++;
-						column = 1;
-					}
+					HandleNewline(current, '\r');
 					break;
 				default:
 					column++;
+					previous = current;
 					break;
 				}
-				previous = current;
 			}
 			return result;
+		}
+
+		private void HandleNewline(char current, char skipChar) {
+			if (previous != skipChar) {
+				line++;
+				column = 1;
+				previous = current;
+			} else {
+				previous = default(char);
+			}
 		}
 
 		public bool TryLookahead(ref int offset, out char ch) {

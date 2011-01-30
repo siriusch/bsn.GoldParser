@@ -103,5 +103,49 @@ namespace bsn.GoldParser.Parser {
 				Expect(!charBuffer.TryLookahead(0, out ch));
 			}
 		}
+
+		[Test]
+		public void MultilineCr() {
+			using (TestStringReader reader = new TestStringReader("1\r\r3")) {
+				TextBuffer charBuffer = new TextBuffer(reader);
+				LineInfo position;
+				charBuffer.Read(reader.Length, out position);
+				Expect(position.Line, EqualTo(1));
+				Expect(charBuffer.Line, EqualTo(3));
+			}
+		}
+
+		[Test]
+		public void MultilineLf() {
+			using (TestStringReader reader = new TestStringReader("1\n\n3")) {
+				TextBuffer charBuffer = new TextBuffer(reader);
+				LineInfo position;
+				charBuffer.Read(reader.Length, out position);
+				Expect(position.Line, EqualTo(1));
+				Expect(charBuffer.Line, EqualTo(3));
+			}
+		}
+
+		[Test]
+		public void MultilineLfCr() {
+			using (TestStringReader reader = new TestStringReader("1\n\r\n\r3")) {
+				TextBuffer charBuffer = new TextBuffer(reader);
+				LineInfo position;
+				charBuffer.Read(reader.Length, out position);
+				Expect(position.Line, EqualTo(1));
+				Expect(charBuffer.Line, EqualTo(3));
+			}
+		}
+
+		[Test]
+		public void MultilineCrLf() {
+			using (TestStringReader reader = new TestStringReader("1\r\n\r\n3")) {
+				TextBuffer charBuffer = new TextBuffer(reader);
+				LineInfo position;
+				charBuffer.Read(reader.Length, out position);
+				Expect(position.Line, EqualTo(1));
+				Expect(charBuffer.Line, EqualTo(3));
+			}
+		}
 	}
 }
