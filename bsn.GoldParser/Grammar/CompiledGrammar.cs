@@ -35,6 +35,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace bsn.GoldParser.Grammar {
 	/// <summary>
@@ -93,7 +94,7 @@ namespace bsn.GoldParser.Grammar {
 		/// <summary>
 		/// Identifies Gold parser grammar file.
 		/// </summary>
-		public const string FileHeader = "GOLD Parser Tables/v1.0";
+		public static readonly Regex FileHeader = new Regex(@"^GOLD Parser Tables/v(?<version>[1-9][0-9]*(\.[0-9]+)?)$", RegexOptions.Singleline|RegexOptions.CultureInvariant|RegexOptions.ExplicitCapture);
 
 		public static bool CanContinueParsing(ParseMessage message) {
 			switch (message) {
@@ -139,8 +140,9 @@ namespace bsn.GoldParser.Grammar {
 			CgtReader reader = new CgtReader(input);
 			CgtWriter writer = new CgtWriter(output);
 			string header = reader.ReadHeaderString();
-			if (FileHeader != header) {
-				throw new FileLoadException("The File Header is invalid");
+			Match headerMatch = FileHeader.Match(header);
+			if (headerMatch.Groups["version"].Value != "1.0") {
+				throw new FileLoadException("The File Header is invalid or of an unsupported version for packing, only uncompressed V1.0 Compiled Grammar Files are supported");
 			}
 			writer.WriteHeaderString(header);
 			while (reader.HasMoreData()) {
@@ -228,6 +230,7 @@ namespace bsn.GoldParser.Grammar {
 		}
 
 		private readonly object sync = new object();
+		private CgtVersion fileVersion;
 		private string about; // Grammar description
 		private string author; // Author of the grammar
 		private ICollection<DfaState> blockCommentStates;
@@ -636,8 +639,20 @@ namespace bsn.GoldParser.Grammar {
 		/// Loads grammar from the binary reader.
 		/// </summary>
 		private void Load(LoadContext context) {
-			if (FileHeader != context.ReadHeaderString()) {
-				throw new FileLoadException("The File Header is invalid");
+			string headerString = context.ReadHeaderString();
+			Match headerMatch = FileHeader.Match(headerString);
+			if (!headerMatch.Success) {
+				throw new FileLoadException("The File Header is invalid or unsupported: "+headerString);
+			}
+			switch (headerMatch.Groups["version"].Value) {
+			case "1.0":
+				fileVersion = CgtVersion.V1_0;
+				break;
+			case "4.2":
+				fileVersion = CgtVersion.V4_2;
+				break;
+			default:
+				throw new FileLoadException(string.Format("The file format version {0} is not unsupported", headerMatch.Groups["version"].Value));
 			}
 			while (context.HasMoreData()) {
 				CgtRecordType recordType = context.ReadNextRecord();
@@ -658,7 +673,11 @@ namespace bsn.GoldParser.Grammar {
 					ReadCharsets(context);
 					break;
 				case CgtRecordType.PackedCharsets:
-					ReadPackedCharsets(context);
+					if (fileVersion == CgtVersion.V1_0) {
+						ReadPackedCharsets(context);
+					} else {
+						ReadRangeCharsets(context);
+					}
 					break;
 				case CgtRecordType.Rules:
 					ReadRules(context);
@@ -677,6 +696,24 @@ namespace bsn.GoldParser.Grammar {
 			startSymbol = symbolTable[context.StartSymbolIndex];
 			lalrInitialState = lalrStateTable[context.LrInitialState];
 			blockCommentStates = GetDfaStatesOfSymbols(symbol => (symbol.Kind == SymbolKind.CommentStart) || (symbol.Kind == SymbolKind.CommentEnd));
+		}
+
+		/// <summary>
+		/// Read char set information.
+		/// </summary>
+		/// <param name="context"></param>
+		private void ReadRangeCharsets(LoadContext context) {
+			int index = context.ReadIntegerEntry();
+			int rangeCount = context.ReadIntegerEntry();
+			string ranges = context.ReadStringEntry();
+			Debug.Assert((ranges.Length % 2) == 0);
+			StringBuilder result = new StringBuilder();
+			for (int i = 0; i < ranges.Length; i+=2) {
+				for (char c = ranges[i]; c <= ranges[i+1]; c++) {
+					result.Append(c);
+				}
+			}
+			charSetTable[index] = new DfaCharset(this, index, result.ToString());
 		}
 
 		/// <summary>

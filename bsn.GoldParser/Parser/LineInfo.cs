@@ -36,7 +36,7 @@ namespace bsn.GoldParser.Parser {
 	/// </summary>
 	public struct LineInfo: IEquatable<LineInfo>, IComparable<LineInfo> {
 		private readonly int column;
-		private readonly int index;
+		private readonly long index;
 		private readonly int line;
 
 		/// <summary>
@@ -45,7 +45,7 @@ namespace bsn.GoldParser.Parser {
 		/// <param name="index">The character index.</param>
 		/// <param name="line">The line.</param>
 		/// <param name="column">The column.</param>
-		public LineInfo(int index, int line, int column) {
+		public LineInfo(long index, int line, int column) {
 			this.line = line;
 			this.index = index;
 			this.column = column;
@@ -65,7 +65,7 @@ namespace bsn.GoldParser.Parser {
 		/// Gets the character index.
 		/// </summary>
 		/// <value>The character index.</value>
-		public int Index {
+		public long Index {
 			get {
 				return index;
 			}
@@ -93,7 +93,7 @@ namespace bsn.GoldParser.Parser {
 
 		public override int GetHashCode() {
 			unchecked {
-				return (line*397)^(column*31)^index;
+				return (line*397)^(column*31)^index.GetHashCode();
 			}
 		}
 
@@ -102,7 +102,7 @@ namespace bsn.GoldParser.Parser {
 		}
 
 		public int CompareTo(LineInfo other) {
-			return index-other.index;
+			return Math.Sign(index-other.index);
 		}
 
 		public bool Equals(LineInfo other) {

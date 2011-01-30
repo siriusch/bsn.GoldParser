@@ -28,8 +28,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // 
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 
 using bsn.GoldParser.Grammar;
@@ -42,11 +40,14 @@ namespace bsn.GoldParser.Parser {
 	/// A pull-model is used for the tokenizer.
 	/// </remarks>
 	public abstract class Tokenizer<T>: ITokenizer<T> where T: class, IToken {
-		private readonly CharBuffer buffer; // Buffer to keep current characters.
+		private enum ParseMode {
+			SingleSymbol,
+			MergeLexicalErrors,
+			BlockComment
+		}
+
+		private readonly TextBuffer buffer; // Buffer to keep current characters.
 		private readonly CompiledGrammar grammar;
-		private int lineBreakPosition;
-		private int lineNumber;
-		private int linePosition;
 		private bool mergeLexicalErrors;
 
 		/// <summary>
@@ -62,36 +63,33 @@ namespace bsn.GoldParser.Parser {
 			if (grammar == null) {
 				throw new ArgumentNullException("grammar");
 			}
-			buffer = new CharBuffer(textReader);
-			linePosition = 1;
-			lineNumber = 1;
+			buffer = new TextBuffer(textReader);
 		}
 
 		/// <summary>
 		/// Gets the index of the input.
 		/// </summary>
 		/// <value>The index of the input.</value>
-		public int InputIndex {
+		public long InputIndex {
 			get {
 				return buffer.Position;
 			}
 		}
 
 		/// <summary>
+		/// Gets current char position in the current source line. It is 1-based.
+		/// </summary>
+		public int LineColumn {
+			get {
+				return buffer.Column;
+			}
+		}
+		/// <summary>
 		/// Gets current line number. It is 1-based.
 		/// </summary>
 		public int LineNumber {
 			get {
-				return lineNumber;
-			}
-		}
-
-		/// <summary>
-		/// Gets current char position in the current source line. It is 1-based.
-		/// </summary>
-		public int LinePosition {
-			get {
-				return linePosition;
+				return buffer.Line;
 			}
 		}
 
@@ -119,111 +117,69 @@ namespace bsn.GoldParser.Parser {
 
 		protected abstract T CreateToken(Symbol tokenSymbol, LineInfo tokenPosition, string text);
 
-		private ParseMessage NextToken(out T token, bool blockComment, bool createToken) {
-			using (CharBuffer.Mark mark = buffer.CreateMark()) {
-				using (CharBuffer.Mark acceptMark = buffer.CreateMark()) {
-					ParseMessage result;
-					LineInfo tokenPosition = new LineInfo(InputIndex, lineNumber, linePosition);
-					List<int> lineBreakPositions = null;
-					Symbol tokenSymbol = null;
-					DfaState state = grammar.DfaInitialState;
-					char ch;
-					while (buffer.TryReadChar(out ch)) {
-						if (ch == '\n') {
-							if (lineBreakPositions == null) {
-								lineBreakPositions = new List<int>(10);
-							}
-							lineBreakPositions.Add(buffer.Position);
-						}
-						state = state.GetTransition(ch);
-						// This block-if statement checks whether an edge was found from the current state.
-						// If so, the state and current position advance. Otherwise it is time to exit the main loop
-						// and report the token found (if there was it fact one). If the LastAcceptState is -1,
-						// then we never found a match and the Error Token is created. Otherwise, a new token
-						// is created using the Symbol in the Accept State and all the characters that
-						// comprise it.
-						if (state == null) {
-							// end has been reached
-							if (tokenSymbol == null) {
-								//Tokenizer cannot recognize symbol
-								buffer.MoveToMark(mark);
-								buffer.TryReadChar(out ch);
-								acceptMark.MoveToReadPosition();
-								if (MergeLexicalErrors && createToken && (!blockComment)) {
-									UpdateLineInfo(lineBreakPositions);
-									while (NextToken(out token, false, false) == ParseMessage.LexicalError) {
-										acceptMark.MoveToReadPosition();
-									}
-									buffer.MoveToMark(acceptMark);
-								}
-								tokenSymbol = grammar.ErrorSymbol;
-							} else {
-								buffer.StepBack(1);
-							}
-							break;
-						}
-						if (blockComment && (!grammar.BlockCommentStates.Contains(state))) {
-							state = grammar.DfaInitialState;
-						} else {
-							// This code checks whether the target state accepts a token. If so, it sets the
-							// appropiate variables so when the algorithm in done, it can return the proper
-							// token and number of characters.
-							if (state.AcceptSymbol != null) {
-								acceptMark.MoveToReadPosition();
-								tokenSymbol = state.AcceptSymbol;
-							}
-						}
-					}
+		private ParseMessage NextSymbol(ParseMode mode, out Symbol tokenSymbol, ref int length) {
+			DfaState state = grammar.DfaInitialState;
+			char ch;
+			tokenSymbol = null;
+			int offset = length;
+			while (buffer.TryLookahead(ref offset, out ch)) {
+				state = state.GetTransition(ch);
+				// This block-if statement checks whether an edge was found from the current state.
+				// If so, the state and current position advance. Otherwise it is time to exit the main loop
+				// and report the token found (if there was it fact one). If the LastAcceptState is -1,
+				// then we never found a match and the Error Token is created. Otherwise, a new token
+				// is created using the Symbol in the Accept State and all the characters that
+				// comprise it.
+				if (state == null) {
+					// end has been reached
 					if (tokenSymbol == null) {
-						tokenSymbol = (acceptMark.Distance == 0) ? grammar.EndSymbol : grammar.ErrorSymbol;
-					}
-					switch (tokenSymbol.Kind) {
-					case SymbolKind.CommentLine:
-						UpdateLineInfo(lineBreakPositions);
-						while (buffer.TryReadChar(out ch) && (ch != '\r') && (ch != '\n')) {}
-						if ((ch == '\r') || (ch == '\n')) {
-							buffer.StepBack(1);
-						}
-						result = ParseMessage.CommentLineRead;
-						break;
-					case SymbolKind.CommentStart:
-						result = ParseMessage.None;
-						UpdateLineInfo(lineBreakPositions);
-						do {
-							NextToken(out token, true, true);
-							switch (token.Symbol.Kind) {
-							case SymbolKind.End:
-								result = ParseMessage.CommentError;
-								break;
-							case SymbolKind.CommentEnd:
-								result = ParseMessage.CommentBlockRead;
-								break;
+						//Tokenizer cannot recognize symbol
+						length = offset;
+						if (mode == ParseMode.MergeLexicalErrors) {
+							while (NextSymbol(ParseMode.SingleSymbol, out tokenSymbol, ref offset) == ParseMessage.LexicalError) {
+								length = offset;
 							}
-						} while (result == ParseMessage.None);
-						break;
-					case SymbolKind.Error:
-						result = ParseMessage.LexicalError;
-						break;
-					default:
-						buffer.MoveToMark(acceptMark);
-						UpdateLineInfo(lineBreakPositions);
-						result = ParseMessage.TokenRead;
-						break;
+						}
+						tokenSymbol = grammar.ErrorSymbol;
 					}
-					token = (createToken) ? CreateToken(tokenSymbol, tokenPosition, mark.Text) : null;
-					return result;
+					break;
+				}
+				if ((mode == ParseMode.BlockComment) && (!grammar.BlockCommentStates.Contains(state))) {
+					state = grammar.DfaInitialState;
+				} else {
+					// This code checks whether the target state accepts a token. If so, it sets the
+					// appropiate variables so when the algorithm in done, it can return the proper
+					// token and number of characters.
+					if (state.AcceptSymbol != null) {
+						tokenSymbol = state.AcceptSymbol;
+						length = offset;
+					}
 				}
 			}
-		}
-
-		private void UpdateLineInfo(IList<int> lineBreakPositions) {
-			if (lineBreakPositions != null) {
-				Debug.Assert(lineBreakPositions.Count > 0);
-				lineNumber += lineBreakPositions.Count;
-				lineBreakPosition = lineBreakPositions[lineBreakPositions.Count-1];
-				lineBreakPositions.Clear();
+			if (tokenSymbol == null) {
+				tokenSymbol = (offset == length) ? grammar.EndSymbol : grammar.ErrorSymbol;
 			}
-			linePosition = (buffer.Position-lineBreakPosition)+1;
+			switch (tokenSymbol.Kind) {
+			case SymbolKind.CommentLine:
+				while (buffer.TryLookahead(length, out ch) && (ch != '\r') && (ch != '\n')) {
+					length++;
+				}
+				return ParseMessage.CommentLineRead;
+			case SymbolKind.CommentStart:
+				for (;;) {
+					Symbol blockTokenSymbol;
+					NextSymbol(ParseMode.BlockComment, out blockTokenSymbol, ref length);
+					switch (blockTokenSymbol.Kind) {
+					case SymbolKind.End:
+						return ParseMessage.CommentError;
+					case SymbolKind.CommentEnd:
+						return ParseMessage.CommentBlockRead;
+					}
+				}
+			case SymbolKind.Error:
+				return ParseMessage.LexicalError;
+			}
+			return ParseMessage.TokenRead;
 		}
 
 		/// <summary>
@@ -241,7 +197,13 @@ namespace bsn.GoldParser.Parser {
 		/// </summary>
 		/// <returns>Token symbol which was read.</returns>
 		public virtual ParseMessage NextToken(out T token) {
-			return NextToken(out token, false, true);
+			Symbol tokenSymbol;
+			int offset = 0;
+			ParseMessage result = NextSymbol(MergeLexicalErrors ? ParseMode.MergeLexicalErrors : ParseMode.SingleSymbol, out tokenSymbol, ref offset);
+			LineInfo position;
+			string text = buffer.Read(offset, out position);
+			token = CreateToken(tokenSymbol, position, text);
+			return result;
 		}
 	}
 

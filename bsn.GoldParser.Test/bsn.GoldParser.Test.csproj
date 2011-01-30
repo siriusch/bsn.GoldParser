@@ -53,7 +53,9 @@
   <ItemGroup>
     <Compile Include="Grammar\CompiledGrammarTest.cs" />
     <Compile Include="Grammar\SymbolSetTest.cs" />
-    <Compile Include="Parser\CharBufferTest.cs" />
+    <Compile Include="Parser\TextBufferTest.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Parser\LalrProcessorTest.cs" />
     <Compile Include="Semantic\AssemblyAttributes.cs" />
     <Compile Include="Semantic\RuleAttributeTest.cs" />

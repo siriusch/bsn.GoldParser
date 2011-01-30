@@ -55,7 +55,7 @@ namespace bsn.GoldParser.Sample {
 					Console.WriteLine(string.Format(NumberFormatInfo.InvariantInfo, "Result: {0}", ((Computable)processor.CurrentToken).GetValue()));
 				} else {
 					IToken token = processor.CurrentToken;
-					Console.WriteLine(string.Format("{0} {1}", "^".PadLeft(token.Position.Index+1), parseMessage));
+					Console.WriteLine(string.Format("{0} {1}", "^".PadLeft(token.Position.Column), parseMessage));
 				}
 			}
 		}

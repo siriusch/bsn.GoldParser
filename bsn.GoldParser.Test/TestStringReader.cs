@@ -60,5 +60,9 @@ namespace bsn.GoldParser.Parser {
 				return data.Length;
 			}
 		}
+
+		public override string ToString() {
+	 		return data;
+		}	
 	}
 }
