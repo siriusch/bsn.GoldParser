@@ -134,7 +134,7 @@ namespace bsn.GoldParser.Parser {
 					// end has been reached
 					if (tokenSymbol == null) {
 						//Tokenizer cannot recognize symbol
-						length = offset;
+						offset = ++length;
 						if (mode == ParseMode.MergeLexicalErrors) {
 							while (NextSymbol(ParseMode.SingleSymbol, out tokenSymbol, ref offset) == ParseMessage.LexicalError) {
 								length = offset;
@@ -157,7 +157,12 @@ namespace bsn.GoldParser.Parser {
 				}
 			}
 			if (tokenSymbol == null) {
-				tokenSymbol = (offset == length) ? grammar.EndSymbol : grammar.ErrorSymbol;
+				if (offset == length) {
+					tokenSymbol = grammar.EndSymbol;
+				} else {
+					tokenSymbol = grammar.ErrorSymbol;
+					length++;
+				}
 			}
 			switch (tokenSymbol.Kind) {
 			case SymbolKind.CommentLine:

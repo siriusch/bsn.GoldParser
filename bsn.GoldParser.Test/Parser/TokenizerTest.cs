@@ -79,7 +79,7 @@ namespace bsn.GoldParser.Parser {
 
 		[Test]
 		public void CheckUnmergedLexicalError() {
-			using (TestStringReader reader = new TestStringReader("1+xx*200")) {
+			using (TestStringReader reader = new TestStringReader("1+Nx*200")) {
 				Tokenizer tokenizer = new Tokenizer(reader, grammar);
 				Token token;
 				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
@@ -88,8 +88,10 @@ namespace bsn.GoldParser.Parser {
 				Expect(token.Symbol.Kind, EqualTo(SymbolKind.Terminal));
 				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.LexicalError));
 				Expect(token.Symbol.Kind, EqualTo(SymbolKind.Error));
+				Expect(token.Text, EqualTo("N"));
 				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.LexicalError));
 				Expect(token.Symbol.Kind, EqualTo(SymbolKind.Error));
+				Expect(token.Text, EqualTo("x"));
 				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
 				Expect(token.Symbol.Kind, EqualTo(SymbolKind.Terminal));
 				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
@@ -100,8 +102,21 @@ namespace bsn.GoldParser.Parser {
 		}
 
 		[Test]
+		public void CheckLexicalErrorOnEnd() {
+			using (TestStringReader reader = new TestStringReader("'")) {
+				Tokenizer tokenizer = new Tokenizer(reader, grammar);
+				Token token;
+				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.LexicalError));
+				Expect(token.Symbol.Kind, EqualTo(SymbolKind.Error));
+				Expect(token.Text, EqualTo("'"));
+				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
+				Expect(token.Symbol.Kind, EqualTo(SymbolKind.End));
+			}
+		}
+
+		[Test]
 		public void CheckMergedLexicalError() {
-			using (TestStringReader reader = new TestStringReader("1+xx*200")) {
+			using (TestStringReader reader = new TestStringReader("1+Nx*200")) {
 				Tokenizer tokenizer = new Tokenizer(reader, grammar);
 				tokenizer.MergeLexicalErrors = true;
 				Token token;
@@ -111,6 +126,7 @@ namespace bsn.GoldParser.Parser {
 				Expect(token.Symbol.Kind, EqualTo(SymbolKind.Terminal));
 				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.LexicalError));
 				Expect(token.Symbol.Kind, EqualTo(SymbolKind.Error));
+				Expect(token.Text, EqualTo("Nx"));
 				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
 				Expect(token.Symbol.Kind, EqualTo(SymbolKind.Terminal));
 				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
