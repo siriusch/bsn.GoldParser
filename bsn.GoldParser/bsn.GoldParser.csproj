@@ -23,7 +23,7 @@
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
     <StartupObject>
     </StartupObject>
-    <KeyContainerName>SiriusKey</KeyContainerName>
+    <KeyContainerName>bsn</KeyContainerName>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>3.5</OldToolsVersion>
