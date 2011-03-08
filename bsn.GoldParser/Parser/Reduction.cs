@@ -77,6 +77,12 @@ namespace bsn.GoldParser.Parser {
 			}
 		}
 
+		public Rule Rule {
+			get {
+				return rule;
+			}
+		}
+
 		public override string ToString() {
 			StringBuilder sb = new StringBuilder();
 			foreach (Token token in tokens) {
