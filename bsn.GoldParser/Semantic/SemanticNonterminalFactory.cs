@@ -67,7 +67,15 @@ namespace bsn.GoldParser.Semantic {
 			Debug.Assert(rule != null);
 			TOutput result = Create(rule, tokens);
 			Debug.Assert(result != null);
-			result.Initialize(rule.RuleSymbol, (tokens.Count > 0) ? ((IToken)tokens[0]).Position : default(LineInfo));
+			LineInfo position = default(LineInfo);
+			for (int i = 0; i < tokens.Count; i++) {
+				IToken token = tokens[i];
+				if (token.Position.Index > 0) {
+					position = token.Position;
+					break;
+				}
+			}
+			result.Initialize(rule.RuleSymbol, position);
 			return result;
 		}
 
