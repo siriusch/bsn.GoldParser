@@ -27,6 +27,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // 
+
 using System;
 using System.Diagnostics;
 
@@ -43,6 +44,12 @@ namespace bsn.GoldParser.Grammar {
 		}
 
 		public LalrState State {
+			get {
+				return state;
+			}
+		}
+
+		public override object Target {
 			get {
 				return state;
 			}
