@@ -62,6 +62,8 @@
     <Compile Include="Semantic\RuleDeclarationParserTest.cs" />
     <Compile Include="Semantic\SemanticProcessorTest.cs" />
     <Compile Include="Semantic\SemanticTypeActionsTest.cs" />
+    <Compile Include="Semantic\StrictCtorParameterMatching\ParameterMatching.cs" />
+    <Compile Include="Semantic\StrictCtorParameterMatching\MockToken.cs" />
     <Compile Include="Semantic\TerminalAttributeTest.cs" />
     <Compile Include="Semantic\TestAdd.cs" />
     <Compile Include="Semantic\TestConstant.cs" />

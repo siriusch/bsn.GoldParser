@@ -64,8 +64,11 @@ using System.Security.Permissions;
 
 [assembly: AssemblyVersion("1.3.*")]
 [assembly:
-		InternalsVisibleTo(
-				"bsn.GoldParser.Test, PublicKey=0024000004800000940000000602000000240000525341310004000001000100230eb4221fcce3d50a5806f69855416c597d5ddf8284ef7f0d29a72d8f8ca0179da1b61694cdfc22bbdd8af8f505ca3bbf1f9ab92cacf7fc6c45111dcffeef998dfbfb47f8064cd5fe3caf14114a13c5c8acb8a0ae6ea2f79ad673ddd33ec594dec2bdeeb7f562b1576949a41b44cdd4791f06a1fa44d3d2148df163e89498af"
+		InternalsVisibleTo("bsn.GoldParser.Test, PublicKey=00240000048000009400000006020000002400005253413100040000010001002151fe0eba5210"
+            +"3066e01872ed12c1c1a31bd4a1c37a1d5d797ee11b4547c5f865b467504720028a5e1a76fb123b"
+            +"3645903854e6e515ac7ffa23cb4b5d5217952710f3080f902eefba05dfa90766b7b0cb9465b6b7"
+            +"f3976497c553fab4c84a111b51be7a1fc4d9a16be3608b42c44995b1a9e2e2b086aa3876dd41dd"
+            +"4ad8ceeb"
 				)]
 //
 // In order to sign your assembly you must specify a key to use. Refer to the 

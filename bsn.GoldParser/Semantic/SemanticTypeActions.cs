@@ -67,7 +67,8 @@ namespace bsn.GoldParser.Semantic {
 			return bestMatch ?? typeof(T);
 		}
 
-		protected override void InitializeInternal(ICollection<string> errors, bool trace) {
+        protected override void InitializeInternal(ICollection<string> errors, bool trace, bool strongParameterCheck)
+        {
 			foreach (Type type in typeof(T).Assembly.GetTypes()) {
 				if (typeof(T).IsAssignableFrom(type) && type.IsClass && (!type.IsAbstract)) {
 					SemanticTerminalFactory<T> terminalFactory = null;
@@ -132,6 +133,19 @@ namespace bsn.GoldParser.Semantic {
 									} else {
 										parameterMapping = RuleDeclarationParser.BindConstructor(ruleAttribute.ParsedRule, constructor, ruleAttribute.AllowTruncationForConstructor);
 									}
+                                    if(ruleAttribute.StrictlyMatchCtorParameters.HasValue ? ruleAttribute.StrictlyMatchCtorParameters.Value : strongParameterCheck)
+                                    {
+                                        bool failed = false;
+                                        foreach(var i in parameterMapping)
+                                        {
+                                            failed |= i < 0;
+                                        }
+                                        if (failed)
+                                        {
+                                            errors.Add(string.Format("Rule {0} does not map symbols to all the constructor arguments, but strict matching is set.",rule));
+                                        }
+                                    }
+
 									SemanticNonterminalFactory<T> nonterminalFactory = CreateNonterminalFactory(factoryType, factoryConstructor, parameterMapping, rule.SymbolCount);
 									RegisterNonterminalFactory(rule, nonterminalFactory);
 								} catch (TargetInvocationException ex) {
