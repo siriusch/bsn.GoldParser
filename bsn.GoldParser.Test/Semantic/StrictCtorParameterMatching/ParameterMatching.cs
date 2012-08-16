@@ -10,21 +10,47 @@ namespace bsn.GoldParser.Semantic.StrictCtorParameterMatching
     [TestFixture]
     class ParameterMatching
     {
-        [Test]
-        public void UnmatchedParametersPass()
+        private CompiledGrammar _grammar;
+
+        [TestFixtureSetUp]
+        protected void SetUp()
         {
-            var grammar = CompiledGrammarTest.LoadTestGrammar();
-            var actions = new SemanticTypeActions<MockToken>(grammar);
-            actions.Initialize(true);
+            _grammar = CompiledGrammarTest.LoadTestGrammar();
+        }       
+
+        [Test]
+        public void BaseTest()
+        {
+            var actionsA = new SemanticTypeActions<MockTokenBase>(_grammar);
+            Assert.Throws<InvalidOperationException>(() => actionsA.Initialize(true, true));
+            
+            var actionsB = new SemanticTypeActions<MockTokenBase>(_grammar);
+            Assert.DoesNotThrow(() => actionsB.Initialize(true,false));
+
+            //default should be false
+            var actionsC = new SemanticTypeActions<MockTokenBase>(_grammar);
+            Assert.DoesNotThrow(() => actionsC.Initialize(true));
         }
 
         [Test]
-        [ExpectedException(typeof(InvalidOperationException))]
-        public void UnmatchedParametersFail()
+        public void ExplicitCheckTest()
         {
-            var grammar = CompiledGrammarTest.LoadTestGrammar();
-            var actions = new SemanticTypeActions<MockToken>(grammar);
-            actions.Initialize(true, true);
+            var actionsA = new SemanticTypeActions<MockTokenBaseExplicitChecks>(_grammar);
+            Assert.Throws<InvalidOperationException>(() => actionsA.Initialize(true, true));
+
+            var actionsB = new SemanticTypeActions<MockTokenBaseExplicitChecks>(_grammar);
+            Assert.Throws<InvalidOperationException>(() => actionsB.Initialize(true, false));            
         }
+
+        [Test]
+        public void ExplicitNoCheckTest()
+        {
+            var actionsA = new SemanticTypeActions<MockTokenBaseExplicitNoChecks>(_grammar);
+            Assert.DoesNotThrow(() => actionsA.Initialize(true, true));
+
+            var actionsB = new SemanticTypeActions<MockTokenBaseExplicitNoChecks>(_grammar);
+            Assert.DoesNotThrow(() => actionsB.Initialize(true, false));
+        }
+
     }
 }

@@ -93,13 +93,13 @@ namespace bsn.GoldParser.Semantic {
 			return false;
 		}
 
-		internal static int[] BindConstructor(Reduction ruleDeclaration, ConstructorInfo constructor, bool allowTruncation) {
-			ParameterInfo[] parameters = constructor.GetParameters();
+		internal static int[] BindMethodBase(Reduction ruleDeclaration, MethodBase methodBase, bool allowTruncation, bool bijectiveMapping) {
+			ParameterInfo[] parameters = methodBase.GetParameters();
 			int[] mapping = new int[parameters.Length];
 			for (int i = 0; i < mapping.Length; i++) {
 				mapping[i] = -1;
 				if (parameters[i].ParameterType.IsValueType) {
-					throw new InvalidOperationException("Only reference types are allowed as constructor parameters when binding to rules");
+					throw new InvalidOperationException("Only reference types are allowed as methodBase parameters when binding to rules");
 				}
 			}
 			int index = 0;
@@ -107,17 +107,29 @@ namespace bsn.GoldParser.Semantic {
 				if (ruleHandleIndex >= 0) {
 					if (ruleHandleIndex >= mapping.Length) {
 						if (!allowTruncation) {
-							throw new InvalidOperationException("The constructor parameter mapping is not allowed to be truncated");
+							throw new InvalidOperationException("The methodBase parameter mapping is not allowed to be truncated");
 						}
 					} else {
 						if (mapping[ruleHandleIndex] >= 0) {
-							throw new InvalidOperationException("Only one handle can be assigned per constructor parameter");
+							throw new InvalidOperationException("Only one handle can be assigned per methodBase parameter");
 						}
 						mapping[ruleHandleIndex] = index;
 					}
 				}
 				index++;
 			}
+            if (bijectiveMapping)
+            {
+                bool failed = false;
+                foreach (var i in mapping)
+                {
+                    failed |= i < 0;
+                }
+                if (failed)
+                {
+                    throw new InvalidOperationException("Strict parameter matching is set - each parameter must be matched to a symbol.");
+                }
+            }
 			return mapping;
 		}
 

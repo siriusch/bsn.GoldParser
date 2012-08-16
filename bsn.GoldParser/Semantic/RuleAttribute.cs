@@ -48,7 +48,7 @@ namespace bsn.GoldParser.Semantic {
 	/// </remarks>
 	/// <seealso cref="TerminalAttribute"/>
 	/// <seealso cref="RuleTrimAttribute"/>
-	[AttributeUsage(AttributeTargets.Constructor, AllowMultiple=true, Inherited=false)]
+	[AttributeUsage(AttributeTargets.Constructor | AttributeTargets.Method, AllowMultiple=true, Inherited=false)]
 	public sealed class RuleAttribute: RuleAttributeBase, IEquatable<RuleAttribute> {
 		private readonly Type[] genericTypeParameters;
 		private bool allowTruncationForConstructor;
@@ -78,6 +78,36 @@ namespace bsn.GoldParser.Semantic {
             this.genericTypeParameters = genericTypeParameters;
         }
 
+        /// <summary>
+        /// Define that the constructor where the attribute is applied shall be invoked on the closed generic type for the given reduction rule.
+        /// </summary>
+        /// <param name="rule">The rule (in the same form as in the grammar file, such as <c>&lt;List&gt; ::= Item ',' &lt;List&gt;</c>).</param>
+        /// <param name="genericTypeParameters">The type parameters to use for closing the generic type.</param>
+        public RuleAttribute(string rule, Type genericTypeParam1)
+            : this(rule, new[]{genericTypeParam1})
+        {
+        }
+
+        /// <summary>
+        /// Define that the constructor where the attribute is applied shall be invoked on the closed generic type for the given reduction rule.
+        /// </summary>
+        /// <param name="rule">The rule (in the same form as in the grammar file, such as <c>&lt;List&gt; ::= Item ',' &lt;List&gt;</c>).</param>
+        /// <param name="genericTypeParameters">The type parameters to use for closing the generic type.</param>
+        public RuleAttribute(string rule, Type genericTypeParam1, Type genericTypeParam2)
+            : this(rule, new[] { genericTypeParam1, genericTypeParam2 })
+        {
+        }
+
+        /// <summary>
+        /// Define that the constructor where the attribute is applied shall be invoked on the closed generic type for the given reduction rule.
+        /// </summary>
+        /// <param name="rule">The rule (in the same form as in the grammar file, such as <c>&lt;List&gt; ::= Item ',' &lt;List&gt;</c>).</param>
+        /// <param name="genericTypeParameters">The type parameters to use for closing the generic type.</param>
+        public RuleAttribute(string rule, Type genericTypeParam1, Type genericTypeParam2, Type genericTypeParam3)
+            : this(rule, new[] { genericTypeParam1, genericTypeParam2, genericTypeParam3 })
+        {
+        }
+
 		/// <summary>
 		/// Gets or sets a value indicating whether the list of symbols may be truncated when invoking the constructor.
 		/// </summary>
@@ -104,8 +134,6 @@ namespace bsn.GoldParser.Semantic {
 				allowTruncationForConstructor = value;
 			}
 		}
-
-	    private bool _strictlyMatchCtorParameters;
 
 	    /// <summary>
 	    /// Gets or sets a value indicating whether constructor parameters will be strictly matched.

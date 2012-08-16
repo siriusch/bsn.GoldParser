@@ -21,17 +21,17 @@ namespace bsn.GoldParser.Semantic.StrictCtorParameterMatching
     [Terminal("Integer")]
     [Terminal("NULL")]
     [Terminal("String")]
-    class MockToken : SemanticToken
+    class MockTokenBaseExplicitChecks : SemanticToken
     {
-        public MockToken(string text){}
+        public MockTokenBaseExplicitChecks(string text){}
 
-        [Rule(@"<Empty> ::= ")]
+        [Rule(@"<Empty> ::= ",true)]
         [Rule(@"<Expression> ::= <Expression> '+' <Mult Exp>")]
         [Rule(@"<Expression> ::= <Expression> '-' <Mult Exp>")]
         [Rule(@"<Mult Exp> ::= <Mult Exp> '*' <Negate Exp>")]
         [Rule(@"<Mult Exp> ::= <Mult Exp> '/' <Negate Exp>")]
-        [Rule(@"<Negate Exp> ::= '-' <Value>")]
+        [Rule(@"<Negate Exp> ::= '-' <Value>", true)]
         [Rule(@"<Value> ::= '(' <Expression> ')'")]
-        public MockToken(MockToken a, MockToken b, MockToken c){ }
+        public MockTokenBaseExplicitChecks(MockTokenBase a, MockTokenBase b, MockTokenBase c){ }
     }
 }
