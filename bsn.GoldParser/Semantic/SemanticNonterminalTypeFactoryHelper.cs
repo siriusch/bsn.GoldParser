@@ -27,6 +27,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // 
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -37,29 +38,50 @@ namespace bsn.GoldParser.Semantic {
 	internal static class SemanticNonterminalTypeFactoryHelper<TBase> where TBase: SemanticToken {
 		public delegate T Activator<T>(IList<TBase> tokens);
 
-		private static readonly Dictionary<ConstructorInfo, DynamicMethod> dynamicMethods = new Dictionary<ConstructorInfo, DynamicMethod>();
+		private static readonly Dictionary<MethodBase, DynamicMethod> dynamicMethods = new Dictionary<MethodBase, DynamicMethod>();
 		private static readonly MethodInfo iListGetItem = GetIListGetItemMethod();
 
-		private static MethodInfo GetIListGetItemMethod() {
-			MethodInfo result = typeof(IList<TBase>).GetProperty("Item").GetGetMethod();
-			Debug.Assert(result != null);
-			return result;
+		public static Activator<T> CreateActivator<T>(SemanticNonterminalTypeFactory<TBase, T> target, MethodBase methodBase, int[] parameterMapping) where T: TBase {
+			if (target == null) {
+				throw new ArgumentNullException("target");
+			}
+			if (methodBase == null) {
+				throw new ArgumentNullException("methodBase");
+			}
+			return (Activator<T>)GetDynamicMethod(methodBase).CreateDelegate(typeof(Activator<T>), parameterMapping);
 		}
 
-		private static DynamicMethod GetDynamicMethod(ConstructorInfo constructor) {
-			Debug.Assert(constructor != null);
+		private static DynamicMethod GetDynamicMethod(MethodBase methodBase) {
+			Debug.Assert(methodBase != null);
 			lock (dynamicMethods) {
 				DynamicMethod result;
-				if (!dynamicMethods.TryGetValue(constructor, out result)) {
-					result = new DynamicMethod(string.Format("SemanticNonterminalTypeFactory<{0}>.Activator", constructor.DeclaringType.FullName), constructor.DeclaringType, new[] {typeof(int[]), typeof(IList<TBase>)}, true);
+				if (!dynamicMethods.TryGetValue(methodBase, out result)) {
+					ConstructorInfo constructor = methodBase as ConstructorInfo;
+					MethodInfo method = methodBase as MethodInfo;
+					Type returnType;
+					if (constructor != null) {
+						returnType = constructor.DeclaringType;
+						Debug.Assert(returnType != null);
+					} else if (method != null) {
+						if (!method.IsStatic) {
+							throw new InvalidOperationException("Factories can only be created for static methods");
+						}
+						returnType = method.ReturnType;
+						if (!typeof(TBase).IsAssignableFrom(returnType)) {
+							throw new InvalidOperationException("The static method doesn't return the required type");
+						}
+					} else {
+						throw new ArgumentException("Expected methodBase to be one of: ConstructorInfo, MethodInfo, instead is: "+methodBase.GetType());
+					}
+					result = new DynamicMethod(string.Format("SemanticNonterminalTypeFactory<{0}>.Activator", returnType.FullName), returnType, new[] {typeof(int[]), typeof(IList<TBase>)}, true);
 					ILGenerator il = result.GetILGenerator();
 					Dictionary<int, ParameterInfo> parameters = new Dictionary<int, ParameterInfo>();
-					foreach (ParameterInfo parameter in constructor.GetParameters()) {
+					foreach (ParameterInfo parameter in methodBase.GetParameters()) {
 						parameters.Add(parameter.Position, parameter);
 					}
 					for (int i = 0; i < parameters.Count; i++) {
 						if (parameters[i].ParameterType.IsValueType) {
-							throw new InvalidOperationException("Constructor arguments cannot be value types");
+							throw new InvalidOperationException(methodBase.MemberType+" arguments cannot be value types");
 						}
 						Label loadNull = il.DefineLabel();
 						Label end = il.DefineLabel();
@@ -79,43 +101,22 @@ namespace bsn.GoldParser.Semantic {
 						il.Emit(OpCodes.Ldnull); // load a null reference instead
 						il.MarkLabel(end);
 					}
-					il.Emit(OpCodes.Newobj, constructor); // invoke methodBase
+					if (constructor != null) {
+						il.Emit(OpCodes.Newobj, constructor); // invoke constructor
+					} else {
+						il.Emit(OpCodes.Call, method); // invoke static method
+					}
 					il.Emit(OpCodes.Ret);
-					dynamicMethods.Add(constructor, result);
+					dynamicMethods.Add(methodBase, result);
 				}
 				return result;
 			}
 		}
 
-		public static Activator<T> CreateActivator<T>(SemanticNonterminalTypeFactory<TBase, T> target, MethodBase methodBase, int[] parameterMapping) where T: TBase {
-			if (target == null) {
-				throw new ArgumentNullException("target");
-			}
-			if (methodBase == null) {
-				throw new ArgumentNullException("methodBase");
-			}
-            if(methodBase is ConstructorInfo)
-            {
-                return (Activator<T>)GetDynamicMethod(methodBase as ConstructorInfo).CreateDelegate(typeof(Activator<T>), parameterMapping);
-            }
-            if (methodBase is MethodInfo)
-            {
-                return (tokens) => (T) methodBase.Invoke(null, Map(tokens, parameterMapping));
-            }
-            throw new ArgumentException("Expected methodBase to be one of: ConstructorInfo, MethodInfo, instead is: " + methodBase.GetType());			
+		private static MethodInfo GetIListGetItemMethod() {
+			MethodInfo result = typeof(IList<TBase>).GetProperty("Item").GetGetMethod();
+			Debug.Assert(result != null);
+			return result;
 		}
-
-	    private static object[] Map(IList<TBase> tokens, int[] parameterMapping)
-	    {
-	        var res = new object[parameterMapping.Length];
-            for (var i = 0; i < res.Length;i++)
-            {
-                if (parameterMapping[i] < 0)
-                    res[i] = null;
-                else
-                    res[i] = tokens[parameterMapping[i]];
-            }
-	        return res;
-	    }
 	}
 }
