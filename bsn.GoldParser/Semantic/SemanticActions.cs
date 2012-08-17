@@ -113,11 +113,17 @@ namespace bsn.GoldParser.Semantic {
 			Initialize(false);
 		}
 
-		public void Initialize(bool trace) {
-			int initializationState = Interlocked.CompareExchange(ref initialized, 1, 0);
-			if (initializationState < 2) {
-				PerformInitialization(initializationState, trace);
-			}
+        /// <summary>
+        /// Initializes these actions.
+        /// </summary>
+        /// <param name="trace"></param>
+        /// <param name="strongParameterMatching">Defines the default strong parameter matching which is assigned to a rule if it doesn't have an explicit one. <c>true</c> requires all the parameters to have a symbol assigned.</param>
+		public void Initialize(bool trace, bool strongParameterMatching = false) {
+            int initializationState = Interlocked.CompareExchange(ref initialized, 1, 0);
+            if (initializationState < 2)
+            {
+                PerformInitialization(initializationState, trace, strongParameterMatching);
+            }
 		}
 
 		public bool TryGetNonterminalFactory(Rule rule, out SemanticNonterminalFactory<T> factory) {
@@ -217,7 +223,7 @@ namespace bsn.GoldParser.Semantic {
 			}
 		}
 
-		protected abstract void InitializeInternal(ICollection<string> errors, bool trace);
+		protected abstract void InitializeInternal(ICollection<string> errors, bool trace, bool strongParameterCheck);
 
 		protected virtual void RegisterNonterminalFactory(Rule rule, SemanticNonterminalFactory<T> factory) {
 			if (rule == null) {
@@ -254,13 +260,13 @@ namespace bsn.GoldParser.Semantic {
 			return terminalFactories[tokenSymbol].CreateAndInitialize(tokenSymbol, tokenPosition, text);
 		}
 
-		private void PerformInitialization(int initializationState, bool trace) {
+		private void PerformInitialization(int initializationState, bool trace, bool strongParameterCheck) {
 			switch (initializationState) {
 			case 0:
 				initializingThread = Thread.CurrentThread.ManagedThreadId;
 				List<string> errors = new List<string>();
 				try {
-					InitializeInternal(errors, trace);
+					InitializeInternal(errors, trace, strongParameterCheck);
 				} finally {
 					Interlocked.Increment(ref initialized);
 					initializingThread = -1;

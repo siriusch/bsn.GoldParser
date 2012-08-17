@@ -79,7 +79,7 @@ namespace bsn.GoldParser.Semantic {
 						il.Emit(OpCodes.Ldnull); // load a null reference instead
 						il.MarkLabel(end);
 					}
-					il.Emit(OpCodes.Newobj, constructor); // invoke constructor
+					il.Emit(OpCodes.Newobj, constructor); // invoke methodBase
 					il.Emit(OpCodes.Ret);
 					dynamicMethods.Add(constructor, result);
 				}
@@ -87,14 +87,35 @@ namespace bsn.GoldParser.Semantic {
 			}
 		}
 
-		public static Activator<T> CreateActivator<T>(SemanticNonterminalTypeFactory<TBase, T> target, ConstructorInfo constructor, int[] parameterMapping) where T: TBase {
+		public static Activator<T> CreateActivator<T>(SemanticNonterminalTypeFactory<TBase, T> target, MethodBase methodBase, int[] parameterMapping) where T: TBase {
 			if (target == null) {
 				throw new ArgumentNullException("target");
 			}
-			if (constructor == null) {
-				throw new ArgumentNullException("constructor");
+			if (methodBase == null) {
+				throw new ArgumentNullException("methodBase");
 			}
-			return (Activator<T>)GetDynamicMethod(constructor).CreateDelegate(typeof(Activator<T>), parameterMapping);
+            if(methodBase is ConstructorInfo)
+            {
+                return (Activator<T>)GetDynamicMethod(methodBase as ConstructorInfo).CreateDelegate(typeof(Activator<T>), parameterMapping);
+            }
+            if (methodBase is MethodInfo)
+            {
+                return (tokens) => (T) methodBase.Invoke(null, Map(tokens, parameterMapping));
+            }
+            throw new ArgumentException("Expected methodBase to be one of: ConstructorInfo, MethodInfo, instead is: " + methodBase.GetType());			
 		}
+
+	    private static object[] Map(IList<TBase> tokens, int[] parameterMapping)
+	    {
+	        var res = new object[parameterMapping.Length];
+            for (var i = 0; i < res.Length;i++)
+            {
+                if (parameterMapping[i] < 0)
+                    res[i] = null;
+                else
+                    res[i] = tokens[parameterMapping[i]];
+            }
+	        return res;
+	    }
 	}
 }
