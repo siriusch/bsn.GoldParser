@@ -26,7 +26,7 @@
 // 
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-// 
+
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -113,17 +113,24 @@ namespace bsn.GoldParser.Semantic {
 			Initialize(false);
 		}
 
-        /// <summary>
-        /// Initializes these actions.
-        /// </summary>
-        /// <param name="trace"></param>
-        /// <param name="strongParameterMatching">Defines the default strong parameter matching which is assigned to a rule if it doesn't have an explicit one. <c>true</c> requires all the parameters to have a symbol assigned.</param>
-		public void Initialize(bool trace, bool strongParameterMatching = false) {
-            int initializationState = Interlocked.CompareExchange(ref initialized, 1, 0);
-            if (initializationState < 2)
-            {
-                PerformInitialization(initializationState, trace, strongParameterMatching);
-            }
+		/// <summary>
+		/// Initializes these actions.
+		/// </summary>
+		/// <param name="trace"></param>
+		public void Initialize(bool trace) {
+			Initialize(trace, false);
+		}
+
+		/// <summary>
+		/// Initializes these actions.
+		/// </summary>
+		/// <param name="trace"></param>
+		/// <param name="strongParameterMatching">Defines the default strong parameter matching which is assigned to a rule if it doesn't have an explicit one. <c>true</c> requires all the parameters to have a symbol assigned.</param>
+		public void Initialize(bool trace, bool strongParameterMatching) {
+			int initializationState = Interlocked.CompareExchange(ref initialized, 1, 0);
+			if (initializationState < 2) {
+				PerformInitialization(initializationState, trace, strongParameterMatching);
+			}
 		}
 
 		public bool TryGetNonterminalFactory(Rule rule, out SemanticNonterminalFactory<T> factory) {

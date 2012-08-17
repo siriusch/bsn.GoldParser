@@ -26,7 +26,7 @@
 // 
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-// 
+
 using System;
 
 namespace bsn.GoldParser.Semantic {
@@ -48,65 +48,47 @@ namespace bsn.GoldParser.Semantic {
 	/// </remarks>
 	/// <seealso cref="TerminalAttribute"/>
 	/// <seealso cref="RuleTrimAttribute"/>
-	[AttributeUsage(AttributeTargets.Constructor | AttributeTargets.Method, AllowMultiple=true, Inherited=false)]
+	[AttributeUsage(AttributeTargets.Constructor|AttributeTargets.Method, AllowMultiple = true, Inherited = false)]
 	public sealed class RuleAttribute: RuleAttributeBase, IEquatable<RuleAttribute> {
 		private readonly Type[] genericTypeParameters;
 		private bool allowTruncationForConstructor;
 		private int[] constructorParameterMapping;
+		private bool? strictlyMatchParameters;
 
-	    /// <summary>
-	    /// Define that the constructor where the attribute is applied shall be invoked on the closed generic type for the given reduction rule.
-	    /// </summary>
-	    /// <param name="rule">The rule (in the same form as in the grammar file, such as <c>&lt;List&gt; ::= Item ',' &lt;List&gt;</c>).</param>
-	    /// <param name="strictlyMatchCtorParameters">Defines whether each constructor parameter has to be mapped to a symbol.</param>
-	    /// <param name="genericTypeParameters">The type parameters to use for closing the generic type.</param>
-	    [CLSCompliant(false)]
-		public RuleAttribute(string rule, bool strictlyMatchCtorParameters, params Type[] genericTypeParameters): this(rule,genericTypeParameters)
-		{
-		    StrictlyMatchCtorParameters = strictlyMatchCtorParameters;
+		/// <summary>
+		/// Define that the constructor where the attribute is applied shall be invoked on the closed generic type for the given reduction rule.
+		/// </summary>
+		/// <param name="rule">The rule (in the same form as in the grammar file, such as <c>&lt;List&gt; ::= Item ',' &lt;List&gt;</c>).</param>
+		/// <param name="genericTypeParameters">The type parameters to use for closing the generic type.</param>
+		[CLSCompliant(false)]
+		public RuleAttribute(string rule, params Type[] genericTypeParameters)
+				: base(rule) {
+			this.genericTypeParameters = genericTypeParameters;
 		}
 
-        /// <summary>
-        /// Define that the constructor where the attribute is applied shall be invoked on the closed generic type for the given reduction rule.
-        /// </summary>
-        /// <param name="rule">The rule (in the same form as in the grammar file, such as <c>&lt;List&gt; ::= Item ',' &lt;List&gt;</c>).</param>
-        /// <param name="genericTypeParameters">The type parameters to use for closing the generic type.</param>
-        [CLSCompliant(false)]
-        public RuleAttribute(string rule, params Type[] genericTypeParameters)
-            : base(rule)
-        {
-            this.genericTypeParameters = genericTypeParameters;
-        }
+		/// <summary>
+		/// Define that the constructor where the attribute is applied shall be invoked on the closed generic type for the given reduction rule.
+		/// </summary>
+		/// <param name="rule">The rule (in the same form as in the grammar file, such as <c>&lt;List&gt; ::= Item ',' &lt;List&gt;</c>).</param>
+		/// <param name="genericTypeParameters">The type parameters to use for closing the generic type.</param>
+		public RuleAttribute(string rule, Type genericTypeParam1)
+				: this(rule, new[] {genericTypeParam1}) {}
 
-        /// <summary>
-        /// Define that the constructor where the attribute is applied shall be invoked on the closed generic type for the given reduction rule.
-        /// </summary>
-        /// <param name="rule">The rule (in the same form as in the grammar file, such as <c>&lt;List&gt; ::= Item ',' &lt;List&gt;</c>).</param>
-        /// <param name="genericTypeParameters">The type parameters to use for closing the generic type.</param>
-        public RuleAttribute(string rule, Type genericTypeParam1)
-            : this(rule, new[]{genericTypeParam1})
-        {
-        }
+		/// <summary>
+		/// Define that the constructor where the attribute is applied shall be invoked on the closed generic type for the given reduction rule.
+		/// </summary>
+		/// <param name="rule">The rule (in the same form as in the grammar file, such as <c>&lt;List&gt; ::= Item ',' &lt;List&gt;</c>).</param>
+		/// <param name="genericTypeParameters">The type parameters to use for closing the generic type.</param>
+		public RuleAttribute(string rule, Type genericTypeParam1, Type genericTypeParam2)
+				: this(rule, new[] {genericTypeParam1, genericTypeParam2}) {}
 
-        /// <summary>
-        /// Define that the constructor where the attribute is applied shall be invoked on the closed generic type for the given reduction rule.
-        /// </summary>
-        /// <param name="rule">The rule (in the same form as in the grammar file, such as <c>&lt;List&gt; ::= Item ',' &lt;List&gt;</c>).</param>
-        /// <param name="genericTypeParameters">The type parameters to use for closing the generic type.</param>
-        public RuleAttribute(string rule, Type genericTypeParam1, Type genericTypeParam2)
-            : this(rule, new[] { genericTypeParam1, genericTypeParam2 })
-        {
-        }
-
-        /// <summary>
-        /// Define that the constructor where the attribute is applied shall be invoked on the closed generic type for the given reduction rule.
-        /// </summary>
-        /// <param name="rule">The rule (in the same form as in the grammar file, such as <c>&lt;List&gt; ::= Item ',' &lt;List&gt;</c>).</param>
-        /// <param name="genericTypeParameters">The type parameters to use for closing the generic type.</param>
-        public RuleAttribute(string rule, Type genericTypeParam1, Type genericTypeParam2, Type genericTypeParam3)
-            : this(rule, new[] { genericTypeParam1, genericTypeParam2, genericTypeParam3 })
-        {
-        }
+		/// <summary>
+		/// Define that the constructor where the attribute is applied shall be invoked on the closed generic type for the given reduction rule.
+		/// </summary>
+		/// <param name="rule">The rule (in the same form as in the grammar file, such as <c>&lt;List&gt; ::= Item ',' &lt;List&gt;</c>).</param>
+		/// <param name="genericTypeParameters">The type parameters to use for closing the generic type.</param>
+		public RuleAttribute(string rule, Type genericTypeParam1, Type genericTypeParam2, Type genericTypeParam3)
+				: this(rule, new[] {genericTypeParam1, genericTypeParam2, genericTypeParam3}) {}
 
 		/// <summary>
 		/// Gets or sets a value indicating whether the list of symbols may be truncated when invoking the constructor.
@@ -135,15 +117,7 @@ namespace bsn.GoldParser.Semantic {
 			}
 		}
 
-	    /// <summary>
-	    /// Gets or sets a value indicating whether constructor parameters will be strictly matched.
-	    /// </summary>
-	    /// <value>
-	    /// If <c>true</c> then every constructor parameter must be matched to a symbol. Otherwise, constructor parameters that don't have a matching symbol will be null.
-	    /// </value>      
-	    public bool? StrictlyMatchCtorParameters { get; private set; }
-
-	    /// <summary>
+		/// <summary>
 		/// Allows to define an explicit mapping of symbols to constructor parameters. The indices are 0-based.
 		/// </summary>
 		/// <value>An array with exacltly one integer index for each constructor parameter. The index must point to one of the symbols (0-based).</value>
@@ -196,12 +170,32 @@ namespace bsn.GoldParser.Semantic {
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets a value indicating whether constructor parameters will be strictly matched.
+		/// </summary>
+		/// <value>
+		/// If <c>true</c> then every constructor parameter must be matched to a symbol. Otherwise, constructor parameters that don't have a matching symbol will be null.
+		/// </value>
+		/// <remarks>If not set, the setting passed into the <see cref="SemanticActions{T}.Initialize(bool,bool)"/> method will be used.</remarks>
+		public bool StrictlyMatchParameters {
+			get {
+				return strictlyMatchParameters.GetValueOrDefault();
+			}
+			set {
+				strictlyMatchParameters = value;
+			}
+		}
+
 		public override bool Equals(object obj) {
 			return base.Equals(obj as RuleAttribute);
 		}
 
 		public override int GetHashCode() {
 			return ParsedRule.ToString().GetHashCode();
+		}
+
+		internal bool StrictlyMatchParametersOrDefault(bool strongParameterCheck) {
+			return strictlyMatchParameters.GetValueOrDefault(strongParameterCheck);
 		}
 
 		public bool Equals(RuleAttribute other) {

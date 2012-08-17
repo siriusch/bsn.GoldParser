@@ -26,7 +26,7 @@
 // 
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-// 
+
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -52,7 +52,7 @@ namespace bsn.GoldParser.Semantic {
 			}
 			ParameterInfo[] parameters = methodBase.GetParameters();
 			if (parameterMapping.Length != parameters.Length) {
-				throw new ArgumentException("The parameter mapping must have exactly as many items as the methodBase has parameters", "parameterMapping");
+				throw new ArgumentException("The parameter mapping must have exactly as many items as the "+methodBase.MemberType+" has parameters", "parameterMapping");
 			}
 			int requiredHandles = 0;
 			foreach (int i in parameterMapping) {
@@ -74,8 +74,7 @@ namespace bsn.GoldParser.Semantic {
 				}
 			}
 			inputTypes = Array.AsReadOnly(inputTypeBuilder);
-            activator = SemanticNonterminalTypeFactoryHelper<TBase>.CreateActivator(this, methodBase, parameterMapping);
-
+			activator = SemanticNonterminalTypeFactoryHelper<TBase>.CreateActivator(this, methodBase, parameterMapping);
 			Debug.Assert(activator != null);
 		}
 

@@ -38,7 +38,7 @@ namespace bsn.GoldParser.Semantic.StaticMethodAttribute {
 		[Rule(@"<Expression> ::= <Mult Exp>")]
 		[Rule(@"<Value> ::= '(' <Expression> ')'")]
 		[Rule(@"<Empty> ::= ")]
-		[Rule(@"<Negate Exp> ::= '-' <Value>", false)]
+		[Rule(@"<Negate Exp> ::= '-' <Value>", StrictlyMatchParameters = false)]
 		[Rule(@"<Mult Exp> ::= <Mult Exp> '*' <Negate Exp>")]
 		[Rule(@"<Mult Exp> ::= <Mult Exp> '/' <Negate Exp>")]
 		public DynamicMockTokenBase Get(DynamicMockTokenBase a, DynamicMockTokenBase b, DynamicMockTokenBase c) {

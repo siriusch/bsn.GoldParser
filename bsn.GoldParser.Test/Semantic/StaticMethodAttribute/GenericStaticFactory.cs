@@ -34,7 +34,7 @@ using System;
 namespace bsn.GoldParser.Semantic.StaticMethodAttribute {
 	internal class GenericStaticFactory {
 		[Rule(@"<Value> ::= '(' <Expression> ')'")]
-		[Rule(@"<Negate Exp> ::= '-' <Value>", false)]
+		[Rule(@"<Negate Exp> ::= '-' <Value>", StrictlyMatchParameters = false)]
 		[Rule(@"<Mult Exp> ::= <Mult Exp> '*' <Negate Exp>")]
 		[Rule(@"<Mult Exp> ::= <Mult Exp> '/' <Negate Exp>")]
 		public static MockGenericTokenBase Create(MockGenericTokenBase a, MockGenericTokenBase b, MockGenericTokenBase c) {

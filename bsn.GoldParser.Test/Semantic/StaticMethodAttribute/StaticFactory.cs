@@ -33,7 +33,7 @@ using System;
 
 namespace bsn.GoldParser.Semantic.StaticMethodAttribute {
 	internal class StaticFactory {
-		[Rule(@"<Negate Exp> ::= '-' <Value>", false)]
+		[Rule(@"<Negate Exp> ::= '-' <Value>", StrictlyMatchParameters = false)]
 		[Rule(@"<Mult Exp> ::= <Mult Exp> '*' <Negate Exp>")]
 		[Rule(@"<Mult Exp> ::= <Mult Exp> '/' <Negate Exp>")]
 		public static MockTokenBase Basic(MockTokenBase a, MockTokenBase b, MockTokenBase c) {

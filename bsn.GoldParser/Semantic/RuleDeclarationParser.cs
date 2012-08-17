@@ -26,11 +26,10 @@
 // 
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-// 
+
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
@@ -48,21 +47,89 @@ namespace bsn.GoldParser.Semantic {
 			}
 		}
 
-		internal static bool TryParse(string ruleString, out Reduction ruleToken) {
-			using (StringReader reader = new StringReader(ruleString)) {
-				Tokenizer tokenizer = new Tokenizer(reader, ruleGrammar);
-				LalrProcessor processor = new LalrProcessor(tokenizer);
-				ParseMessage message;
-				do {
-					message = processor.Parse();
-					if (message == ParseMessage.Accept) {
-						ruleToken = (Reduction)processor.CurrentToken;
-						return true;
-					}
-				} while (CompiledGrammar.CanContinueParsing(message));
+		internal static int[] BindMethodBase(Reduction ruleDeclaration, MethodBase methodBase, bool allowTruncation, bool bijectiveMapping) {
+			ParameterInfo[] parameters = methodBase.GetParameters();
+			int[] mapping = new int[parameters.Length];
+			for (int i = 0; i < mapping.Length; i++) {
+				mapping[i] = -1;
+				if (parameters[i].ParameterType.IsValueType) {
+					throw new InvalidOperationException("Only reference types are allowed as "+methodBase.MemberType+" parameters when binding to rules");
+				}
 			}
-			ruleToken = null;
-			return false;
+			int index = 0;
+			foreach (int ruleHandleIndex in GetRuleHandleIndexes(ruleDeclaration)) {
+				if (ruleHandleIndex >= 0) {
+					if (ruleHandleIndex >= mapping.Length) {
+						if (!allowTruncation) {
+							throw new InvalidOperationException("The "+methodBase.MemberType+" parameter mapping is not allowed to be truncated");
+						}
+					} else {
+						if (mapping[ruleHandleIndex] >= 0) {
+							throw new InvalidOperationException("Only one handle can be assigned per "+methodBase.MemberType+" parameter");
+						}
+						mapping[ruleHandleIndex] = index;
+					}
+				}
+				index++;
+			}
+			if (bijectiveMapping) {
+				bool failed = false;
+				foreach (int i in mapping) {
+					failed |= i < 0;
+				}
+				if (failed) {
+					throw new InvalidOperationException("Strict parameter matching is set - each parameter must be matched to a symbol.");
+				}
+			}
+			return mapping;
+		}
+
+		internal static IEnumerable<int> GetRuleHandleIndexes(Reduction ruleDeclaration) {
+			if (ruleDeclaration == null) {
+				throw new ArgumentNullException("ruleDeclaration");
+			}
+			Reduction handle = (Reduction)ruleDeclaration.Children[2];
+			int index = 0;
+			List<int> emittedIndexes = new List<int>();
+			while (handle.Children.Count == 2) {
+				Reduction handleSymbol = (Reduction)handle.Children[0];
+				TextToken offset = handleSymbol.Children[0] as TextToken;
+				if (offset != null) {
+					if (offset.Text == "~") {
+						yield return -1;
+					} else {
+						int result = int.Parse(offset.Text.TrimEnd(' ', ':'), NumberFormatInfo.InvariantInfo);
+						emittedIndexes.Add(result);
+						yield return result;
+					}
+				} else {
+					while (emittedIndexes.Contains(index)) {
+						index++;
+					}
+					emittedIndexes.Add(index);
+					yield return index++;
+				}
+				handle = (Reduction)handle.Children[1];
+			}
+		}
+
+		internal static IEnumerable<string> GetRuleHandleNames(Reduction ruleDeclaration) {
+			if (ruleDeclaration == null) {
+				throw new ArgumentNullException("ruleDeclaration");
+			}
+			Reduction handle = (Reduction)ruleDeclaration.Children[2];
+			while (handle.Children.Count == 2) {
+				Reduction handleSymbol = (Reduction)handle.Children[0];
+				yield return handleSymbol.Children[handleSymbol.Children.Count-1].ToString();
+				handle = (Reduction)handle.Children[1];
+			}
+		}
+
+		internal static string GetRuleSymbolName(Reduction ruleDeclaration) {
+			if (ruleDeclaration == null) {
+				throw new ArgumentNullException("ruleDeclaration");
+			}
+			return ruleDeclaration.Children[0].ToString();
 		}
 
 		internal static bool TryBindGrammar(Reduction ruleDeclaration, CompiledGrammar grammar, out Rule rule) {
@@ -93,92 +160,21 @@ namespace bsn.GoldParser.Semantic {
 			return false;
 		}
 
-		internal static int[] BindMethodBase(Reduction ruleDeclaration, MethodBase methodBase, bool allowTruncation, bool bijectiveMapping) {
-			ParameterInfo[] parameters = methodBase.GetParameters();
-			int[] mapping = new int[parameters.Length];
-			for (int i = 0; i < mapping.Length; i++) {
-				mapping[i] = -1;
-				if (parameters[i].ParameterType.IsValueType) {
-					throw new InvalidOperationException("Only reference types are allowed as methodBase parameters when binding to rules");
-				}
-			}
-			int index = 0;
-			foreach (int ruleHandleIndex in GetRuleHandleIndexes(ruleDeclaration)) {
-				if (ruleHandleIndex >= 0) {
-					if (ruleHandleIndex >= mapping.Length) {
-						if (!allowTruncation) {
-							throw new InvalidOperationException("The methodBase parameter mapping is not allowed to be truncated");
-						}
-					} else {
-						if (mapping[ruleHandleIndex] >= 0) {
-							throw new InvalidOperationException("Only one handle can be assigned per methodBase parameter");
-						}
-						mapping[ruleHandleIndex] = index;
+		internal static bool TryParse(string ruleString, out Reduction ruleToken) {
+			using (StringReader reader = new StringReader(ruleString)) {
+				Tokenizer tokenizer = new Tokenizer(reader, ruleGrammar);
+				LalrProcessor processor = new LalrProcessor(tokenizer);
+				ParseMessage message;
+				do {
+					message = processor.Parse();
+					if (message == ParseMessage.Accept) {
+						ruleToken = (Reduction)processor.CurrentToken;
+						return true;
 					}
-				}
-				index++;
+				} while (CompiledGrammar.CanContinueParsing(message));
 			}
-            if (bijectiveMapping)
-            {
-                bool failed = false;
-                foreach (var i in mapping)
-                {
-                    failed |= i < 0;
-                }
-                if (failed)
-                {
-                    throw new InvalidOperationException("Strict parameter matching is set - each parameter must be matched to a symbol.");
-                }
-            }
-			return mapping;
-		}
-
-		internal static string GetRuleSymbolName(Reduction ruleDeclaration) {
-			if (ruleDeclaration == null) {
-				throw new ArgumentNullException("ruleDeclaration");
-			}
-			return ruleDeclaration.Children[0].ToString();
-		}
-
-		internal static IEnumerable<string> GetRuleHandleNames(Reduction ruleDeclaration) {
-			if (ruleDeclaration == null) {
-				throw new ArgumentNullException("ruleDeclaration");
-			}
-			Reduction handle = (Reduction)ruleDeclaration.Children[2];
-			while (handle.Children.Count == 2) {
-				Reduction handleSymbol = (Reduction)handle.Children[0];
-				yield return handleSymbol.Children[handleSymbol.Children.Count-1].ToString();
-				handle = (Reduction)handle.Children[1];
-			}
-		}
-
-		internal static IEnumerable<int> GetRuleHandleIndexes(Reduction ruleDeclaration) {
-			if (ruleDeclaration == null) {
-				throw new ArgumentNullException("ruleDeclaration");
-			}
-			Reduction handle = (Reduction)ruleDeclaration.Children[2];
-			int index = 0;
-			List<int> emittedIndexes = new List<int>();
-			while (handle.Children.Count == 2) {
-				Reduction handleSymbol = (Reduction)handle.Children[0];
-				TextToken offset = handleSymbol.Children[0] as TextToken;
-				if (offset != null) {
-					if (offset.Text == "~") {
-						yield return -1;
-					} else {
-						int result = int.Parse(offset.Text.TrimEnd(' ', ':'), NumberFormatInfo.InvariantInfo);
-						emittedIndexes.Add(result);
-						yield return result;
-					}
-				} else {
-					while (emittedIndexes.Contains(index)) {
-						index++;
-					}
-					emittedIndexes.Add(index);
-					yield return index++;
-				}
-				handle = (Reduction)handle.Children[1];
-			}
+			ruleToken = null;
+			return false;
 		}
 
 		private readonly CompiledGrammar grammar;

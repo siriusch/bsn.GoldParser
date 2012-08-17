@@ -51,12 +51,12 @@ namespace bsn.GoldParser.Semantic.StrictCtorParameterMatching {
 	internal class MockTokenBaseExplicitChecks: SemanticToken {
 		public MockTokenBaseExplicitChecks(string text) {}
 
-		[Rule(@"<Empty> ::= ", true)]
+		[Rule(@"<Empty> ::= ", StrictlyMatchParameters = true)]
 		[Rule(@"<Expression> ::= <Expression> '+' <Mult Exp>")]
 		[Rule(@"<Expression> ::= <Expression> '-' <Mult Exp>")]
 		[Rule(@"<Mult Exp> ::= <Mult Exp> '*' <Negate Exp>")]
 		[Rule(@"<Mult Exp> ::= <Mult Exp> '/' <Negate Exp>")]
-		[Rule(@"<Negate Exp> ::= '-' <Value>", true)]
+		[Rule(@"<Negate Exp> ::= '-' <Value>", StrictlyMatchParameters = true)]
 		[Rule(@"<Value> ::= '(' <Expression> ')'")]
 		public MockTokenBaseExplicitChecks(MockTokenBase a, MockTokenBase b, MockTokenBase c) {}
 	}
