@@ -27,52 +27,54 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // 
+
 using System;
+
+using Xunit;
 
 using bsn.GoldParser.Grammar;
 
-using NUnit.Framework;
-
 namespace bsn.GoldParser.Semantic {
-	[TestFixture]
-	public class TerminalAttributeTest: AssertionHelper {
-		private CompiledGrammar grammar;
+	public class TerminalAttributeTest {
+		private readonly CompiledGrammar grammar;
 
-		[TestFixtureSetUp]
-		public void SetUp() {
+		public TerminalAttributeTest() {
 			grammar = CompiledGrammarTest.LoadTestGrammar();
 		}
 
-		[Test]
+		[Fact]
 		public void BindToGrammar() {
-			Expect(new TerminalAttribute("Integer").Bind(grammar), Not.Null);
+			TerminalAttribute terminalAttribute = new TerminalAttribute("Integer");
+			Assert.NotNull(terminalAttribute.Bind(grammar));
 		}
 
-		[Test]
-		[ExpectedException(typeof(ArgumentNullException))]
+		[Fact]
 		public void ConstructWithEmptyString() {
-			new TerminalAttribute(string.Empty);
+			Assert.Throws<ArgumentNullException>(() => {
+				new TerminalAttribute(string.Empty);
+			});
 		}
 
-		[Test]
+		[Fact]
 		public void ConstructWithGenericArgument() {
 			new TerminalAttribute("Integer", typeof(TestValue));
 		}
 
-		[Test]
+		[Fact]
 		public void ConstructWithGenericArguments() {
 			new TerminalAttribute("Integer", typeof(TestValue), typeof(TestValue));
 		}
 
-		[Test]
+		[Fact]
 		public void ConstructWithString() {
 			new TerminalAttribute("Integer");
 		}
 
-		[Test]
-		[ExpectedException(typeof(ArgumentNullException))]
+		[Fact]
 		public void ConstructWithoutString() {
-			new TerminalAttribute(null);
+			Assert.Throws<ArgumentNullException>(() => {
+				new TerminalAttribute(null);
+			});
 		}
 	}
 }

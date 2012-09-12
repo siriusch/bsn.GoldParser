@@ -3,7 +3,7 @@
 // 
 // Copyright 2009, 2010 by Arsène von Wyss - avw@gmx.ch
 //
-// This file has kinly been contributed by Jan Polasek
+// This file has kindly been contributed by Jan Polášek
 // 
 // Development has been supported by Sirius Technologies AG, Basel
 // 
@@ -31,44 +31,42 @@
 
 using System;
 
-using NUnit.Framework;
+using Xunit;
 
 using bsn.GoldParser.Grammar;
 
 namespace bsn.GoldParser.Semantic.StrictCtorParameterMatching {
-	[TestFixture]
-	internal class ParameterMatching {
-		private CompiledGrammar _grammar;
+	public class ParameterMatching {
+		private readonly CompiledGrammar grammar;
 
-		[TestFixtureSetUp]
-		protected void SetUp() {
-			_grammar = CompiledGrammarTest.LoadTestGrammar();
+		public ParameterMatching() {
+			grammar = CompiledGrammarTest.LoadTestGrammar();
 		}
 
-		[Test]
+		[Fact]
 		public void BaseTest() {
-			SemanticTypeActions<MockTokenBase> actionsA = new SemanticTypeActions<MockTokenBase>(_grammar);
+			SemanticTypeActions<MockTokenBase> actionsA = new SemanticTypeActions<MockTokenBase>(grammar);
 			Assert.Throws<InvalidOperationException>(() => actionsA.Initialize(true, true));
-			SemanticTypeActions<MockTokenBase> actionsB = new SemanticTypeActions<MockTokenBase>(_grammar);
+			SemanticTypeActions<MockTokenBase> actionsB = new SemanticTypeActions<MockTokenBase>(grammar);
 			Assert.DoesNotThrow(() => actionsB.Initialize(true, false));
 			//default should be false
-			SemanticTypeActions<MockTokenBase> actionsC = new SemanticTypeActions<MockTokenBase>(_grammar);
+			SemanticTypeActions<MockTokenBase> actionsC = new SemanticTypeActions<MockTokenBase>(grammar);
 			Assert.DoesNotThrow(() => actionsC.Initialize(true));
 		}
 
-		[Test]
+		[Fact]
 		public void ExplicitCheckTest() {
-			SemanticTypeActions<MockTokenBaseExplicitChecks> actionsA = new SemanticTypeActions<MockTokenBaseExplicitChecks>(_grammar);
+			SemanticTypeActions<MockTokenBaseExplicitChecks> actionsA = new SemanticTypeActions<MockTokenBaseExplicitChecks>(grammar);
 			Assert.Throws<InvalidOperationException>(() => actionsA.Initialize(true, true));
-			SemanticTypeActions<MockTokenBaseExplicitChecks> actionsB = new SemanticTypeActions<MockTokenBaseExplicitChecks>(_grammar);
+			SemanticTypeActions<MockTokenBaseExplicitChecks> actionsB = new SemanticTypeActions<MockTokenBaseExplicitChecks>(grammar);
 			Assert.Throws<InvalidOperationException>(() => actionsB.Initialize(true, false));
 		}
 
-		[Test]
+		[Fact]
 		public void ExplicitNoCheckTest() {
-			SemanticTypeActions<MockTokenBaseExplicitNoChecks> actionsA = new SemanticTypeActions<MockTokenBaseExplicitNoChecks>(_grammar);
+			SemanticTypeActions<MockTokenBaseExplicitNoChecks> actionsA = new SemanticTypeActions<MockTokenBaseExplicitNoChecks>(grammar);
 			Assert.DoesNotThrow(() => actionsA.Initialize(true, true));
-			SemanticTypeActions<MockTokenBaseExplicitNoChecks> actionsB = new SemanticTypeActions<MockTokenBaseExplicitNoChecks>(_grammar);
+			SemanticTypeActions<MockTokenBaseExplicitNoChecks> actionsB = new SemanticTypeActions<MockTokenBaseExplicitNoChecks>(grammar);
 			Assert.DoesNotThrow(() => actionsB.Initialize(true, false));
 		}
 	}

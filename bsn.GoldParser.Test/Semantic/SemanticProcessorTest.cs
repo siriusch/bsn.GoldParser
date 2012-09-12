@@ -27,62 +27,60 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // 
+
 using System;
-using System.Linq;
+
+using Xunit;
 
 using bsn.GoldParser.Grammar;
 using bsn.GoldParser.Parser;
 
-using NUnit.Framework;
-
 namespace bsn.GoldParser.Semantic {
-	[TestFixture]
-	public class SemanticProcessorTest: AssertionHelper {
-		private SemanticTypeActions<TestToken> actions;
+	public class SemanticProcessorTest {
+		private readonly SemanticTypeActions<TestToken> actions;
 
-		[TestFixtureSetUp]
-		public void SetUp() {
+		public SemanticProcessorTest() {
 			actions = new SemanticTypeActions<TestToken>(CompiledGrammarTest.LoadTestGrammar());
-			actions.Initialize();
+			actions.Initialize(false);
 		}
 
-		[Test]
+		[Fact]
 		public void ParseComplexExpression() {
 			using (TestStringReader reader = new TestStringReader("((100+5.0)/\r\n(4.5+.5))-\r\n12345.4e+1")) {
 				SemanticProcessor<TestToken> processor = new SemanticProcessor<TestToken>(reader, actions);
-				Expect(processor.ParseAll(), EqualTo(ParseMessage.Accept));
-				Expect(processor.CurrentToken, InstanceOf<TestValue>());
+				Assert.Equal(ParseMessage.Accept, processor.ParseAll());
+				Assert.IsAssignableFrom<TestValue>(processor.CurrentToken);
 				TestValue value = (TestValue)processor.CurrentToken;
-				Expect(value.Compute(), EqualTo(-123433.0));
+				Assert.Equal(-123433.0, value.Compute());
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void ParseEmpty() {
 			using (TestStringReader reader = new TestStringReader("")) {
 				SemanticProcessor<TestToken> processor = new SemanticProcessor<TestToken>(reader, actions);
-				Expect(processor.ParseAll(), EqualTo(ParseMessage.Accept));
-				Expect(processor.CurrentToken, InstanceOf<TestEmpty>());
+				Assert.Equal(ParseMessage.Accept, processor.ParseAll());
+				Assert.IsType<TestEmpty>(processor.CurrentToken);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void ParseNull() {
 			using (TestStringReader reader = new TestStringReader("NULL")) {
 				SemanticProcessor<TestToken> processor = new SemanticProcessor<TestToken>(reader, actions);
-				Expect(processor.ParseAll(), EqualTo(ParseMessage.Accept));
-				Expect(processor.CurrentToken, InstanceOf<TestEmpty>());
+				Assert.Equal(ParseMessage.Accept, processor.ParseAll());
+				Assert.IsType<TestEmpty>(processor.CurrentToken);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void ParseSimpleExpression() {
 			using (TestStringReader reader = new TestStringReader("100")) {
 				SemanticProcessor<TestToken> processor = new SemanticProcessor<TestToken>(reader, actions);
-				Expect(processor.ParseAll(), EqualTo(ParseMessage.Accept));
-				Expect(processor.CurrentToken, InstanceOf<TestValue>());
+				Assert.Equal(ParseMessage.Accept, processor.ParseAll());
+				Assert.IsAssignableFrom<TestValue>(processor.CurrentToken);
 				TestValue value = (TestValue)processor.CurrentToken;
-				Expect(value.Compute(), EqualTo(100));
+				Assert.Equal(100, value.Compute());
 			}
 		}
 	}

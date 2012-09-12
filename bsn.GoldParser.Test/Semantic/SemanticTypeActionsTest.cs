@@ -27,41 +27,40 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // 
+
 using System;
-using System.Linq;
+
+using Xunit;
 
 using bsn.GoldParser.Grammar;
 
-using NUnit.Framework;
-
 namespace bsn.GoldParser.Semantic {
-	[TestFixture]
-	public class SemanticTypeActionsTest: AssertionHelper {
-		private CompiledGrammar grammar;
+	public class SemanticTypeActionsTest {
+		private readonly CompiledGrammar grammar;
 
-		[TestFixtureSetUp]
-		public void SetUp() {
+		public SemanticTypeActionsTest() {
 			grammar = CompiledGrammarTest.LoadTestGrammar();
 		}
 
-		internal SemanticTypeActions<TestToken> CreateSemanticActions() {
-			return new SemanticTypeActions<TestToken>(grammar);
-		}
-
-		[Test]
-		[ExpectedException(typeof(ArgumentNullException))]
+		[Fact]
 		public void ConstructWithoutGrammar() {
-			new SemanticTypeActions<TestToken>(null);
+			Assert.Throws<ArgumentNullException>(() => {
+				new SemanticTypeActions<TestToken>(null);
+			});
 		}
 
-		[Test]
+		[Fact]
 		public void Create() {
 			CreateSemanticActions();
 		}
 
-		[Test]
+		[Fact]
 		public void Initialize() {
-			CreateSemanticActions().Initialize();
+			CreateSemanticActions().Initialize(true);
+		}
+
+		private SemanticTypeActions<TestToken> CreateSemanticActions() {
+			return new SemanticTypeActions<TestToken>(grammar);
 		}
 	}
 }

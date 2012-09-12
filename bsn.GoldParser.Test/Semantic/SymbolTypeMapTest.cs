@@ -27,149 +27,148 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // 
+
 using System;
 using System.Collections.ObjectModel;
-using System.Linq;
+
+using Xunit;
 
 using bsn.GoldParser.Grammar;
 
-using NUnit.Framework;
-
 namespace bsn.GoldParser.Semantic {
-	[TestFixture]
-	public class SymbolTypeMapTest: AssertionHelper {
-		private CompiledGrammar grammar;
+	public class SymbolTypeMapTest {
+		private readonly CompiledGrammar grammar;
 
-		[TestFixtureSetUp]
-		public void SetUp() {
+		public SymbolTypeMapTest() {
 			grammar = CompiledGrammarTest.LoadTestGrammar();
 		}
 
-		[Test]
+		[Fact]
 		public void CheckParentCommon() {
 			Symbol symbol = grammar.GetSymbolByName(Symbol.FormatTerminalSymbol("-"));
 			SymbolTypeMap<TestToken> parentSymbolTypeMap = new SymbolTypeMap<TestToken>();
 			SymbolTypeMap<TestToken> symbolTypeMap = new SymbolTypeMap<TestToken>(parentSymbolTypeMap);
 			parentSymbolTypeMap.SetTypeForSymbol(symbol, typeof(TestSubtract));
 			symbolTypeMap.SetTypeForSymbol(symbol, typeof(TestAdd));
-			Expect(symbolTypeMap.GetSymbolType(symbol), EqualTo(typeof(TestOperation)));
+			Assert.Equal(typeof(TestOperation), symbolTypeMap.GetSymbolType(symbol));
 		}
 
-		[Test]
+		[Fact]
 		public void CheckParentNone() {
 			Symbol symbol = grammar.GetSymbolByName(Symbol.FormatTerminalSymbol("-"));
 			SymbolTypeMap<TestToken> parentSymbolTypeMap = new SymbolTypeMap<TestToken>();
 			SymbolTypeMap<TestToken> symbolTypeMap = new SymbolTypeMap<TestToken>(parentSymbolTypeMap);
-			Expect(symbolTypeMap.GetSymbolType(symbol), EqualTo(typeof(TestToken)));
+			Assert.Equal(typeof(TestToken), symbolTypeMap.GetSymbolType(symbol));
 		}
 
-		[Test]
+		[Fact]
 		public void CheckParentPassthrough() {
 			Symbol symbol = grammar.GetSymbolByName(Symbol.FormatTerminalSymbol("-"));
 			SymbolTypeMap<TestToken> parentSymbolTypeMap = new SymbolTypeMap<TestToken>();
 			SymbolTypeMap<TestToken> symbolTypeMap = new SymbolTypeMap<TestToken>(parentSymbolTypeMap);
 			parentSymbolTypeMap.SetTypeForSymbol(symbol, typeof(TestAdd));
-			Expect(symbolTypeMap.GetSymbolType(symbol), EqualTo(typeof(TestAdd)));
+			Assert.Equal(typeof(TestAdd), symbolTypeMap.GetSymbolType(symbol));
 		}
 
-		[Test]
+		[Fact]
 		public void CheckParentSkip() {
 			Symbol symbol = grammar.GetSymbolByName(Symbol.FormatTerminalSymbol("-"));
 			SymbolTypeMap<TestToken> parentSymbolTypeMap = new SymbolTypeMap<TestToken>();
 			SymbolTypeMap<TestToken> symbolTypeMap = new SymbolTypeMap<TestToken>(parentSymbolTypeMap);
 			symbolTypeMap.SetTypeForSymbol(symbol, typeof(TestAdd));
-			Expect(symbolTypeMap.GetSymbolType(symbol), EqualTo(typeof(TestAdd)));
+			Assert.Equal(typeof(TestAdd), symbolTypeMap.GetSymbolType(symbol));
 		}
 
-		[Test]
+		[Fact]
 		public void CheckParentVersionIncrementType() {
 			Symbol symbol = grammar.GetSymbolByName(Symbol.FormatTerminalSymbol("-"));
 			SymbolTypeMap<TestToken> parentSymbolTypeMap = new SymbolTypeMap<TestToken>();
 			SymbolTypeMap<TestToken> symbolTypeMap = new SymbolTypeMap<TestToken>(parentSymbolTypeMap);
 			long version = symbolTypeMap.Version;
 			symbolTypeMap.SetTypeForSymbol(symbol, typeof(TestAdd));
-			Expect(symbolTypeMap.Version, GreaterThan(version));
+			Assert.True(version < symbolTypeMap.Version);
 			version = symbolTypeMap.Version;
 			parentSymbolTypeMap.SetTypeForSymbol(symbol, typeof(TestAdd));
-			Expect(symbolTypeMap.Version, GreaterThan(version));
+			Assert.True(version < symbolTypeMap.Version);
 		}
 
-		[Test]
+		[Fact]
 		public void CheckVersionIncrementType() {
 			Symbol symbol = grammar.GetSymbolByName(Symbol.FormatTerminalSymbol("-"));
 			SymbolTypeMap<TestToken> symbolTypeMap = new SymbolTypeMap<TestToken>();
 			long version = symbolTypeMap.Version;
 			symbolTypeMap.SetTypeForSymbol(symbol, typeof(TestAdd));
-			Expect(symbolTypeMap.Version, GreaterThan(version));
+			Assert.True(version < symbolTypeMap.Version);
 			version = symbolTypeMap.Version;
 			symbolTypeMap.SetTypeForSymbol(symbol, typeof(TestSubtract));
-			Expect(symbolTypeMap.Version, GreaterThan(version));
+			Assert.True(version < symbolTypeMap.Version);
 		}
 
-		[Test]
+		[Fact]
 		public void Create() {
 			new SymbolTypeMap<SemanticToken>();
 		}
 
-		[Test]
+		[Fact]
 		public void GetCommonBaseTypeAncestor() {
 			SymbolTypeMap<TestToken> symbolTypeMap = new SymbolTypeMap<TestToken>();
-			Expect(symbolTypeMap.GetCommonBaseType(typeof(TestAdd), typeof(TestSubtract)), EqualTo(typeof(TestOperation)));
+			Assert.Equal(typeof(TestOperation), symbolTypeMap.GetCommonBaseType(typeof(TestAdd), typeof(TestSubtract)));
 		}
 
-		[Test]
+		[Fact]
 		public void GetCommonBaseTypeBothBase() {
 			SymbolTypeMap<TestToken> symbolTypeMap = new SymbolTypeMap<TestToken>();
-			Expect(symbolTypeMap.GetCommonBaseType(typeof(TestToken), typeof(TestToken)), EqualTo(typeof(TestToken)));
+			Assert.Equal(typeof(TestToken), symbolTypeMap.GetCommonBaseType(typeof(TestToken), typeof(TestToken)));
 		}
 
-		[Test]
+		[Fact]
 		public void GetCommonBaseTypeNoCommon() {
 			SymbolTypeMap<TestToken> symbolTypeMap = new SymbolTypeMap<TestToken>();
-			Expect(symbolTypeMap.GetCommonBaseType(typeof(TestValue), typeof(TestSubtract)), EqualTo(typeof(TestToken)));
+			Assert.Equal(typeof(TestToken), symbolTypeMap.GetCommonBaseType(typeof(TestValue), typeof(TestSubtract)));
 		}
 
-		[Test]
+		[Fact]
 		public void GetCommonBaseTypeSame() {
 			SymbolTypeMap<TestToken> symbolTypeMap = new SymbolTypeMap<TestToken>();
-			Expect(symbolTypeMap.GetCommonBaseType(typeof(TestValue), typeof(TestValue)), EqualTo(typeof(TestValue)));
+			Assert.Equal(typeof(TestValue), symbolTypeMap.GetCommonBaseType(typeof(TestValue), typeof(TestValue)));
 		}
 
-		[Test]
+		[Fact]
 		public void GetNoAncestors() {
 			SymbolTypeMap<TestToken> symbolTypeMap = new SymbolTypeMap<TestToken>();
 			ReadOnlyCollection<Type> baseTypes = symbolTypeMap.GetBaseTypes(typeof(TestToken));
-			Expect(baseTypes, EquivalentTo(new[] {typeof(TestToken)}));
+			Assert.Equal(new[] {typeof(TestToken)}, baseTypes);
 		}
 
-		[Test]
+		[Fact]
 		public void GetSeveralAncestors() {
 			SymbolTypeMap<TestToken> symbolTypeMap = new SymbolTypeMap<TestToken>();
 			ReadOnlyCollection<Type> baseTypes = symbolTypeMap.GetBaseTypes(typeof(TestAdd));
-			Expect(baseTypes, EquivalentTo(new[] {typeof(TestToken), typeof(TestOperation), typeof(TestAdd)}));
+			Assert.Equal(new[] {typeof(TestToken), typeof(TestOperation), typeof(TestAdd)}, baseTypes);
 		}
 
-		[Test]
+		[Fact]
 		public void GetSingleAncestor() {
 			SymbolTypeMap<TestToken> symbolTypeMap = new SymbolTypeMap<TestToken>();
 			ReadOnlyCollection<Type> baseTypes = symbolTypeMap.GetBaseTypes(typeof(TestOperation));
-			Expect(baseTypes, EquivalentTo(new[] {typeof(TestToken), typeof(TestOperation)}));
+			Assert.Equal(new[] {typeof(TestToken), typeof(TestOperation)}, baseTypes);
 		}
 
-		[Test]
+		[Fact]
 		public void GetSymbolType() {
 			Symbol symbol = grammar.GetSymbolByName(Symbol.FormatTerminalSymbol("-"));
 			SymbolTypeMap<TestToken> symbolTypeMap = new SymbolTypeMap<TestToken>();
 			symbolTypeMap.SetTypeForSymbol(symbol, typeof(TestAdd));
 			symbolTypeMap.SetTypeForSymbol(symbol, typeof(TestSubtract));
-			Expect(symbolTypeMap.GetSymbolType(symbol), EqualTo(typeof(TestOperation)));
+			Assert.Equal(typeof(TestOperation), symbolTypeMap.GetSymbolType(symbol));
 		}
 
-		[Test]
-		[ExpectedException(typeof(ArgumentException))]
+		[Fact]
 		public void InvalidType() {
 			SymbolTypeMap<TestToken> symbolTypeMap = new SymbolTypeMap<TestToken>();
-			symbolTypeMap.GetBaseTypes(typeof(SemanticToken));
+			Assert.Throws<ArgumentException>(() => {
+				symbolTypeMap.GetBaseTypes(typeof(SemanticToken));
+			});
 		}
 	}
 }

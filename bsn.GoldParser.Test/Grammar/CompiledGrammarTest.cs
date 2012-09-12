@@ -27,183 +27,186 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //  
+
 using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 
-using NUnit.Framework;
+using Xunit;
 
 namespace bsn.GoldParser.Grammar {
-	[TestFixture]
-	public class CompiledGrammarTest: AssertionHelper {
+	public class CompiledGrammarTest {
 		internal static CompiledGrammar LoadTestGrammar() {
 			return CompiledGrammar.Load(typeof(CompiledGrammarTest), "TestGrammar.cgt");
 		}
 
-		[Test]
+		[Fact]
 		public void CheckAbout() {
 			CompiledGrammar grammar = LoadTestGrammar();
-			Expect(grammar.About, EqualTo("Example for testing Gold Parser Engine"));
+			Assert.Equal("Example for testing Gold Parser Engine", grammar.About);
 		}
 
-		[Test]
+		[Fact]
 		public void CheckAuthor() {
 			CompiledGrammar grammar = LoadTestGrammar();
-			Expect(grammar.Author, EqualTo("Robert van Loenhout and Arsène von Wyss"));
+			Assert.Equal("Robert van Loenhout and Arsène von Wyss", grammar.Author);
 		}
 
-		[Test]
+		[Fact]
 		public void CheckCaseSensitive() {
 			CompiledGrammar grammar = LoadTestGrammar();
-			Expect(grammar.CaseSensitive, EqualTo(false));
+			Assert.Equal(false, grammar.CaseSensitive);
 		}
 
-		[Test]
+		[Fact]
 		public void CheckDfaCharsetCount() {
 			CompiledGrammar grammar = LoadTestGrammar();
-			Expect(grammar.DfaCharsetCount, EqualTo(16));
+			Assert.Equal(16, grammar.DfaCharsetCount);
 		}
 
-		[Test]
+		[Fact]
 		public void CheckEndSymbol() {
 			CompiledGrammar grammar = LoadTestGrammar();
-			Expect(grammar.EndSymbol.Kind == SymbolKind.End);
-			Expect(grammar.DfaInitialState.Index, EqualTo(0));
+			Assert.Equal(SymbolKind.End, grammar.EndSymbol.Kind);
+			Assert.Equal(0, grammar.DfaInitialState.Index);
 		}
 
-		[Test]
+		[Fact]
 		public void CheckErrorSymbol() {
 			CompiledGrammar grammar = LoadTestGrammar();
-			Expect(grammar.ErrorSymbol.Kind == SymbolKind.Error);
-			Expect(grammar.DfaInitialState.Index, EqualTo(0));
+			Assert.Equal(SymbolKind.Error, grammar.ErrorSymbol.Kind);
+			Assert.Equal(0, grammar.DfaInitialState.Index);
 		}
 
-		[Test]
+		[Fact]
 		public void CheckInitialDfaStateIndex() {
 			CompiledGrammar grammar = LoadTestGrammar();
-			Expect(grammar.DfaInitialState, Not.Append(Null));
-			Expect(grammar.DfaInitialState.Index, EqualTo(0));
+			Assert.NotNull(grammar.DfaInitialState);
+			Assert.Equal(0, grammar.DfaInitialState.Index);
 		}
 
-		[Test]
+		[Fact]
 		public void CheckInitialLalrStateIndex() {
 			CompiledGrammar grammar = LoadTestGrammar();
-			Expect(grammar.InitialLRState, Not.Append(Null));
-			Expect(grammar.InitialLRState.Index, EqualTo(0));
+			Assert.NotNull(grammar.InitialLRState);
+			Assert.Equal(0, grammar.InitialLRState.Index);
 		}
 
-		[Test]
+		[Fact]
 		public void CheckLalrStateCount() {
 			CompiledGrammar grammar = LoadTestGrammar();
-			Expect(grammar.LalrStateCount, EqualTo(24));
+			Assert.Equal(24, grammar.LalrStateCount);
 		}
 
-		[Test]
+		[Fact]
 		public void CheckName() {
 			CompiledGrammar grammar = LoadTestGrammar();
-			Expect(grammar.Name, EqualTo("Text Calculator Grammar"));
+			Assert.Equal("Text Calculator Grammar", grammar.Name);
 		}
 
-		[Test]
+		[Fact]
 		public void CheckRuleCount() {
 			CompiledGrammar grammar = LoadTestGrammar();
-			Expect(grammar.RuleCount, EqualTo(16));
+			Assert.Equal(16, grammar.RuleCount);
 			for (int i = 0; i < grammar.RuleCount; i++) {
 				Trace.WriteLine(grammar.GetRule(i).Definition, i.ToString());
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void CheckSymbolCount() {
 			CompiledGrammar grammar = LoadTestGrammar();
-			Expect(grammar.SymbolCount, EqualTo(22));
+			Assert.Equal(22, grammar.SymbolCount);
 			for (int i = 0; i < grammar.SymbolCount; i++) {
 				Trace.WriteLine(grammar.GetSymbol(i).Name, i.ToString());
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void CheckVersion() {
 			CompiledGrammar grammar = LoadTestGrammar();
-			Expect(grammar.Version, EqualTo("1.1"));
+			Assert.Equal("1.1", grammar.Version);
 		}
 
-		[Test]
-		[ExpectedException(typeof(ArgumentNullException))]
+		[Fact]
 		public void ConstructWithoutBinaryReader() {
-			CompiledGrammar.Load((BinaryReader)null);
+			Assert.Throws<ArgumentNullException>(() => {
+				CompiledGrammar.Load((BinaryReader)null);
+			});
 		}
 
-		[Test]
-		[ExpectedException(typeof(ArgumentNullException))]
+		[Fact]
 		public void ConstructWithoutManifestResourceName() {
-			CompiledGrammar.Load(null, null);
+			Assert.Throws<ArgumentNullException>(() => {
+				CompiledGrammar.Load(null, null);
+			});
 		}
 
-		[Test]
-		[ExpectedException(typeof(ArgumentNullException))]
+		[Fact]
 		public void ConstructWithoutStream() {
-			CompiledGrammar.Load((Stream)null);
+			Assert.Throws<ArgumentNullException>(() => {
+				CompiledGrammar.Load((Stream)null);
+			});
 		}
 
-		[Test]
+		[Fact]
 		public void GetNonterminalRules() {
 			CompiledGrammar grammar = LoadTestGrammar();
 			Symbol symbol = grammar.GetSymbolByName("<Expression>");
-			Expect(symbol, Not.Null);
+			Assert.NotNull(symbol);
 			ReadOnlyCollection<Rule> rules = grammar.GetRulesForSymbol(symbol);
-			Expect(rules, Not.Null);
-			Expect(rules.Count, EqualTo(3));
+			Assert.NotNull(rules);
+			Assert.Equal(3, rules.Count);
 		}
 
-		[Test]
+		[Fact]
 		public void GetNonterminalSymbol() {
 			Symbol symbol = LoadTestGrammar().GetSymbolByName("<Expression>");
-			Expect(symbol, Not.Null);
-			Expect(symbol.Name, EqualTo("Expression"));
+			Assert.NotNull(symbol);
+			Assert.Equal("Expression", symbol.Name);
 		}
 
-		[Test]
+		[Fact]
 		public void GetTerminalSymbol() {
 			Symbol symbol = LoadTestGrammar().GetSymbolByName("Float");
-			Expect(symbol, Not.Null);
-			Expect(symbol.Name, EqualTo("Float"));
+			Assert.NotNull(symbol);
+			Assert.Equal("Float", symbol.Name);
 		}
 
-		[Test]
+		[Fact]
 		public void PackTest() {
 			CompiledGrammar unpackedGrammar;
 			CompiledGrammar packedGrammar;
 			using (MemoryStream packedStream = new MemoryStream()) {
 				using (Stream unpackedStream = typeof(CompiledGrammarTest).Assembly.GetManifestResourceStream(typeof(CompiledGrammarTest), "TestGrammar.cgt")) {
-					Expect(unpackedStream, Not.Null);
+					Assert.NotNull(unpackedStream);
 					unpackedGrammar = CompiledGrammar.Load(unpackedStream);
 					unpackedStream.Seek(0, SeekOrigin.Begin);
 					CompiledGrammar.Pack(unpackedStream, packedStream, true);
 					Debug.WriteLine(string.Format("Packed length: {0} (original {1}, {2} times reduction)", packedStream.Length, unpackedStream.Length, unpackedStream.Length/(double)packedStream.Length));
-					Expect(packedStream.Length < unpackedStream.Length);
+					Assert.True(packedStream.Length < unpackedStream.Length);
 				}
 				packedStream.Seek(0, SeekOrigin.Begin);
 				packedGrammar = CompiledGrammar.Load(packedStream);
 			}
-			Expect(packedGrammar.About, EqualTo(unpackedGrammar.About));
-			Expect(packedGrammar.Author, EqualTo(unpackedGrammar.Author));
-			Expect(packedGrammar.CaseSensitive, EqualTo(unpackedGrammar.CaseSensitive));
-			Expect(packedGrammar.DfaCharsetCount, EqualTo(unpackedGrammar.DfaCharsetCount));
-			Expect(packedGrammar.DfaInitialState.Index, EqualTo(unpackedGrammar.DfaInitialState.Index));
-			Expect(packedGrammar.DfaStateCount, EqualTo(unpackedGrammar.DfaStateCount));
-			Expect(packedGrammar.EndSymbol.Index, EqualTo(unpackedGrammar.EndSymbol.Index));
-			Expect(packedGrammar.ErrorSymbol.Index, EqualTo(unpackedGrammar.ErrorSymbol.Index));
-			Expect(packedGrammar.InitialLRState.Index, EqualTo(unpackedGrammar.InitialLRState.Index));
-			Expect(packedGrammar.LalrStateCount, EqualTo(unpackedGrammar.LalrStateCount));
-			Expect(packedGrammar.Name, EqualTo(unpackedGrammar.Name));
-			Expect(packedGrammar.RuleCount, EqualTo(unpackedGrammar.RuleCount));
-			Expect(packedGrammar.StartSymbol.Index, EqualTo(unpackedGrammar.StartSymbol.Index));
-			Expect(packedGrammar.SymbolCount, EqualTo(unpackedGrammar.SymbolCount));
-			Expect(packedGrammar.Version, EqualTo(unpackedGrammar.Version));
+			Assert.Equal(unpackedGrammar.About, packedGrammar.About);
+			Assert.Equal(unpackedGrammar.Author, packedGrammar.Author);
+			Assert.Equal(unpackedGrammar.CaseSensitive, packedGrammar.CaseSensitive);
+			Assert.Equal(unpackedGrammar.DfaCharsetCount, packedGrammar.DfaCharsetCount);
+			Assert.Equal(unpackedGrammar.DfaInitialState.Index, packedGrammar.DfaInitialState.Index);
+			Assert.Equal(unpackedGrammar.DfaStateCount, packedGrammar.DfaStateCount);
+			Assert.Equal(unpackedGrammar.EndSymbol.Index, packedGrammar.EndSymbol.Index);
+			Assert.Equal(unpackedGrammar.ErrorSymbol.Index, packedGrammar.ErrorSymbol.Index);
+			Assert.Equal(unpackedGrammar.InitialLRState.Index, packedGrammar.InitialLRState.Index);
+			Assert.Equal(unpackedGrammar.LalrStateCount, packedGrammar.LalrStateCount);
+			Assert.Equal(unpackedGrammar.Name, packedGrammar.Name);
+			Assert.Equal(unpackedGrammar.RuleCount, packedGrammar.RuleCount);
+			Assert.Equal(unpackedGrammar.StartSymbol.Index, packedGrammar.StartSymbol.Index);
+			Assert.Equal(unpackedGrammar.SymbolCount, packedGrammar.SymbolCount);
+			Assert.Equal(unpackedGrammar.Version, packedGrammar.Version);
 			for (int i = 0; i < packedGrammar.DfaCharsetCount; i++) {
-				Expect(new string(packedGrammar.GetDfaCharset(i).CharactersIncludingSequence), EqualTo(new string(unpackedGrammar.GetDfaCharset(i).CharactersIncludingSequence)));
+				Assert.Equal(new string(unpackedGrammar.GetDfaCharset(i).CharactersIncludingSequence), new string(packedGrammar.GetDfaCharset(i).CharactersIncludingSequence));
 			}
 		}
 	}

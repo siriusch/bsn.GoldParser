@@ -27,124 +27,126 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // 
-using System;
 
-using NUnit.Framework;
+using System;
+using System.Globalization;
+
+using Xunit;
 
 namespace bsn.GoldParser.Parser {
-	[TestFixture]
-	public class TextBufferTest: AssertionHelper {
-		[Test]
-		[ExpectedException(typeof(ArgumentNullException))]
+	public class TextBufferTest {
+		[Fact]
 		public void ConstructWithoutTextReader() {
-			new TextBuffer(null);
+			Assert.Throws<ArgumentNullException>(() => {
+				new TextBuffer(null);
+			});
 		}
 
-		[Test]
+		[Fact]
 		public void EmptyTextReaderLook() {
 			using (TestStringReader reader = new TestStringReader(0)) {
 				TextBuffer charBuffer = new TextBuffer(reader);
 				char ch;
-				Expect(!charBuffer.TryLookahead(0, out ch));
+				Assert.False(charBuffer.TryLookahead(0, out ch));
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void EmptyTextReaderRead() {
 			using (TestStringReader reader = new TestStringReader(0)) {
 				TextBuffer charBuffer = new TextBuffer(reader);
 				LineInfo position;
-				Expect(charBuffer.Read(0, out position) == string.Empty);
+				Assert.Equal(string.Empty, charBuffer.Read(0, out position));
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void MarkLongDistanceAndReplay() {
 			using (TestStringReader reader = new TestStringReader(1024*20)) {
 				TextBuffer charBuffer = new TextBuffer(reader);
 				char ch;
 				LineInfo position;
-				Expect(charBuffer.Read(128, out position) == reader.ToString().Substring(0, 128));
+				Assert.Equal(reader.ToString().Substring(0, 128), charBuffer.Read(128, out position));
 				int offset = 0;
 				for (int i = 128; i < 1024*16; i++) {
-					Expect(charBuffer.TryLookahead(ref offset, out ch));
-					Expect(ch == reader[i]);
+					Assert.True(charBuffer.TryLookahead(ref offset, out ch));
+					Assert.Equal(reader[i], ch);
 				}
 				offset = 0;
 				for (int i = 128; i < 1024*8; i++) {
-					Expect(charBuffer.TryLookahead(ref offset, out ch));
-					Expect(ch == reader[i]);
+					Assert.True(charBuffer.TryLookahead(ref offset, out ch));
+					Assert.Equal(reader[i], ch);
 				}
-				Expect(charBuffer.Read(reader.Length-128, out position) == reader.ToString().Substring(128));
-				Expect(!charBuffer.TryLookahead(0, out ch));
+				Assert.Equal(reader.ToString().Substring(128), charBuffer.Read(reader.Length-128, out position));
+				Assert.False(charBuffer.TryLookahead(0, out ch));
 			}
 		}
 
-		[Test]
-		public void ReadManyChars() {
-			using (TestStringReader reader = new TestStringReader(1024*1024)) {
-				TextBuffer charBuffer = new TextBuffer(reader);
-				char ch;
-				for (int i = 0; i < reader.Length; i++) {
-					Expect(charBuffer.TryLookahead(i, out ch));
-					Expect(ch == reader[i]);
-				}
-				Expect(!charBuffer.TryLookahead(reader.Length, out ch));
-			}
-		}
-
-		[Test]
-		public void ReadSingleChar() {
-			using (TestStringReader reader = new TestStringReader(1)) {
-				TextBuffer charBuffer = new TextBuffer(reader);
-				LineInfo position;
-				Expect(charBuffer.Read(1, out position) == reader[0].ToString());
-				char ch;
-				Expect(!charBuffer.TryLookahead(0, out ch));
-			}
-		}
-
-		[Test]
+		[Fact]
 		public void MultilineCr() {
 			using (TestStringReader reader = new TestStringReader("1\r\r3")) {
 				TextBuffer charBuffer = new TextBuffer(reader);
 				LineInfo position;
 				charBuffer.Read(reader.Length, out position);
-				Expect(position.Line, EqualTo(1));
-				Expect(charBuffer.Line, EqualTo(3));
+				Assert.Equal(1, position.Line);
+				Assert.Equal(3, charBuffer.Line);
 			}
 		}
 
-		[Test]
-		public void MultilineLf() {
-			using (TestStringReader reader = new TestStringReader("1\n\n3")) {
-				TextBuffer charBuffer = new TextBuffer(reader);
-				LineInfo position;
-				charBuffer.Read(reader.Length, out position);
-				Expect(position.Line, EqualTo(1));
-				Expect(charBuffer.Line, EqualTo(3));
-			}
-		}
-
-		[Test]
-		public void MultilineLfCr() {
-			using (TestStringReader reader = new TestStringReader("1\n\r\n\r3")) {
-				TextBuffer charBuffer = new TextBuffer(reader);
-				LineInfo position;
-				charBuffer.Read(reader.Length, out position);
-				Expect(position.Line, EqualTo(1));
-				Expect(charBuffer.Line, EqualTo(3));
-			}
-		}
-
-		[Test]
+		[Fact]
 		public void MultilineCrLf() {
 			using (TestStringReader reader = new TestStringReader("1\r\n\r\n3")) {
 				TextBuffer charBuffer = new TextBuffer(reader);
 				LineInfo position;
 				charBuffer.Read(reader.Length, out position);
-				Expect(position.Line, EqualTo(1));
-				Expect(charBuffer.Line, EqualTo(3));
+				Assert.Equal(1, position.Line);
+				Assert.Equal(3, charBuffer.Line);
+			}
+		}
+
+		[Fact]
+		public void MultilineLf() {
+			using (TestStringReader reader = new TestStringReader("1\n\n3")) {
+				TextBuffer charBuffer = new TextBuffer(reader);
+				LineInfo position;
+				charBuffer.Read(reader.Length, out position);
+				Assert.Equal(1, position.Line);
+				Assert.Equal(3, charBuffer.Line);
+			}
+		}
+
+		[Fact]
+		public void MultilineLfCr() {
+			using (TestStringReader reader = new TestStringReader("1\n\r\n\r3")) {
+				TextBuffer charBuffer = new TextBuffer(reader);
+				LineInfo position;
+				charBuffer.Read(reader.Length, out position);
+				Assert.Equal(1, position.Line);
+				Assert.Equal(3, charBuffer.Line);
+			}
+		}
+
+		[Fact]
+		public void ReadManyChars() {
+			using (TestStringReader reader = new TestStringReader(1024*1024)) {
+				TextBuffer charBuffer = new TextBuffer(reader);
+				char ch;
+				for (int i = 0; i < reader.Length; i++) {
+					Assert.True(charBuffer.TryLookahead(i, out ch));
+					Assert.Equal(reader[i], ch);
+				}
+				Assert.False(charBuffer.TryLookahead(reader.Length, out ch));
+			}
+		}
+
+		[Fact]
+		public void ReadSingleChar() {
+			using (TestStringReader reader = new TestStringReader(1)) {
+				TextBuffer charBuffer = new TextBuffer(reader);
+				LineInfo position;
+				Assert.Equal(reader[0].ToString(CultureInfo.InvariantCulture), charBuffer.Read(1, out position));
+				char ch;
+				Assert.False(charBuffer.TryLookahead(0, out ch));
 			}
 		}
 	}

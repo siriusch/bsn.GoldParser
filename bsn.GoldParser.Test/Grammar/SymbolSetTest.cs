@@ -27,81 +27,80 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // 
-using System;
-using System.Linq;
 
-using NUnit.Framework;
+using System;
+
+using Xunit;
 
 namespace bsn.GoldParser.Grammar {
-	[TestFixture]
-	public class SymbolSetTest: AssertionHelper {
-		private CompiledGrammar grammar;
+	public class SymbolSetTest {
+		private readonly CompiledGrammar grammar;
 
-		[TestFixtureSetUp]
-		public void SetUp() {
+		public SymbolSetTest() {
 			grammar = CompiledGrammarTest.LoadTestGrammar();
 		}
 
-		[Test]
+		[Fact]
 		public void Create() {
 			new SymbolSet();
 		}
 
-		[Test]
+		[Fact]
 		public void GetFalse() {
 			SymbolSet set = new SymbolSet();
-			Expect(set[grammar.GetSymbol(0)], EqualTo(false));
+			Assert.Equal(false, set[grammar.GetSymbol(0)]);
 		}
 
-		[Test]
+		[Fact]
 		public void MultiSetGet() {
 			SymbolSet set = new SymbolSet();
 			Symbol symbol = grammar.GetSymbol(0);
 			set[symbol] = false;
-			Expect(set[symbol], EqualTo(false));
+			Assert.Equal(false, set[symbol]);
 			set[symbol] = true;
-			Expect(set[symbol], EqualTo(true));
+			Assert.Equal(true, set[symbol]);
 			set[symbol] = true;
-			Expect(set[symbol], EqualTo(true));
+			Assert.Equal(true, set[symbol]);
 			set[symbol] = false;
-			Expect(set[symbol], EqualTo(false));
+			Assert.Equal(false, set[symbol]);
 		}
 
-		[Test]
+		[Fact]
 		public void SetGetFalse() {
 			SymbolSet set = new SymbolSet();
 			Symbol symbol = grammar.GetSymbol(0);
 			set[symbol] = false;
-			Expect(set[symbol], EqualTo(false));
+			Assert.Equal(false, set[symbol]);
 		}
 
-		[Test]
+		[Fact]
 		public void SetGetMulti() {
 			SymbolSet set = new SymbolSet();
 			Symbol symbolX = grammar.GetSymbol(0);
 			Symbol symbolY = grammar.GetSymbol(1);
 			set[symbolX] = true;
 			set[symbolY] = true;
-			Expect(set[symbolX], EqualTo(true));
-			Expect(set[symbolY], EqualTo(true));
+			Assert.Equal(true, set[symbolX]);
+			Assert.Equal(true, set[symbolY]);
 			set[symbolX] = false;
-			Expect(set[symbolX], EqualTo(false));
-			Expect(set[symbolY], EqualTo(true));
+			Assert.Equal(false, set[symbolX]);
+			Assert.Equal(true, set[symbolY]);
 		}
 
-		[Test]
+		[Fact]
 		public void SetGetTrue() {
 			SymbolSet set = new SymbolSet();
 			Symbol symbol = grammar.GetSymbol(0);
 			set[symbol] = true;
-			Expect(set[symbol], EqualTo(true));
+			Assert.Equal(true, set[symbol]);
 		}
 
-		[Test]
-		[ExpectedException(typeof(ArgumentNullException))]
+		[Fact]
 		public void SetNull() {
 			SymbolSet set = new SymbolSet();
-			set[null] = true;
+			Assert.Throws<ArgumentNullException>(() => {
+				set[null] = true;
+			});
 		}
 	}
 }

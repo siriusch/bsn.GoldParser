@@ -27,77 +27,78 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // 
+
 using System;
 using System.Diagnostics;
+
+using Xunit;
 
 using bsn.GoldParser.Grammar;
 using bsn.GoldParser.Parser;
 
-using NUnit.Framework;
-
 namespace bsn.GoldParser.Semantic {
-	[TestFixture]
-	public class RuleDeclarationParserTest: AssertionHelper {
-		private CompiledGrammar grammar;
+	public class RuleDeclarationParserTest {
+		private readonly CompiledGrammar grammar;
 
-		[TestFixtureSetUp]
-		public void SetUp() {
+		public RuleDeclarationParserTest() {
 			grammar = CompiledGrammarTest.LoadTestGrammar();
 		}
 
-		[Test]
-		[ExpectedException(typeof(ArgumentNullException))]
+		[Fact]
 		public void ConstructWithoutGrammar() {
-			new RuleDeclarationParser(null);
+			Assert.Throws<ArgumentNullException>(() => {
+				new RuleDeclarationParser(null);
+			});
 		}
 
-		[Test]
-		[ExpectedException(typeof(ArgumentNullException))]
+		[Fact]
 		public void NullRuleString() {
 			RuleDeclarationParser parser = new RuleDeclarationParser(grammar);
 			Rule rule;
-			parser.TryParse(null, out rule);
+			Assert.Throws<ArgumentNullException>(() => {
+				parser.TryParse(null, out rule);
+			});
 		}
 
-		[Test]
+		[Fact]
+		public void ValidRuleMap1() {
+			Reduction reduction;
+			Assert.True(RuleDeclarationParser.TryParse("<Value> ::= ~'(' <Expression> ~')'", out reduction));
+			foreach (int index in RuleDeclarationParser.GetRuleHandleIndexes(reduction)) {
+				Debug.WriteLine(index);
+			}
+		}
+
+		[Fact]
+		public void ValidRuleMap2() {
+			Reduction reduction;
+			Assert.True(RuleDeclarationParser.TryParse("<Value> ::= ~'(' 1:<Expression> ')'", out reduction));
+			foreach (int index in RuleDeclarationParser.GetRuleHandleIndexes(reduction)) {
+				Debug.WriteLine(index);
+			}
+		}
+
+		[Fact]
 		public void ValidRuleStringComplex() {
 			RuleDeclarationParser parser = new RuleDeclarationParser(grammar);
 			Rule rule;
-			Expect(parser.TryParse("<Value> ::= '(' <Expression> ')'", out rule), True);
+			Assert.True(parser.TryParse("<Value> ::= '(' <Expression> ')'", out rule));
 			Debug.WriteLine(rule.Definition);
 		}
 
-		[Test]
-		public void ValidRuleMap1() {
-			Reduction reduction;
-			Expect(RuleDeclarationParser.TryParse("<Value> ::= ~'(' <Expression> ~')'", out reduction), True);
-			foreach (int index in RuleDeclarationParser.GetRuleHandleIndexes(reduction)) {
-				Debug.WriteLine(index);
-			}
-		}
-
-		[Test]
-		public void ValidRuleMap2() {
-			Reduction reduction;
-			Expect(RuleDeclarationParser.TryParse("<Value> ::= ~'(' 1:<Expression> ')'", out reduction), True);
-			foreach (int index in RuleDeclarationParser.GetRuleHandleIndexes(reduction)) {
-				Debug.WriteLine(index);
-			}
-		}
-
-		[Test]
+		[Fact]
 		public void ValidRuleStringEmpty() {
 			RuleDeclarationParser parser = new RuleDeclarationParser(grammar);
 			Rule rule;
-			Expect(parser.TryParse("<Empty> ::=", out rule), EqualTo(true));
+			Assert.Equal(true, parser.TryParse("<Empty> ::=", out rule));
 			Debug.WriteLine(rule.Definition);
 		}
 
-		[Test]
+		[Fact]
 		public void ValidRuleStringSimple() {
 			RuleDeclarationParser parser = new RuleDeclarationParser(grammar);
 			Rule rule;
-			Expect(parser.TryParse("<Value> ::= Float", out rule), EqualTo(true));
+			Assert.Equal(true, parser.TryParse("<Value> ::= Float", out rule));
 			Debug.WriteLine(rule.Definition);
 		}
 	}

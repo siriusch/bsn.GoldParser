@@ -27,219 +27,222 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // 
+
 using System;
+
+using Xunit;
 
 using bsn.GoldParser.Grammar;
 
-using NUnit.Framework;
-
 namespace bsn.GoldParser.Parser {
-	[TestFixture]
-	public class TokenizerTest: AssertionHelper {
-		private CompiledGrammar grammar;
-
-		[TestFixtureSetUp]
-		public void SetUp() {
-			grammar = CompiledGrammarTest.LoadTestGrammar();
-		}
-
+	public class TokenizerTest {
 		internal static TestStringReader GetReader() {
 			return new TestStringReader("0*(3-5)/-9 -- line comment\r\n+1.0 /* block\r\ncomment */ *.0e2");
 		}
 
-		[Test]
+		private readonly CompiledGrammar grammar;
+
+		public TokenizerTest() {
+			grammar = CompiledGrammarTest.LoadTestGrammar();
+		}
+
+		[Fact]
 		public void BlockCommentWithNestedUnclosedString() {
 			using (TestStringReader reader = new TestStringReader("/* don't /*** 'do ***/ this */ 0")) {
 				Tokenizer tokenizer = new Tokenizer(reader, grammar);
 				Token token;
-				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.CommentBlockRead));
-				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
-				Expect(token.Symbol.Kind, EqualTo(SymbolKind.WhiteSpace));
-				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
-				Expect(token.Symbol.Kind, EqualTo(SymbolKind.Terminal));
-				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
-				Expect(token.Symbol.Kind, EqualTo(SymbolKind.End));
+				Assert.Equal(ParseMessage.CommentBlockRead, tokenizer.NextToken(out token));
+				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
+				Assert.Equal(SymbolKind.WhiteSpace, token.Symbol.Kind);
+				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
+				Assert.Equal(SymbolKind.Terminal, token.Symbol.Kind);
+				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
+				Assert.Equal(SymbolKind.End, token.Symbol.Kind);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void BlockCommentWithUnclosedString() {
 			using (TestStringReader reader = new TestStringReader("/* don't */ 'do this'")) {
 				Tokenizer tokenizer = new Tokenizer(reader, grammar);
 				Token token;
-				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.CommentBlockRead));
-				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
-				Expect(token.Symbol.Kind, EqualTo(SymbolKind.WhiteSpace));
-				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
-				Expect(token.Symbol.Kind, EqualTo(SymbolKind.Terminal));
-				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
-				Expect(token.Symbol.Kind, EqualTo(SymbolKind.End));
+				Assert.Equal(ParseMessage.CommentBlockRead, tokenizer.NextToken(out token));
+				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
+				Assert.Equal(SymbolKind.WhiteSpace, token.Symbol.Kind);
+				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
+				Assert.Equal(SymbolKind.Terminal, token.Symbol.Kind);
+				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
+				Assert.Equal(SymbolKind.End, token.Symbol.Kind);
 			}
 		}
 
-		[Test]
-		public void CheckUnmergedLexicalError() {
-			using (TestStringReader reader = new TestStringReader("1+Nx*200")) {
-				Tokenizer tokenizer = new Tokenizer(reader, grammar);
-				Token token;
-				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
-				Expect(token.Symbol.Kind, EqualTo(SymbolKind.Terminal));
-				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
-				Expect(token.Symbol.Kind, EqualTo(SymbolKind.Terminal));
-				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.LexicalError));
-				Expect(token.Symbol.Kind, EqualTo(SymbolKind.Error));
-				Expect(token.Text, EqualTo("N"));
-				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.LexicalError));
-				Expect(token.Symbol.Kind, EqualTo(SymbolKind.Error));
-				Expect(token.Text, EqualTo("x"));
-				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
-				Expect(token.Symbol.Kind, EqualTo(SymbolKind.Terminal));
-				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
-				Expect(token.Symbol.Kind, EqualTo(SymbolKind.Terminal));
-				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
-				Expect(token.Symbol.Kind, EqualTo(SymbolKind.End));
-			}
-		}
-
-		[Test]
+		[Fact]
 		public void CheckLexicalErrorOnEnd() {
 			using (TestStringReader reader = new TestStringReader("'")) {
 				Tokenizer tokenizer = new Tokenizer(reader, grammar);
 				Token token;
-				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.LexicalError));
-				Expect(token.Symbol.Kind, EqualTo(SymbolKind.Error));
-				Expect(token.Text, EqualTo("'"));
-				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
-				Expect(token.Symbol.Kind, EqualTo(SymbolKind.End));
+				Assert.Equal(ParseMessage.LexicalError, tokenizer.NextToken(out token));
+				Assert.Equal(SymbolKind.Error, token.Symbol.Kind);
+				Assert.Equal("'", token.Text);
+				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
+				Assert.Equal(SymbolKind.End, token.Symbol.Kind);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void CheckMergedLexicalError() {
 			using (TestStringReader reader = new TestStringReader("1+Nx*200")) {
 				Tokenizer tokenizer = new Tokenizer(reader, grammar);
 				tokenizer.MergeLexicalErrors = true;
 				Token token;
-				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
-				Expect(token.Symbol.Kind, EqualTo(SymbolKind.Terminal));
-				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
-				Expect(token.Symbol.Kind, EqualTo(SymbolKind.Terminal));
-				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.LexicalError));
-				Expect(token.Symbol.Kind, EqualTo(SymbolKind.Error));
-				Expect(token.Text, EqualTo("Nx"));
-				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
-				Expect(token.Symbol.Kind, EqualTo(SymbolKind.Terminal));
-				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
-				Expect(token.Symbol.Kind, EqualTo(SymbolKind.Terminal));
-				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
-				Expect(token.Symbol.Kind, EqualTo(SymbolKind.End));
+				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
+				Assert.Equal(SymbolKind.Terminal, token.Symbol.Kind);
+				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
+				Assert.Equal(SymbolKind.Terminal, token.Symbol.Kind);
+				Assert.Equal(ParseMessage.LexicalError, tokenizer.NextToken(out token));
+				Assert.Equal(SymbolKind.Error, token.Symbol.Kind);
+				Assert.Equal("Nx", token.Text);
+				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
+				Assert.Equal(SymbolKind.Terminal, token.Symbol.Kind);
+				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
+				Assert.Equal(SymbolKind.Terminal, token.Symbol.Kind);
+				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
+				Assert.Equal(SymbolKind.End, token.Symbol.Kind);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void CheckTokens() {
 			using (TestStringReader reader = GetReader()) {
 				Tokenizer tokenizer = new Tokenizer(reader, grammar);
 				Token token;
-				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
-				Expect(token.Text, EqualTo("0"));
-				Expect(token.Position.Index, EqualTo(0));
-				Expect(token.Symbol.Name, EqualTo("Integer"));
-				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
-				Expect(token.Text, EqualTo("*"));
-				Expect(token.Position.Index, EqualTo(1));
-				Expect(token.Symbol.Name, EqualTo("*"));
-				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
-				Expect(token.Text, EqualTo("("));
-				Expect(token.Position.Index, EqualTo(2));
-				Expect(token.Symbol.Name, EqualTo("("));
-				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
-				Expect(token.Text, EqualTo("3"));
-				Expect(token.Position.Index, EqualTo(3));
-				Expect(token.Symbol.Name, EqualTo("Integer"));
-				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
-				Expect(token.Text, EqualTo("-"));
-				Expect(token.Position.Index, EqualTo(4));
-				Expect(token.Symbol.Name, EqualTo("-"));
-				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
-				Expect(token.Text, EqualTo("5"));
-				Expect(token.Position.Index, EqualTo(5));
-				Expect(token.Symbol.Name, EqualTo("Integer"));
-				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
-				Expect(token.Text, EqualTo(")"));
-				Expect(token.Position.Index, EqualTo(6));
-				Expect(token.Symbol.Name, EqualTo(")"));
-				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
-				Expect(token.Text, EqualTo("/"));
-				Expect(token.Position.Index, EqualTo(7));
-				Expect(token.Symbol.Name, EqualTo("/"));
-				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
-				Expect(token.Text, EqualTo("-"));
-				Expect(token.Position.Index, EqualTo(8));
-				Expect(token.Symbol.Name, EqualTo("-"));
-				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
-				Expect(token.Text, EqualTo("9"));
-				Expect(token.Position.Index, EqualTo(9));
-				Expect(token.Symbol.Name, EqualTo("Integer"));
-				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
-				Expect(token.Text, EqualTo(" "));
-				Expect(token.Position.Index, EqualTo(10));
-				Expect(token.Symbol.Kind, EqualTo(SymbolKind.WhiteSpace));
-				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.CommentLineRead));
-				Expect(token.Text, EqualTo("-- line comment"));
-				Expect(token.Position.Index, EqualTo(11));
-				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
-				Expect(token.Symbol.Kind, EqualTo(SymbolKind.WhiteSpace));
-				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
-				Expect(token.Text, EqualTo("+"));
-				Expect(token.Position.Index, EqualTo(28));
-				Expect(token.Symbol.Name, EqualTo("+"));
-				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
-				Expect(token.Text, EqualTo("1.0"));
-				Expect(token.Position.Index, EqualTo(29));
-				Expect(token.Symbol.Name, EqualTo("Float"));
-				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
-				Expect(token.Symbol.Kind, EqualTo(SymbolKind.WhiteSpace));
-				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.CommentBlockRead));
-				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
-				Expect(token.Symbol.Kind, EqualTo(SymbolKind.WhiteSpace));
-				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
-				Expect(token.Text, EqualTo("*"));
-				Expect(token.Position.Index, EqualTo(54));
-				Expect(token.Symbol.Name, EqualTo("*"));
-				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
-				Expect(token.Text, EqualTo(".0e2"));
-				Expect(token.Position.Index, EqualTo(55));
-				Expect(token.Symbol.Name, EqualTo("Float"));
-				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
-				Expect(token.Symbol.Kind, EqualTo(SymbolKind.End));
+				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
+				Assert.Equal("0", token.Text);
+				Assert.Equal(0, token.Position.Index);
+				Assert.Equal("Integer", token.Symbol.Name);
+				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
+				Assert.Equal("*", token.Text);
+				Assert.Equal(1, token.Position.Index);
+				Assert.Equal("*", token.Symbol.Name);
+				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
+				Assert.Equal("(", token.Text);
+				Assert.Equal(2, token.Position.Index);
+				Assert.Equal("(", token.Symbol.Name);
+				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
+				Assert.Equal("3", token.Text);
+				Assert.Equal(3, token.Position.Index);
+				Assert.Equal("Integer", token.Symbol.Name);
+				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
+				Assert.Equal("-", token.Text);
+				Assert.Equal(4, token.Position.Index);
+				Assert.Equal("-", token.Symbol.Name);
+				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
+				Assert.Equal("5", token.Text);
+				Assert.Equal(5, token.Position.Index);
+				Assert.Equal("Integer", token.Symbol.Name);
+				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
+				Assert.Equal(")", token.Text);
+				Assert.Equal(6, token.Position.Index);
+				Assert.Equal(")", token.Symbol.Name);
+				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
+				Assert.Equal("/", token.Text);
+				Assert.Equal(7, token.Position.Index);
+				Assert.Equal("/", token.Symbol.Name);
+				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
+				Assert.Equal("-", token.Text);
+				Assert.Equal(8, token.Position.Index);
+				Assert.Equal("-", token.Symbol.Name);
+				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
+				Assert.Equal("9", token.Text);
+				Assert.Equal(9, token.Position.Index);
+				Assert.Equal("Integer", token.Symbol.Name);
+				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
+				Assert.Equal(" ", token.Text);
+				Assert.Equal(10, token.Position.Index);
+				Assert.Equal(SymbolKind.WhiteSpace, token.Symbol.Kind);
+				Assert.Equal(ParseMessage.CommentLineRead, tokenizer.NextToken(out token));
+				Assert.Equal("-- line comment", token.Text);
+				Assert.Equal(11, token.Position.Index);
+				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
+				Assert.Equal(SymbolKind.WhiteSpace, token.Symbol.Kind);
+				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
+				Assert.Equal("+", token.Text);
+				Assert.Equal(28, token.Position.Index);
+				Assert.Equal("+", token.Symbol.Name);
+				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
+				Assert.Equal("1.0", token.Text);
+				Assert.Equal(29, token.Position.Index);
+				Assert.Equal("Float", token.Symbol.Name);
+				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
+				Assert.Equal(SymbolKind.WhiteSpace, token.Symbol.Kind);
+				Assert.Equal(ParseMessage.CommentBlockRead, tokenizer.NextToken(out token));
+				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
+				Assert.Equal(SymbolKind.WhiteSpace, token.Symbol.Kind);
+				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
+				Assert.Equal("*", token.Text);
+				Assert.Equal(54, token.Position.Index);
+				Assert.Equal("*", token.Symbol.Name);
+				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
+				Assert.Equal(".0e2", token.Text);
+				Assert.Equal(55, token.Position.Index);
+				Assert.Equal("Float", token.Symbol.Name);
+				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
+				Assert.Equal(SymbolKind.End, token.Symbol.Kind);
 			}
 		}
 
-		[Test]
-		[ExpectedException(typeof(ArgumentNullException))]
+		[Fact]
+		public void CheckUnmergedLexicalError() {
+			using (TestStringReader reader = new TestStringReader("1+Nx*200")) {
+				Tokenizer tokenizer = new Tokenizer(reader, grammar);
+				Token token;
+				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
+				Assert.Equal(SymbolKind.Terminal, token.Symbol.Kind);
+				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
+				Assert.Equal(SymbolKind.Terminal, token.Symbol.Kind);
+				Assert.Equal(ParseMessage.LexicalError, tokenizer.NextToken(out token));
+				Assert.Equal(SymbolKind.Error, token.Symbol.Kind);
+				Assert.Equal("N", token.Text);
+				Assert.Equal(ParseMessage.LexicalError, tokenizer.NextToken(out token));
+				Assert.Equal(SymbolKind.Error, token.Symbol.Kind);
+				Assert.Equal("x", token.Text);
+				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
+				Assert.Equal(SymbolKind.Terminal, token.Symbol.Kind);
+				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
+				Assert.Equal(SymbolKind.Terminal, token.Symbol.Kind);
+				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
+				Assert.Equal(SymbolKind.End, token.Symbol.Kind);
+			}
+		}
+
+		[Fact]
 		public void ConstructWithoutGrammar() {
 			using (TestStringReader reader = GetReader()) {
-				new Tokenizer(reader, null);
+				Assert.Throws<ArgumentNullException>(() => {
+					// ReSharper disable AccessToDisposedClosure
+					new Tokenizer(reader, null);
+					// ReSharper restore AccessToDisposedClosure
+				});
 			}
 		}
 
-		[Test]
-		[ExpectedException(typeof(ArgumentNullException))]
+		[Fact]
 		public void ConstructWithoutReader() {
-			new Tokenizer(null, grammar);
+			Assert.Throws<ArgumentNullException>(() => {
+				new Tokenizer(null, grammar);
+			});
 		}
 
-		[Test]
+		[Fact]
 		public void EndOfDataWithUnfinishedTerminal() {
 			using (TestStringReader reader = new TestStringReader("0 'zero")) {
 				Tokenizer tokenizer = new Tokenizer(reader, grammar);
 				Token token;
-				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
-				Expect(token.Symbol.Kind, EqualTo(SymbolKind.Terminal));
-				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.TokenRead));
-				Expect(token.Symbol.Kind, EqualTo(SymbolKind.WhiteSpace));
-				Expect(tokenizer.NextToken(out token), EqualTo(ParseMessage.LexicalError));
+				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
+				Assert.Equal(SymbolKind.Terminal, token.Symbol.Kind);
+				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
+				Assert.Equal(SymbolKind.WhiteSpace, token.Symbol.Kind);
+				Assert.Equal(ParseMessage.LexicalError, tokenizer.NextToken(out token));
 			}
 		}
 	}

@@ -3,7 +3,7 @@
 // 
 // Copyright 2009, 2010 by Arsène von Wyss - avw@gmx.ch
 //
-// This file has kinly been contributed by Jan Polasek
+// This file has kindly been contributed by Jan Polášek
 // 
 // Development has been supported by Sirius Technologies AG, Basel
 // 

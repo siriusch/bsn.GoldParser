@@ -27,59 +27,61 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // 
+
 using System;
-using System.Linq;
+
+using Xunit;
 
 using bsn.GoldParser.Grammar;
 
-using NUnit.Framework;
-
 namespace bsn.GoldParser.Semantic {
-	[TestFixture]
-	public class RuleAttributeTest: AssertionHelper {
-		private CompiledGrammar grammar;
+	public class RuleAttributeTest {
+		private readonly CompiledGrammar grammar;
 
-		[TestFixtureSetUp]
-		public void SetUp() {
+		public RuleAttributeTest() {
 			grammar = CompiledGrammarTest.LoadTestGrammar();
 		}
 
-		[Test]
+		[Fact]
 		public void BindToGrammar() {
-			Expect(new RuleAttribute("<Negate Exp> ::= '-' <Value>").Bind(grammar), Not.Null);
+			RuleAttribute ruleAttribute = new RuleAttribute("<Negate Exp> ::= '-' <Value>");
+			Assert.NotNull(ruleAttribute.Bind(grammar));
 		}
 
-		[Test]
-		[ExpectedException(typeof(ArgumentNullException))]
+		[Fact]
 		public void ConstructWithEmptyString() {
-			new RuleAttribute(string.Empty);
+			Assert.Throws<ArgumentNullException>(() => {
+				new RuleAttribute(string.Empty);
+			});
 		}
 
-		[Test]
+		[Fact]
 		public void ConstructWithGenericArgument() {
 			new RuleAttribute("<Negate Exp> ::= '-' <Value>", typeof(TestValue));
 		}
 
-		[Test]
+		[Fact]
 		public void ConstructWithGenericArgument2() {
 			new RuleAttribute("<Negate Exp> ::= '-' <Value>", typeof(TestValue), typeof(TestValue));
 		}
 
-		[Test]
-		[ExpectedException(typeof(ArgumentException))]
+		[Fact]
 		public void ConstructWithInvalidString() {
-			new RuleAttribute("<Negate Exp> = '-' <Value>");
+			Assert.Throws<ArgumentException>(() => {
+				new RuleAttribute("<Negate Exp> = '-' <Value>");
+			});
 		}
 
-		[Test]
+		[Fact]
 		public void ConstructWithString() {
 			new RuleAttribute("<Negate Exp> ::= '-' <Value>");
 		}
 
-		[Test]
-		[ExpectedException(typeof(ArgumentNullException))]
+		[Fact]
 		public void ConstructWithoutString() {
-			new RuleAttribute(null);
+			Assert.Throws<ArgumentNullException>(() => {
+				new RuleAttribute(null);
+			});
 		}
 	}
 }

@@ -27,20 +27,219 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // 
+
 using System;
+
+using Xunit;
 
 using bsn.GoldParser.Grammar;
 
-using NUnit.Framework;
-
 namespace bsn.GoldParser.Parser {
-	[TestFixture]
-	public class LalrProcessorTest: AssertionHelper {
-		private CompiledGrammar grammar;
+	public class LalrProcessorTest {
+		private readonly CompiledGrammar grammar;
 
-		[TestFixtureSetUp]
-		public void SetUp() {
+		public LalrProcessorTest() {
 			grammar = CompiledGrammarTest.LoadTestGrammar();
+		}
+
+		[Fact]
+		public void ConstructWithoutTokenizer() {
+			Assert.Throws<ArgumentNullException>(() => {
+				new LalrProcessor(null);
+			});
+		}
+
+		[Fact]
+		public void ParseAll() {
+			using (TestStringReader reader = TokenizerTest.GetReader()) {
+				Tokenizer tokenizer = new Tokenizer(reader, grammar);
+				LalrProcessor processor = new LalrProcessor(tokenizer, true);
+				Assert.Equal(ParseMessage.Accept, processor.ParseAll());
+				Assert.Equal("Expression", processor.CurrentToken.Symbol.Name);
+				Assert.Equal(27, CountTokens(processor.CurrentToken));
+			}
+		}
+
+		[Fact]
+		public void ParseTreeWithTrim() {
+			using (TestStringReader reader = TokenizerTest.GetReader()) {
+				Tokenizer tokenizer = new Tokenizer(reader, grammar);
+				LalrProcessor processor = new LalrProcessor(tokenizer, true);
+				Assert.Equal(true, processor.Trim);
+				Assert.Equal(ParseMessage.TokenRead, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.TokenRead, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.Reduction, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.TokenRead, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.TokenRead, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.TokenRead, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.Reduction, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.TokenRead, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.TokenRead, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.Reduction, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.Reduction, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.TokenRead, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.Reduction, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.Reduction, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.TokenRead, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.TokenRead, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.TokenRead, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.CommentLineRead, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.TokenRead, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.TokenRead, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.Reduction, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.Reduction, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.Reduction, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.TokenRead, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.TokenRead, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.CommentBlockRead, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.TokenRead, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.TokenRead, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.Reduction, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.TokenRead, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.Reduction, processor.Parse());
+				Assert.Equal(typeof(Reduction), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.Reduction, processor.Parse());
+				Assert.Equal(typeof(Reduction), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.Reduction, processor.Parse());
+				Assert.Equal(typeof(Reduction), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.Accept, processor.Parse());
+				Assert.Equal("Expression", processor.CurrentToken.Symbol.Name);
+				Assert.Equal(27, CountTokens(processor.CurrentToken));
+			}
+		}
+
+		[Fact]
+		public void ParseTreeWithoutTrim() {
+			using (TestStringReader reader = TokenizerTest.GetReader()) {
+				Tokenizer tokenizer = new Tokenizer(reader, grammar);
+				LalrProcessor processor = new LalrProcessor(tokenizer);
+				Assert.Equal(false, processor.Trim);
+				Assert.Equal(ParseMessage.TokenRead, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.TokenRead, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.Reduction, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.Reduction, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.Reduction, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.TokenRead, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.TokenRead, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.TokenRead, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.Reduction, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.Reduction, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.Reduction, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.Reduction, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.TokenRead, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.TokenRead, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.Reduction, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.Reduction, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.Reduction, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.Reduction, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.TokenRead, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.Reduction, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.Reduction, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.Reduction, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.TokenRead, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.TokenRead, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.TokenRead, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.CommentLineRead, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.TokenRead, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.TokenRead, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.Reduction, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.Reduction, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.Reduction, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.Reduction, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.TokenRead, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.TokenRead, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.CommentBlockRead, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.TokenRead, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.TokenRead, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.Reduction, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.Reduction, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.Reduction, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.TokenRead, processor.Parse());
+				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.Reduction, processor.Parse());
+				Assert.Equal(typeof(Reduction), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.Reduction, processor.Parse());
+				Assert.Equal(typeof(Reduction), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.Reduction, processor.Parse());
+				Assert.Equal(typeof(Reduction), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.Reduction, processor.Parse());
+				Assert.Equal(typeof(Reduction), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.Reduction, processor.Parse());
+				Assert.Equal(typeof(Reduction), processor.CurrentToken.GetType());
+				Assert.Equal(ParseMessage.Accept, processor.Parse());
+				Assert.Equal("Root", processor.CurrentToken.Symbol.Name);
+				Assert.Equal(40, CountTokens(processor.CurrentToken));
+			}
 		}
 
 		private int CountTokens(IToken currentToken) {
@@ -52,205 +251,6 @@ namespace bsn.GoldParser.Parser {
 				}
 			}
 			return result;
-		}
-
-		[Test]
-		[ExpectedException(typeof(ArgumentNullException))]
-		public void ConstructWithoutTokenizer() {
-			new LalrProcessor(null);
-		}
-
-		[Test]
-		public void ParseAll() {
-			using (TestStringReader reader = TokenizerTest.GetReader()) {
-				Tokenizer tokenizer = new Tokenizer(reader, grammar);
-				LalrProcessor processor = new LalrProcessor(tokenizer, true);
-				Expect(processor.ParseAll(), EqualTo(ParseMessage.Accept));
-				Expect(processor.CurrentToken.Symbol.Name, EqualTo("Expression"));
-				Expect(CountTokens(processor.CurrentToken), EqualTo(27));
-			}
-		}
-
-		[Test]
-		public void ParseTreeWithTrim() {
-			using (TestStringReader reader = TokenizerTest.GetReader()) {
-				Tokenizer tokenizer = new Tokenizer(reader, grammar);
-				LalrProcessor processor = new LalrProcessor(tokenizer, true);
-				Expect(processor.Trim, EqualTo(true));
-				Expect(processor.Parse(), EqualTo(ParseMessage.TokenRead));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.TokenRead));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.Reduction));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.TokenRead));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.TokenRead));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.TokenRead));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.Reduction));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.TokenRead));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.TokenRead));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.Reduction));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.Reduction));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.TokenRead));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.Reduction));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.Reduction));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.TokenRead));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.TokenRead));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.TokenRead));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.CommentLineRead));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.TokenRead));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.TokenRead));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.Reduction));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.Reduction));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.Reduction));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.TokenRead));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.TokenRead));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.CommentBlockRead));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.TokenRead));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.TokenRead));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.Reduction));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.TokenRead));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.Reduction));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(Reduction)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.Reduction));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(Reduction)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.Reduction));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(Reduction)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.Accept));
-				Expect(processor.CurrentToken.Symbol.Name, EqualTo("Expression"));
-				Expect(CountTokens(processor.CurrentToken), EqualTo(27));
-			}
-		}
-
-		[Test]
-		public void ParseTreeWithoutTrim() {
-			using (TestStringReader reader = TokenizerTest.GetReader()) {
-				Tokenizer tokenizer = new Tokenizer(reader, grammar);
-				LalrProcessor processor = new LalrProcessor(tokenizer);
-				Expect(processor.Trim, EqualTo(false));
-				Expect(processor.Parse(), EqualTo(ParseMessage.TokenRead));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.TokenRead));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.Reduction));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.Reduction));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.Reduction));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.TokenRead));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.TokenRead));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.TokenRead));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.Reduction));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.Reduction));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.Reduction));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.Reduction));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.TokenRead));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.TokenRead));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.Reduction));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.Reduction));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.Reduction));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.Reduction));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.TokenRead));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.Reduction));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.Reduction));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.Reduction));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.TokenRead));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.TokenRead));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.TokenRead));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.CommentLineRead));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.TokenRead));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.TokenRead));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.Reduction));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.Reduction));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.Reduction));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.Reduction));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.TokenRead));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.TokenRead));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.CommentBlockRead));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.TokenRead));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.TokenRead));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.Reduction));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.Reduction));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.Reduction));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.TokenRead));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(TextToken)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.Reduction));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(Reduction)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.Reduction));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(Reduction)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.Reduction));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(Reduction)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.Reduction));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(Reduction)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.Reduction));
-				Expect(processor.CurrentToken.GetType(), EqualTo(typeof(Reduction)));
-				Expect(processor.Parse(), EqualTo(ParseMessage.Accept));
-				Expect(processor.CurrentToken.Symbol.Name, EqualTo("Root"));
-				Expect(CountTokens(processor.CurrentToken), EqualTo(40));
-			}
 		}
 	}
 }

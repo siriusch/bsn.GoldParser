@@ -3,7 +3,7 @@
 // 
 // Copyright 2009, 2010 by Arsène von Wyss - avw@gmx.ch
 //
-// This file has kinly been contributed by Jan Polasek
+// This file has kindly been contributed by Jan Polášek
 // 
 // Development has been supported by Sirius Technologies AG, Basel
 // 
@@ -33,25 +33,25 @@ using System;
 using System.IO;
 using System.Text.RegularExpressions;
 
-using NUnit.Framework;
+using Xunit;
 
 using bsn.GoldParser.Grammar;
 
 namespace bsn.GoldParser.Semantic.StaticMethodAttribute {
-	[TestFixture]
-	internal class Tests {
-		private CompiledGrammar _grammar;
+	public class Tests {
+		private readonly CompiledGrammar grammar;
 
-		[TestFixtureSetUp]
-		public void SetUp() {
-			_grammar = CompiledGrammarTest.LoadTestGrammar();
+		public Tests() {
+			grammar = CompiledGrammarTest.LoadTestGrammar();
 		}
 
-		[Test]
+		[Fact]
 		public void DynamicFactory() {
-			SemanticTypeActions<DynamicMockTokenBase> actions = new SemanticTypeActions<DynamicMockTokenBase>(_grammar);
-			Assert.Throws<InvalidOperationException>(actions.Initialize);
-			actions = new SemanticTypeActions<DynamicMockTokenBase>(_grammar);
+			SemanticTypeActions<DynamicMockTokenBase> actions = new SemanticTypeActions<DynamicMockTokenBase>(grammar);
+			// ReSharper disable AccessToModifiedClosure
+			Assert.Throws<InvalidOperationException>(() => actions.Initialize());
+			// ReSharper restore AccessToModifiedClosure
+			actions = new SemanticTypeActions<DynamicMockTokenBase>(grammar);
 			try {
 				actions.Initialize();
 			} catch (InvalidOperationException exception) {
@@ -59,24 +59,24 @@ namespace bsn.GoldParser.Semantic.StaticMethodAttribute {
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void GenericInitializes() {
-			SemanticTypeActions<MockGenericTokenBase> actions = new SemanticTypeActions<MockGenericTokenBase>(_grammar);
+			SemanticTypeActions<MockGenericTokenBase> actions = new SemanticTypeActions<MockGenericTokenBase>(grammar);
 			Assert.DoesNotThrow(actions.Initialize);
 		}
 
-		[Test]
+		[Fact]
 		public void GenericParse() {
-			SemanticTypeActions<MockGenericTokenBase> actions = new SemanticTypeActions<MockGenericTokenBase>(_grammar);
+			SemanticTypeActions<MockGenericTokenBase> actions = new SemanticTypeActions<MockGenericTokenBase>(grammar);
 			actions.Initialize();
 			SemanticProcessor<MockGenericTokenBase> processor = new SemanticProcessor<MockGenericTokenBase>(new StringReader("-1+2+3*4-8"), actions);
-			Assert.AreEqual(ParseMessage.Accept, processor.ParseAll());
-			Assert.IsInstanceOf<MockGenericTokenBase>(processor.CurrentToken);
+			Assert.Equal(ParseMessage.Accept, processor.ParseAll());
+			Assert.IsAssignableFrom<MockGenericTokenBase>(processor.CurrentToken);
 		}
 
-		[Test]
+		[Fact]
 		public void Initializes() {
-			SemanticTypeActions<MockTokenBase> actions = new SemanticTypeActions<MockTokenBase>(_grammar);
+			SemanticTypeActions<MockTokenBase> actions = new SemanticTypeActions<MockTokenBase>(grammar);
 			Assert.DoesNotThrow(actions.Initialize);
 		}
 	}

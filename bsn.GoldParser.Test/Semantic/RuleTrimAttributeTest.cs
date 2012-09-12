@@ -27,68 +27,73 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // 
+
 using System;
+
+using Xunit;
 
 using bsn.GoldParser.Grammar;
 
-using NUnit.Framework;
-
 namespace bsn.GoldParser.Semantic {
-	[TestFixture]
-	public class RuleTrimAttributeTest: AssertionHelper {
-		private CompiledGrammar grammar;
+	public class RuleTrimAttributeTest {
+		private readonly CompiledGrammar grammar;
 
-		[TestFixtureSetUp]
-		public void SetUp() {
+		public RuleTrimAttributeTest() {
 			grammar = CompiledGrammarTest.LoadTestGrammar();
 		}
 
-		[Test]
+		[Fact]
 		public void BindToGrammar() {
 			RuleTrimAttribute attribute = new RuleTrimAttribute("<Negate Exp> ::= '-' <Value>", 1);
-			Expect(attribute.Bind(grammar), Not.Null);
-			Expect(attribute.TrimSymbolIndex, EqualTo(1));
+			Assert.NotNull(attribute.Bind(grammar));
+			Assert.Equal(1, attribute.TrimSymbolIndex);
 		}
 
-		[Test]
-		[ExpectedException(typeof(ArgumentNullException))]
+		[Fact]
 		public void ConstructWithEmptyString() {
-			new RuleTrimAttribute(string.Empty, 0);
+			Assert.Throws<ArgumentNullException>(() => {
+				new RuleTrimAttribute(string.Empty, 0);
+			});
 		}
 
-		[Test]
-		[ExpectedException(typeof(ArgumentException))]
+		[Fact]
 		public void ConstructWithInvalidTrimName() {
-			new RuleTrimAttribute("<Negate Exp> ::= '-' <Value>", "Value");
+			Assert.Throws<ArgumentException>(() => {
+				new RuleTrimAttribute("<Negate Exp> ::= '-' <Value>", "Value");
+			});
 		}
 
-		[Test]
-		[ExpectedException(typeof(ArgumentOutOfRangeException))]
+		[Fact]
 		public void ConstructWithNegativeIndex() {
-			new RuleTrimAttribute("<Negate Exp> ::= '-' <Value>", -1);
+			Assert.Throws<ArgumentOutOfRangeException>(() => {
+				new RuleTrimAttribute("<Negate Exp> ::= '-' <Value>", -1);
+			});
 		}
 
-		[Test]
-		[ExpectedException(typeof(ArgumentNullException))]
+		[Fact]
 		public void ConstructWithNullTrimName() {
-			new RuleTrimAttribute("<Negate Exp> ::= '-' <Value>", null);
+			Assert.Throws<ArgumentNullException>(() => {
+				new RuleTrimAttribute("<Negate Exp> ::= '-' <Value>", null);
+			});
 		}
 
-		[Test]
-		[ExpectedException(typeof(ArgumentOutOfRangeException))]
+		[Fact]
 		public void ConstructWithOverflowIndex() {
-			new RuleTrimAttribute("<Negate Exp> ::= '-' <Value>", 2);
+			Assert.Throws<ArgumentOutOfRangeException>(() => {
+				new RuleTrimAttribute("<Negate Exp> ::= '-' <Value>", 2);
+			});
 		}
 
-		[Test]
+		[Fact]
 		public void ConstructWithTrimName() {
 			new RuleTrimAttribute("<Negate Exp> ::= '-' <Value>", "<Value>");
 		}
 
-		[Test]
-		[ExpectedException(typeof(ArgumentNullException))]
+		[Fact]
 		public void ConstructWithoutString() {
-			new RuleTrimAttribute(null, 0);
+			Assert.Throws<ArgumentNullException>(() => {
+				new RuleTrimAttribute(null, 0);
+			});
 		}
 	}
 }
