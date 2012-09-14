@@ -7,7 +7,7 @@
 ; This translation is done by Arsène von Wyss (avw@gmx.ch)
 ; 
 ; The translation is inspired by the other engine translations:
-; C# engiine by Vladimir Morozov (vmoroz@hotmail.com)
+; C# engine by Vladimir Morozov (vmoroz@hotmail.com)
 ; Delphi engine by Alexandre Rai (riccio@gmx.at)
 ; C# engine by Marcus Klimstra (klimstra@home.nl)
 ;----------------------------------------------------------------------

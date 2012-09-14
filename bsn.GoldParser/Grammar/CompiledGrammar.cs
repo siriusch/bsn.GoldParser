@@ -736,7 +736,7 @@ namespace bsn.GoldParser.Grammar {
 					}
 					break;
 				case CgtRecordType.Rules:
-					ReadRules(context);
+					ReadRule(context);
 					break;
 				case CgtRecordType.DfaStates:
 					ReadDfaState(context);
@@ -775,7 +775,9 @@ namespace bsn.GoldParser.Grammar {
 			GroupAdvanceMode advanceMode = (GroupAdvanceMode)context.ReadIntegerEntry();
 			GroupEndingMode endingMode = (GroupEndingMode)context.ReadIntegerEntry();
 			context.ReadEmptyEntry();
-			int[] nesting = new int[context.ReadIntegerEntry()];
+			int nestingCount = context.ReadIntegerEntry();
+			Debug.Assert(nestingCount == context.EntryCount);
+			int[] nesting = new int[nestingCount];
 			for (int i = 0; i < nesting.Length; i++) {
 				nesting[i] = context.ReadIntegerEntry();
 			}
@@ -825,8 +827,9 @@ namespace bsn.GoldParser.Grammar {
 			context.ReadIntegerEntry(); // unicode plane
 			int rangeCount = context.ReadIntegerEntry();
 			context.ReadEmptyEntry(); // reserved
+			Debug.Assert(rangeCount == context.EntryCount/2);
 			StringBuilder result = new StringBuilder();
-			for (int i = 0; i < rangeCount; i++) {
+			while (context.EntryCount > 0) {
 				char ch = (char)context.ReadIntegerEntry();
 				char end = (char)context.ReadIntegerEntry();
 				while (ch <= end) {
@@ -954,7 +957,7 @@ namespace bsn.GoldParser.Grammar {
 		/// Read rule information.
 		/// </summary>
 		/// <param name="context"></param>
-		private void ReadRules(LoadContext context) {
+		private void ReadRule(LoadContext context) {
 			int index = context.ReadIntegerEntry();
 			Symbol nonterminal = symbolTable[context.ReadIntegerEntry()];
 			context.ReadEmptyEntry();
