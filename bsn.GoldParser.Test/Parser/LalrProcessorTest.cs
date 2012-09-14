@@ -39,7 +39,7 @@ namespace bsn.GoldParser.Parser {
 		private readonly CompiledGrammar grammar;
 
 		public LalrProcessorTest() {
-			grammar = CompiledGrammarTest.LoadTestGrammar();
+			grammar = CgtCompiledGrammarTest.LoadCgtTestGrammar();
 		}
 
 		[Fact]

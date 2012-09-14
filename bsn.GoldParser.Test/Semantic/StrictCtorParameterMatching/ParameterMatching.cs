@@ -40,7 +40,7 @@ namespace bsn.GoldParser.Semantic.StrictCtorParameterMatching {
 		private readonly CompiledGrammar grammar;
 
 		public ParameterMatching() {
-			grammar = CompiledGrammarTest.LoadTestGrammar();
+			grammar = CgtCompiledGrammarTest.LoadCgtTestGrammar();
 		}
 
 		[Fact]

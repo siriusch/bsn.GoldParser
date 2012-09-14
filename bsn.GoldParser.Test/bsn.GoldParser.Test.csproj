@@ -53,8 +53,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Grammar\CompiledGrammarTest.cs" />
-    <Compile Include="Grammar\SymbolSetTest.cs" />
+    <Compile Include="Grammar\CgtCompiledGrammarTest.cs" />
+    <Compile Include="Grammar\CompiledGrammarTestBase.cs" />
+    <Compile Include="Grammar\EgtCompiledGrammarTest.cs" />
+    <Compile Include="Grammar\GrammarObjectSetTest.cs" />
     <Compile Include="Parser\TextBufferTest.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -105,6 +107,7 @@
     <EmbeddedResource Include="Grammar\TestGrammar.cgt" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Grammar\TestGrammar.egt" />
     <None Include="Grammar\TestGrammar.grm" />
     <None Include="packages.config" />
   </ItemGroup>

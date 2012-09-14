@@ -26,55 +26,55 @@
 // 
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-// 
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
 
 namespace bsn.GoldParser.Grammar {
 	/// <summary>
-	/// A set class for symbols.
+	/// A set class for grammar objects.
 	/// </summary>
 	/// <remarks>
 	/// This class is being used because there is no <c>HashSet&lt;&gt;</c> class in the version 2 of the framework.
 	/// </remarks>
-	public class SymbolSet: IEnumerable<Symbol> {
-		private readonly Dictionary<Symbol, bool> entries = new Dictionary<Symbol, bool>();
+	public class GrammarObjectSet<T>: IEnumerable<T> where T: GrammarObject<T> {
+		private readonly Dictionary<T, bool> entries = new Dictionary<T, bool>();
 
 		/// <summary>
-		/// Includes or excludes the specified symbol from the set.
+		/// Includes or excludes the specified object from the set.
 		/// </summary>
-		public bool this[Symbol symbol] {
+		public bool this[T obj] {
 			get {
 				bool result;
-				return (symbol != null) && entries.TryGetValue(symbol, out result) && result;
+				return (obj != null) && entries.TryGetValue(obj, out result) && result;
 			}
 			set {
-				if (value || entries.ContainsKey(symbol)) {
-					entries[symbol] = value;
+				if (value || entries.ContainsKey(obj)) {
+					entries[obj] = value;
 				}
 			}
 		}
 
 		/// <summary>
-		/// Sets the specified symbol.
+		/// Sets the specified object.
 		/// </summary>
-		/// <param name="symbol">The symbol to be included.</param>
-		/// <returns><c>true</c> if the symbol was not yet set.</returns>
-		public bool Set(Symbol symbol) {
+		/// <param name="obj">The object to be included.</param>
+		/// <returns><c>true</c> if the object was not yet set.</returns>
+		public bool Set(T obj) {
 			bool isSet;
-			if (entries.TryGetValue(symbol, out isSet)) {
+			if (entries.TryGetValue(obj, out isSet)) {
 				if (!isSet) {
-					entries[symbol] = true;
+					entries[obj] = true;
 				}
 				return !isSet;
 			}
-			entries.Add(symbol, true);
+			entries.Add(obj, true);
 			return true;
 		}
 
-		public IEnumerator<Symbol> GetEnumerator() {
-			foreach (KeyValuePair<Symbol, bool> entry in entries) {
+		public IEnumerator<T> GetEnumerator() {
+			foreach (KeyValuePair<T, bool> entry in entries) {
 				if (entry.Value) {
 					yield return entry.Key;
 				}

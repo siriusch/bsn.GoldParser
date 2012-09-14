@@ -1,7 +1,7 @@
-﻿// bsn GoldParser .NET Engine
+// bsn GoldParser .NET Engine
 // --------------------------
 // 
-// Copyright 2009, 2010 by Arsène von Wyss - avw@gmx.ch
+// Copyright 2009, 2010 by Ars�ne von Wyss - avw@gmx.ch
 // 
 // Development has been supported by Sirius Technologies AG, Basel
 // 
@@ -26,41 +26,20 @@
 // 
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-// 
 
-using System;
+namespace bsn.GoldParser.Grammar {
+	/// <summary>
+	/// The advance mode for a group in the EGT grammar
+	/// </summary>
+	public enum GroupAdvanceMode: int {
+		/// <summary>
+		/// The group will advance a token at a time.
+		/// </summary>
+		Token = 0,
 
-using Xunit;
-
-using bsn.GoldParser.Grammar;
-
-namespace bsn.GoldParser.Semantic {
-	public class SemanticTypeActionsTest {
-		private readonly CompiledGrammar grammar;
-
-		public SemanticTypeActionsTest() {
-			grammar = CgtCompiledGrammarTest.LoadCgtTestGrammar();
-		}
-
-		[Fact]
-		public void ConstructWithoutGrammar() {
-			Assert.Throws<ArgumentNullException>(() => {
-				new SemanticTypeActions<TestToken>(null);
-			});
-		}
-
-		[Fact]
-		public void Create() {
-			CreateSemanticActions();
-		}
-
-		[Fact]
-		public void Initialize() {
-			CreateSemanticActions().Initialize(true);
-		}
-
-		private SemanticTypeActions<TestToken> CreateSemanticActions() {
-			return new SemanticTypeActions<TestToken>(grammar);
-		}
+		/// <summary>
+		/// The group will advance by just one character at a time.
+		/// </summary>
+		Character = 1
 	}
 }

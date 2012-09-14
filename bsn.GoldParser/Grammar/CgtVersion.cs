@@ -31,8 +31,8 @@ using System;
 
 namespace bsn.GoldParser.Grammar {
 	public enum CgtVersion {
-		None,
-		V1_0,
-		V4_2
+		None = 0,
+		V1_0 = 1,
+		V5_0 = 5
 	}
 }

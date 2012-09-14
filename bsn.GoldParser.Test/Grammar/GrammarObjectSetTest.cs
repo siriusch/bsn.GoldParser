@@ -33,27 +33,27 @@ using System;
 using Xunit;
 
 namespace bsn.GoldParser.Grammar {
-	public class SymbolSetTest {
+	public class GrammarObjectSetTest {
 		private readonly CompiledGrammar grammar;
 
-		public SymbolSetTest() {
-			grammar = CompiledGrammarTest.LoadTestGrammar();
+		public GrammarObjectSetTest() {
+			grammar = CgtCompiledGrammarTest.LoadCgtTestGrammar();
 		}
 
 		[Fact]
 		public void Create() {
-			new SymbolSet();
+			new GrammarObjectSet<Symbol>();
 		}
 
 		[Fact]
 		public void GetFalse() {
-			SymbolSet set = new SymbolSet();
+			GrammarObjectSet<Symbol> set = new GrammarObjectSet<Symbol>();
 			Assert.Equal(false, set[grammar.GetSymbol(0)]);
 		}
 
 		[Fact]
 		public void MultiSetGet() {
-			SymbolSet set = new SymbolSet();
+			GrammarObjectSet<Symbol> set = new GrammarObjectSet<Symbol>();
 			Symbol symbol = grammar.GetSymbol(0);
 			set[symbol] = false;
 			Assert.Equal(false, set[symbol]);
@@ -67,7 +67,7 @@ namespace bsn.GoldParser.Grammar {
 
 		[Fact]
 		public void SetGetFalse() {
-			SymbolSet set = new SymbolSet();
+			GrammarObjectSet<Symbol> set = new GrammarObjectSet<Symbol>();
 			Symbol symbol = grammar.GetSymbol(0);
 			set[symbol] = false;
 			Assert.Equal(false, set[symbol]);
@@ -75,7 +75,7 @@ namespace bsn.GoldParser.Grammar {
 
 		[Fact]
 		public void SetGetMulti() {
-			SymbolSet set = new SymbolSet();
+			GrammarObjectSet<Symbol> set = new GrammarObjectSet<Symbol>();
 			Symbol symbolX = grammar.GetSymbol(0);
 			Symbol symbolY = grammar.GetSymbol(1);
 			set[symbolX] = true;
@@ -89,7 +89,7 @@ namespace bsn.GoldParser.Grammar {
 
 		[Fact]
 		public void SetGetTrue() {
-			SymbolSet set = new SymbolSet();
+			GrammarObjectSet<Symbol> set = new GrammarObjectSet<Symbol>();
 			Symbol symbol = grammar.GetSymbol(0);
 			set[symbol] = true;
 			Assert.Equal(true, set[symbol]);
@@ -97,7 +97,7 @@ namespace bsn.GoldParser.Grammar {
 
 		[Fact]
 		public void SetNull() {
-			SymbolSet set = new SymbolSet();
+			GrammarObjectSet<Symbol> set = new GrammarObjectSet<Symbol>();
 			Assert.Throws<ArgumentNullException>(() => {
 				set[null] = true;
 			});

@@ -1,7 +1,7 @@
-﻿// bsn GoldParser .NET Engine
+// bsn GoldParser .NET Engine
 // --------------------------
 // 
-// Copyright 2009, 2010 by Arsène von Wyss - avw@gmx.ch
+// Copyright 2009, 2010 by Ars�ne von Wyss - avw@gmx.ch
 // 
 // Development has been supported by Sirius Technologies AG, Basel
 // 
@@ -26,41 +26,27 @@
 // 
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-// 
-
-using System;
 
 using Xunit;
 
-using bsn.GoldParser.Grammar;
-
-namespace bsn.GoldParser.Semantic {
-	public class SemanticTypeActionsTest {
-		private readonly CompiledGrammar grammar;
-
-		public SemanticTypeActionsTest() {
-			grammar = CgtCompiledGrammarTest.LoadCgtTestGrammar();
+namespace bsn.GoldParser.Grammar {
+	public class EgtCompiledGrammarTest: CompiledGrammarTestBase {
+		protected internal static CompiledGrammar LoadEgtTestGrammar() {
+			return CompiledGrammar.Load(typeof(EgtCompiledGrammarTest), "TestGrammar.egt");
 		}
 
 		[Fact]
-		public void ConstructWithoutGrammar() {
-			Assert.Throws<ArgumentNullException>(() => {
-				new SemanticTypeActions<TestToken>(null);
-			});
+		public void CheckDfaCharsetCount() {
+			CheckDfaCharsetCountInternal(20);
 		}
 
 		[Fact]
-		public void Create() {
-			CreateSemanticActions();
+		public void CheckSymbolCount() {
+			CheckSymcolCountInternal(24);
 		}
 
-		[Fact]
-		public void Initialize() {
-			CreateSemanticActions().Initialize(true);
-		}
-
-		private SemanticTypeActions<TestToken> CreateSemanticActions() {
-			return new SemanticTypeActions<TestToken>(grammar);
+		protected override CompiledGrammar LoadTestGrammar() {
+			return LoadEgtTestGrammar();
 		}
 	}
 }

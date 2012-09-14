@@ -1,7 +1,7 @@
-ï»¿// bsn GoldParser .NET Engine
+// bsn GoldParser .NET Engine
 // --------------------------
 // 
-// Copyright 2009, 2010 by ArsÃ¨ne von Wyss - avw@gmx.ch
+// Copyright 2009, 2010 by Arsène von Wyss - avw@gmx.ch
 // 
 // Development has been supported by Sirius Technologies AG, Basel
 // 
@@ -26,7 +26,6 @@
 // 
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-//  
 
 using System;
 using System.Collections.ObjectModel;
@@ -36,11 +35,7 @@ using System.IO;
 using Xunit;
 
 namespace bsn.GoldParser.Grammar {
-	public class CompiledGrammarTest {
-		internal static CompiledGrammar LoadTestGrammar() {
-			return CompiledGrammar.Load(typeof(CompiledGrammarTest), "TestGrammar.cgt");
-		}
-
+	public abstract class CompiledGrammarTestBase {
 		[Fact]
 		public void CheckAbout() {
 			CompiledGrammar grammar = LoadTestGrammar();
@@ -50,19 +45,7 @@ namespace bsn.GoldParser.Grammar {
 		[Fact]
 		public void CheckAuthor() {
 			CompiledGrammar grammar = LoadTestGrammar();
-			Assert.Equal("Robert van Loenhout and ArsÃ¨ne von Wyss", grammar.Author);
-		}
-
-		[Fact]
-		public void CheckCaseSensitive() {
-			CompiledGrammar grammar = LoadTestGrammar();
-			Assert.Equal(false, grammar.CaseSensitive);
-		}
-
-		[Fact]
-		public void CheckDfaCharsetCount() {
-			CompiledGrammar grammar = LoadTestGrammar();
-			Assert.Equal(16, grammar.DfaCharsetCount);
+			Assert.Equal("Robert van Loenhout and Arsène von Wyss", grammar.Author);
 		}
 
 		[Fact]
@@ -111,15 +94,6 @@ namespace bsn.GoldParser.Grammar {
 			Assert.Equal(16, grammar.RuleCount);
 			for (int i = 0; i < grammar.RuleCount; i++) {
 				Trace.WriteLine(grammar.GetRule(i).Definition, i.ToString());
-			}
-		}
-
-		[Fact]
-		public void CheckSymbolCount() {
-			CompiledGrammar grammar = LoadTestGrammar();
-			Assert.Equal(22, grammar.SymbolCount);
-			for (int i = 0; i < grammar.SymbolCount; i++) {
-				Trace.WriteLine(grammar.GetSymbol(i).Name, i.ToString());
 			}
 		}
 
@@ -174,40 +148,19 @@ namespace bsn.GoldParser.Grammar {
 			Assert.Equal("Float", symbol.Name);
 		}
 
-		[Fact]
-		public void PackTest() {
-			CompiledGrammar unpackedGrammar;
-			CompiledGrammar packedGrammar;
-			using (MemoryStream packedStream = new MemoryStream()) {
-				using (Stream unpackedStream = typeof(CompiledGrammarTest).Assembly.GetManifestResourceStream(typeof(CompiledGrammarTest), "TestGrammar.cgt")) {
-					Assert.NotNull(unpackedStream);
-					unpackedGrammar = CompiledGrammar.Load(unpackedStream);
-					unpackedStream.Seek(0, SeekOrigin.Begin);
-					CompiledGrammar.Pack(unpackedStream, packedStream, true);
-					Debug.WriteLine(string.Format("Packed length: {0} (original {1}, {2} times reduction)", packedStream.Length, unpackedStream.Length, unpackedStream.Length/(double)packedStream.Length));
-					Assert.True(packedStream.Length < unpackedStream.Length);
-				}
-				packedStream.Seek(0, SeekOrigin.Begin);
-				packedGrammar = CompiledGrammar.Load(packedStream);
-			}
-			Assert.Equal(unpackedGrammar.About, packedGrammar.About);
-			Assert.Equal(unpackedGrammar.Author, packedGrammar.Author);
-			Assert.Equal(unpackedGrammar.CaseSensitive, packedGrammar.CaseSensitive);
-			Assert.Equal(unpackedGrammar.DfaCharsetCount, packedGrammar.DfaCharsetCount);
-			Assert.Equal(unpackedGrammar.DfaInitialState.Index, packedGrammar.DfaInitialState.Index);
-			Assert.Equal(unpackedGrammar.DfaStateCount, packedGrammar.DfaStateCount);
-			Assert.Equal(unpackedGrammar.EndSymbol.Index, packedGrammar.EndSymbol.Index);
-			Assert.Equal(unpackedGrammar.ErrorSymbol.Index, packedGrammar.ErrorSymbol.Index);
-			Assert.Equal(unpackedGrammar.InitialLRState.Index, packedGrammar.InitialLRState.Index);
-			Assert.Equal(unpackedGrammar.LalrStateCount, packedGrammar.LalrStateCount);
-			Assert.Equal(unpackedGrammar.Name, packedGrammar.Name);
-			Assert.Equal(unpackedGrammar.RuleCount, packedGrammar.RuleCount);
-			Assert.Equal(unpackedGrammar.StartSymbol.Index, packedGrammar.StartSymbol.Index);
-			Assert.Equal(unpackedGrammar.SymbolCount, packedGrammar.SymbolCount);
-			Assert.Equal(unpackedGrammar.Version, packedGrammar.Version);
-			for (int i = 0; i < packedGrammar.DfaCharsetCount; i++) {
-				Assert.Equal(new string(unpackedGrammar.GetDfaCharset(i).CharactersIncludingSequence), new string(packedGrammar.GetDfaCharset(i).CharactersIncludingSequence));
+		protected virtual void CheckDfaCharsetCountInternal(int expectedCount) {
+			CompiledGrammar grammar = LoadTestGrammar();
+			Assert.Equal(expectedCount, grammar.DfaCharsetCount);
+		}
+
+		protected virtual void CheckSymcolCountInternal(int expectedCount) {
+			CompiledGrammar grammar = LoadTestGrammar();
+			Assert.Equal(expectedCount, grammar.SymbolCount);
+			for (int i = 0; i < grammar.SymbolCount; i++) {
+				Trace.WriteLine(grammar.GetSymbol(i).Name, i.ToString());
 			}
 		}
+
+		protected abstract CompiledGrammar LoadTestGrammar();
 	}
 }

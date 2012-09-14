@@ -1,7 +1,7 @@
-﻿// bsn GoldParser .NET Engine
+// bsn GoldParser .NET Engine
 // --------------------------
 // 
-// Copyright 2009, 2010 by Arsène von Wyss - avw@gmx.ch
+// Copyright 2009, 2010 by Ars�ne von Wyss - avw@gmx.ch
 // 
 // Development has been supported by Sirius Technologies AG, Basel
 // 
@@ -26,41 +26,20 @@
 // 
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-// 
 
-using System;
+namespace bsn.GoldParser.Grammar {
+	/// <summary>
+	/// The ending mode for a group in the EGT grammar
+	/// </summary>
+	public enum GroupEndingMode: int {
+		/// <summary>
+		/// The ending symbol will be left on the input queue.
+		/// </summary>
+		Open = 0,
 
-using Xunit;
-
-using bsn.GoldParser.Grammar;
-
-namespace bsn.GoldParser.Semantic {
-	public class SemanticTypeActionsTest {
-		private readonly CompiledGrammar grammar;
-
-		public SemanticTypeActionsTest() {
-			grammar = CgtCompiledGrammarTest.LoadCgtTestGrammar();
-		}
-
-		[Fact]
-		public void ConstructWithoutGrammar() {
-			Assert.Throws<ArgumentNullException>(() => {
-				new SemanticTypeActions<TestToken>(null);
-			});
-		}
-
-		[Fact]
-		public void Create() {
-			CreateSemanticActions();
-		}
-
-		[Fact]
-		public void Initialize() {
-			CreateSemanticActions().Initialize(true);
-		}
-
-		private SemanticTypeActions<TestToken> CreateSemanticActions() {
-			return new SemanticTypeActions<TestToken>(grammar);
-		}
+		/// <summary>
+		/// The ending symbol will be consumed.
+		/// </summary>
+		Closed = 1
 	}
 }

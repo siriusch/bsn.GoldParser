@@ -43,7 +43,7 @@ namespace bsn.GoldParser.Parser {
 		private readonly CompiledGrammar grammar;
 
 		public TokenizerTest() {
-			grammar = CompiledGrammarTest.LoadTestGrammar();
+			grammar = CgtCompiledGrammarTest.LoadCgtTestGrammar();
 		}
 
 		[Fact]

@@ -106,7 +106,7 @@ namespace bsn.GoldParser.Semantic {
 			}
 			Queue<Symbol> pending = new Queue<Symbol>();
 			pending.Enqueue(symbol);
-			SymbolSet visited = new SymbolSet();
+			GrammarObjectSet<Symbol> visited = new GrammarObjectSet<Symbol>();
 			Type bestMatch = null;
 			while (pending.Count > 0) {
 				symbol = pending.Dequeue();

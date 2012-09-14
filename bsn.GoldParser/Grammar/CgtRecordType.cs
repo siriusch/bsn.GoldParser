@@ -33,11 +33,14 @@ namespace bsn.GoldParser.Grammar {
 	/// </summary>
 	internal enum CgtRecordType {
 		Parameters = (int)'P', // 80
+		Property = (int)'p', // 112
+		Groups = (int)'g', // 103
 		TableCounts = (int)'T', // 84
+		TableCountsEnhanced = (int)'t', // 116
 		Initial = (int)'I', // 73
 		Symbols = (int)'S', // 83
 		Charsets = (int)'C', // 67
-		PackedCharsets = (int)'c',
+		PackedCharsets = (int)'c', // 99
 		Rules = (int)'R', // 82
 		DfaStates = (int)'D', // 68
 		LRStates = (int)'L', // 76

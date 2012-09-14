@@ -40,7 +40,7 @@ namespace bsn.GoldParser.Semantic {
 		private readonly CompiledGrammar grammar;
 
 		public SymbolTypeMapTest() {
-			grammar = CompiledGrammarTest.LoadTestGrammar();
+			grammar = CgtCompiledGrammarTest.LoadCgtTestGrammar();
 		}
 
 		[Fact]
