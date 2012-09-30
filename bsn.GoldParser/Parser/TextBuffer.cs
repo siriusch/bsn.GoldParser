@@ -44,6 +44,11 @@ namespace bsn.GoldParser.Parser {
 		private bool eof;
 		private int line = 1;
 		private char previous;
+		private int rollbackBufferOffset;
+		private long rollbackBufferPosition = -1;
+		private int rollbackColumn;
+		private int rollbackLine;
+		private char rollbackPrevious;
 
 		public TextBuffer(TextReader reader) {
 			if (reader == null) {
@@ -84,6 +89,11 @@ namespace bsn.GoldParser.Parser {
 			if (!EnsureBuffer(count-1)) {
 				throw new ArgumentOutOfRangeException("count");
 			}
+			rollbackBufferOffset = bufferOffset;
+			rollbackBufferPosition = bufferPosition;
+			rollbackColumn = column;
+			rollbackLine = line;
+			rollbackPrevious = previous;
 			var result = new string(buffer, bufferOffset, count);
 			for (int i = 0; i < count; i++) {
 				char current = buffer[bufferOffset++];
@@ -101,6 +111,17 @@ namespace bsn.GoldParser.Parser {
 				}
 			}
 			return result;
+		}
+
+		public void Rollback() {
+			if (rollbackBufferPosition != bufferPosition) {
+				throw new InvalidOperationException("The buffer was flushed and cannot be rolled back");
+			}
+			bufferOffset = rollbackBufferOffset;
+			column = rollbackColumn;
+			line = rollbackLine;
+			previous = rollbackPrevious;
+			rollbackBufferPosition = -1;
 		}
 
 		private void HandleNewline(char current, char skipChar) {

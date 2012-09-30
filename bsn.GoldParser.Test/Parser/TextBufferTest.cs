@@ -83,6 +83,21 @@ namespace bsn.GoldParser.Parser {
 		}
 
 		[Fact]
+		public void ReadAndRollback() {
+			using (TestStringReader reader = new TestStringReader(1024*20)) {
+				TextBuffer charBuffer = new TextBuffer(reader);
+				LineInfo position1;
+				Assert.Equal(reader.ToString().Substring(0, 1280), charBuffer.Read(1280, out position1));
+				Assert.Equal(charBuffer.Position, 1280);
+				charBuffer.Rollback();
+				Assert.Equal(charBuffer.Position, 0);
+				LineInfo position2;
+				Assert.Equal(reader.ToString().Substring(0, 1280), charBuffer.Read(1280, out position2));
+				Assert.Equal(position1, position2);
+			}
+		}
+
+		[Fact]
 		public void MultilineCr() {
 			using (TestStringReader reader = new TestStringReader("1\r\r3")) {
 				TextBuffer charBuffer = new TextBuffer(reader);
