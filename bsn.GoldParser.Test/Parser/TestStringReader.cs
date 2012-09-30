@@ -26,8 +26,7 @@
 // 
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-//  
-using System;
+
 using System.IO;
 using System.Text;
 
@@ -36,7 +35,18 @@ namespace bsn.GoldParser.Parser {
 		private static string CreateTestString(int charCount) {
 			StringBuilder builder = new StringBuilder(charCount);
 			for (int i = 0; i < charCount; i++) {
-				builder.Append((char)(i%80+32));
+				int ix = i%82;
+				switch (ix) {
+				case 0:
+					builder.Append('\r');
+					break;
+				case 1:
+					builder.Append('\n');
+					break;
+				default:
+					builder.Append((char)(ix + 30));
+					break;
+				}
 			}
 			return builder.ToString();
 		}
