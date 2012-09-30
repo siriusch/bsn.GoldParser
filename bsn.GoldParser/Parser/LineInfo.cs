@@ -106,7 +106,7 @@ namespace bsn.GoldParser.Parser {
 		}
 
 		public bool Equals(LineInfo other) {
-			return (other.line == line) && (other.column == column) && (other.index == column);
+			return (other.line == line) && (other.column == column) && (other.index == index);
 		}
 	}
 }
