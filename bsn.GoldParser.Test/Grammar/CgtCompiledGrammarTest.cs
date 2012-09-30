@@ -60,36 +60,41 @@ namespace bsn.GoldParser.Grammar {
 		[Fact]
 		public void PackTest() {
 			CompiledGrammar unpackedGrammar;
-			CompiledGrammar packedGrammar;
+			CompiledGrammar packedGrammar = null;
 			using (MemoryStream packedStream = new MemoryStream()) {
 				using (Stream unpackedStream = typeof(CgtCompiledGrammarTest).Assembly.GetManifestResourceStream(typeof(CgtCompiledGrammarTest), "TestGrammar.cgt")) {
 					Assert.NotNull(unpackedStream);
 					unpackedGrammar = CompiledGrammar.Load(unpackedStream);
 					unpackedStream.Seek(0, SeekOrigin.Begin);
 					CompiledGrammar.Pack(unpackedStream, packedStream, true);
-					Debug.WriteLine(string.Format("Packed length: {0} (original {1}, {2} times reduction)", packedStream.Length, unpackedStream.Length, unpackedStream.Length/(double)packedStream.Length));
+					Trace.WriteLine(string.Format("Packed length: {0} (original {1}, {2} times reduction)", packedStream.Length, unpackedStream.Length, unpackedStream.Length/(double)packedStream.Length));
 					Assert.True(packedStream.Length < unpackedStream.Length);
 				}
 				packedStream.Seek(0, SeekOrigin.Begin);
-				packedGrammar = CompiledGrammar.Load(packedStream);
+				// ReSharper disable AccessToDisposedClosure
+				Assert.DoesNotThrow(() => packedGrammar = CompiledGrammar.Load(packedStream));
+				// ReSharper restore AccessToDisposedClosure
+				Assert.NotNull(packedGrammar);
 			}
-			Assert.Equal(unpackedGrammar.About, packedGrammar.About);
-			Assert.Equal(unpackedGrammar.Author, packedGrammar.Author);
-			Assert.Equal(unpackedGrammar.CaseSensitive, packedGrammar.CaseSensitive);
-			Assert.Equal(unpackedGrammar.DfaCharsetCount, packedGrammar.DfaCharsetCount);
-			Assert.Equal(unpackedGrammar.DfaInitialState.Index, packedGrammar.DfaInitialState.Index);
-			Assert.Equal(unpackedGrammar.DfaStateCount, packedGrammar.DfaStateCount);
-			Assert.Equal(unpackedGrammar.EndSymbol.Index, packedGrammar.EndSymbol.Index);
-			Assert.Equal(unpackedGrammar.ErrorSymbol.Index, packedGrammar.ErrorSymbol.Index);
-			Assert.Equal(unpackedGrammar.InitialLRState.Index, packedGrammar.InitialLRState.Index);
-			Assert.Equal(unpackedGrammar.LalrStateCount, packedGrammar.LalrStateCount);
-			Assert.Equal(unpackedGrammar.Name, packedGrammar.Name);
-			Assert.Equal(unpackedGrammar.RuleCount, packedGrammar.RuleCount);
-			Assert.Equal(unpackedGrammar.StartSymbol.Index, packedGrammar.StartSymbol.Index);
-			Assert.Equal(unpackedGrammar.SymbolCount, packedGrammar.SymbolCount);
-			Assert.Equal(unpackedGrammar.Version, packedGrammar.Version);
-			for (int i = 0; i < packedGrammar.DfaCharsetCount; i++) {
-				Assert.Equal(new string(unpackedGrammar.GetDfaCharset(i).CharactersIncludingSequence), new string(packedGrammar.GetDfaCharset(i).CharactersIncludingSequence));
+			if (packedGrammar != null) {
+				Assert.Equal(unpackedGrammar.About, packedGrammar.About);
+				Assert.Equal(unpackedGrammar.Author, packedGrammar.Author);
+				Assert.Equal(unpackedGrammar.CaseSensitive, packedGrammar.CaseSensitive);
+				Assert.Equal(unpackedGrammar.DfaCharsetCount, packedGrammar.DfaCharsetCount);
+				Assert.Equal(unpackedGrammar.DfaInitialState.Index, packedGrammar.DfaInitialState.Index);
+				Assert.Equal(unpackedGrammar.DfaStateCount, packedGrammar.DfaStateCount);
+				Assert.Equal(unpackedGrammar.EndSymbol.Index, packedGrammar.EndSymbol.Index);
+				Assert.Equal(unpackedGrammar.ErrorSymbol.Index, packedGrammar.ErrorSymbol.Index);
+				Assert.Equal(unpackedGrammar.InitialLRState.Index, packedGrammar.InitialLRState.Index);
+				Assert.Equal(unpackedGrammar.LalrStateCount, packedGrammar.LalrStateCount);
+				Assert.Equal(unpackedGrammar.Name, packedGrammar.Name);
+				Assert.Equal(unpackedGrammar.RuleCount, packedGrammar.RuleCount);
+				Assert.Equal(unpackedGrammar.StartSymbol.Index, packedGrammar.StartSymbol.Index);
+				Assert.Equal(unpackedGrammar.SymbolCount, packedGrammar.SymbolCount);
+				Assert.Equal(unpackedGrammar.Version, packedGrammar.Version);
+				for (int i = 0; i < packedGrammar.DfaCharsetCount; i++) {
+					Assert.Equal(new string(unpackedGrammar.GetDfaCharset(i).CharactersIncludingSequence), new string(packedGrammar.GetDfaCharset(i).CharactersIncludingSequence));
+				}
 			}
 		}
 
