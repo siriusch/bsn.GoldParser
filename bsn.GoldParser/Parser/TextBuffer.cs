@@ -32,7 +32,7 @@ using System.Diagnostics;
 using System.IO;
 
 namespace bsn.GoldParser.Parser {
-	internal class TextBuffer {
+	public class TextBuffer {
 		private const int BufferSize = 2048;
 
 		private readonly TextReader reader;

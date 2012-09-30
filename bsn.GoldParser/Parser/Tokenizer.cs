@@ -55,15 +55,22 @@ namespace bsn.GoldParser.Parser {
 		/// </summary>
 		/// <param name="textReader"><see cref="TextReader"/> instance to read data from.</param>
 		/// <param name="grammar">The grammar used for the DFA states</param>
-		protected Tokenizer(TextReader textReader, CompiledGrammar grammar) {
+		protected Tokenizer(TextReader textReader, CompiledGrammar grammar): this(new TextBuffer(textReader), grammar) {}
+
+		/// <summary>
+		/// Initializes new instance of Parser class.
+		/// </summary>
+		/// <param name="textBuffer"><see cref="TextBuffer"/> instance to read data from.</param>
+		/// <param name="grammar">The grammar used for the DFA states</param>
+		protected Tokenizer(TextBuffer textBuffer, CompiledGrammar grammar) {
 			this.grammar = grammar;
-			if (textReader == null) {
-				throw new ArgumentNullException("textReader");
+			if (textBuffer == null) {
+				throw new ArgumentNullException("textBuffer");
 			}
 			if (grammar == null) {
 				throw new ArgumentNullException("grammar");
 			}
-			buffer = new TextBuffer(textReader);
+			buffer = textBuffer;
 		}
 
 		/// <summary>
@@ -90,6 +97,18 @@ namespace bsn.GoldParser.Parser {
 		public int LineNumber {
 			get {
 				return buffer.Line;
+			}
+		}
+
+		/// <summary>
+		/// Gets the text buffer.
+		/// </summary>
+		/// <value>
+		/// The text buffer.
+		/// </value>
+		protected TextBuffer Buffer {
+			get {
+				return buffer;
 			}
 		}
 
