@@ -687,6 +687,7 @@ namespace bsn.GoldParser.Grammar {
 		/// </summary>
 		private void Load(LoadContext context) {
 			string headerString = context.ReadHeaderString();
+			Trace.WriteLine(headerString, "Reading header");
 			Match headerMatch = FileHeader.Match(headerString);
 			if (!headerMatch.Success) {
 				throw new FileLoadException("The File Header is invalid or unsupported: "+headerString);
@@ -703,6 +704,7 @@ namespace bsn.GoldParser.Grammar {
 			}
 			while (context.HasMoreData()) {
 				CgtRecordType recordType = context.ReadNextRecord();
+				Trace.WriteLine(recordType, "Reading record");
 				switch (recordType) {
 				case CgtRecordType.Parameters:
 					ReadHeader(context);
