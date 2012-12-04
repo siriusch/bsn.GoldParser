@@ -16,7 +16,7 @@ namespace bsn.GoldParser.Semantic {
 			}
 
 			public static bool Parse(Stream stream) {
-				CompiledGrammar grammar = CompiledGrammar.Load(typeof(TestUnicode), "TestUnicode.cgt"); // embedded resource
+				CompiledGrammar grammar = CompiledGrammar.Load(typeof(TestUnicode), "TestUnicode.egt"); // embedded resource
 				SemanticTypeActions<TestToken> actions = new SemanticTypeActions<TestToken>(grammar);
 				actions.Initialize(true);
 				using (StreamReader reader = new StreamReader(stream)) // defaults to UTF-8

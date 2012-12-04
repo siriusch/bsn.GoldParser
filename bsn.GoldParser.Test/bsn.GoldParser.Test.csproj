@@ -111,7 +111,7 @@
     <EmbeddedResource Include="Grammar\TestGrammar.egt" />
     <None Include="Grammar\TestGrammar.grm" />
     <None Include="packages.config" />
-    <EmbeddedResource Include="Semantic\TestUnicode.cgt" />
+    <EmbeddedResource Include="Semantic\TestUnicode.egt" />
     <None Include="Semantic\TestUnicode.grm" />
   </ItemGroup>
   <ItemGroup>
