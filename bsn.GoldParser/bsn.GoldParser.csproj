@@ -166,7 +166,7 @@
     <Compile Include="Xml\ProcessResult.cs" />
     <Compile Include="Xml\TokenXmlReader.cs" />
     <None Include="Grammar\GoldParser.txt" />
-    <EmbeddedResource Include="Semantic\GoldRuleDeclaration.cgt" />
+    <EmbeddedResource Include="Semantic\GoldRuleDeclaration.egt" />
     <None Include="Semantic\GoldRuleDeclaration.grm" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

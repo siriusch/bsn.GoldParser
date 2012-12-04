@@ -1,7 +1,10 @@
 ﻿"Name"         = 'GOLD Meta-Language Rule Declaration'
-"Version"      = '2.6.0'
+"Version"      = '5.2.0'
 "Author"       = 'Arsène von Wyss'
 "About"        = 'This grammar defines rule declarations as used in the GOLD Meta-Language.'
+
+"Case Sensitive" = 'True'
+"Character Mapping" = 'None'
 
 "Start Symbol" = <Rule Decl>
 
@@ -9,9 +12,9 @@
 ! Special Terminals
 ! ====================================================================
 
-{Nonterminal Ch} = {Alphanumeric} + [_-.] + {Space} 
-{Terminal Ch}    = {Alphanumeric} + [_-.] 
-{Literal Ch}     = {Printable}    - ['']       !Basically anything, DO NOT CHANGE!
+{Terminal Ch}    = {All Printable} - [<>''~:] - {Whitespace}
+{Nonterminal Ch} = {Terminal Ch} + {Space}
+{Literal Ch}     = {All Valid} - [''] !Basically anything, DO NOT CHANGE!
 
 Nonterminal    = '<' {Nonterminal Ch}+ '>'
 Terminal       = {Terminal Ch}+  | '' {Literal Ch}* ''  

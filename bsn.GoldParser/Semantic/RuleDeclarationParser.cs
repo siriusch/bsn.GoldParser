@@ -39,7 +39,7 @@ using bsn.GoldParser.Parser;
 
 namespace bsn.GoldParser.Semantic {
 	public class RuleDeclarationParser {
-		private static readonly CompiledGrammar ruleGrammar = CompiledGrammar.Load(typeof(RuleDeclarationParser), "GoldRuleDeclaration.cgt");
+		private static readonly CompiledGrammar ruleGrammar = CompiledGrammar.Load(typeof(RuleDeclarationParser), "GoldRuleDeclaration.egt");
 
 		internal static CompiledGrammar RuleGrammar {
 			get {

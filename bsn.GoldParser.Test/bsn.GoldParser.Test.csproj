@@ -96,6 +96,7 @@
     <Compile Include="Semantic\SymbolTypeMapTest.cs" />
     <Compile Include="Parser\TokenizerTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Semantic\TestUnicode.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\bsn.GoldParser\bsn.GoldParser.csproj">
@@ -110,6 +111,8 @@
     <EmbeddedResource Include="Grammar\TestGrammar.egt" />
     <None Include="Grammar\TestGrammar.grm" />
     <None Include="packages.config" />
+    <EmbeddedResource Include="Semantic\TestUnicode.cgt" />
+    <None Include="Semantic\TestUnicode.grm" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Xml\" />
