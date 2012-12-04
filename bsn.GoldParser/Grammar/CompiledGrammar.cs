@@ -216,12 +216,15 @@ namespace bsn.GoldParser.Grammar {
 			}
 			if (stream.CanSeek) {
 				long position = stream.Position;
-				try {
-					using (GZipStream packedStream = new GZipStream(stream, CompressionMode.Decompress, true)) {
-						return Load(new BinaryReader(packedStream));
+				if ((stream.ReadByte() == 31) && (stream.ReadByte() == 139)) { // GZIP header ID bytes as per RFC1952
+					stream.Seek(position, SeekOrigin.Begin);
+					try {
+						using (GZipStream packedStream = new GZipStream(stream, CompressionMode.Decompress, true)) {
+							return Load(new BinaryReader(packedStream));
+						}
+					} catch (InvalidDataException) {} catch (IOException) {
+						// not a compressed stream
 					}
-				} catch (InvalidDataException) {} catch (FileLoadException) {
-					// not a compressed stream
 				}
 				stream.Seek(position, SeekOrigin.Begin);
 			}
@@ -326,6 +329,12 @@ namespace bsn.GoldParser.Grammar {
 			}
 		}
 
+		/// <summary>
+		/// Gets the block comment states.
+		/// </summary>
+		/// <value>
+		/// The block comment states.
+		/// </value>
 		public ICollection<DfaState> BlockCommentStates {
 			get {
 				return blockCommentStates;
@@ -687,7 +696,7 @@ namespace bsn.GoldParser.Grammar {
 		/// </summary>
 		private void Load(LoadContext context) {
 			string headerString = context.ReadHeaderString();
-			Trace.WriteLine(headerString, "Reading header");
+//			Trace.WriteLine(headerString, "Reading header");
 			Match headerMatch = FileHeader.Match(headerString);
 			if (!headerMatch.Success) {
 				throw new FileLoadException("The File Header is invalid or unsupported: "+headerString);
@@ -704,7 +713,7 @@ namespace bsn.GoldParser.Grammar {
 			}
 			while (context.HasMoreData()) {
 				CgtRecordType recordType = context.ReadNextRecord();
-				Trace.WriteLine(recordType, "Reading record");
+///				Trace.WriteLine(recordType, "Reading record");
 				switch (recordType) {
 				case CgtRecordType.Parameters:
 					ReadHeader(context);
