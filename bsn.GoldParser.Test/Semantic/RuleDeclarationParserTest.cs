@@ -41,7 +41,7 @@ namespace bsn.GoldParser.Semantic {
 		private readonly CompiledGrammar grammar;
 
 		public RuleDeclarationParserTest() {
-			grammar = CgtCompiledGrammarTest.LoadCgtTestGrammar();
+			grammar = EgtCompiledGrammarTest.LoadEgtTestGrammar();
 		}
 
 		[Fact]

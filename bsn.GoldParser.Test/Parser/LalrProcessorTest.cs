@@ -38,7 +38,7 @@ namespace bsn.GoldParser.Parser {
 		private readonly CompiledGrammar grammar;
 
 		public LalrProcessorTest() {
-			grammar = CgtCompiledGrammarTest.LoadCgtTestGrammar();
+			grammar = EgtCompiledGrammarTest.LoadEgtTestGrammar();
 		}
 
 		[Fact]
@@ -99,7 +99,7 @@ namespace bsn.GoldParser.Parser {
 				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
 				Assert.Equal(ParseMessage.TokenRead, processor.Parse());
 				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
-				Assert.Equal(ParseMessage.CommentLineRead, processor.Parse());
+				Assert.Equal(ParseMessage.BlockRead, processor.Parse());
 				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
 				Assert.Equal(ParseMessage.TokenRead, processor.Parse());
 				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
@@ -115,7 +115,7 @@ namespace bsn.GoldParser.Parser {
 				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
 				Assert.Equal(ParseMessage.TokenRead, processor.Parse());
 				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
-				Assert.Equal(ParseMessage.CommentBlockRead, processor.Parse());
+				Assert.Equal(ParseMessage.BlockRead, processor.Parse());
 				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
 				Assert.Equal(ParseMessage.TokenRead, processor.Parse());
 				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
@@ -193,7 +193,7 @@ namespace bsn.GoldParser.Parser {
 				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
 				Assert.Equal(ParseMessage.TokenRead, processor.Parse());
 				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
-				Assert.Equal(ParseMessage.CommentLineRead, processor.Parse());
+				Assert.Equal(ParseMessage.BlockRead, processor.Parse());
 				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
 				Assert.Equal(ParseMessage.TokenRead, processor.Parse());
 				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
@@ -211,7 +211,7 @@ namespace bsn.GoldParser.Parser {
 				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
 				Assert.Equal(ParseMessage.TokenRead, processor.Parse());
 				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
-				Assert.Equal(ParseMessage.CommentBlockRead, processor.Parse());
+				Assert.Equal(ParseMessage.BlockRead, processor.Parse());
 				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());
 				Assert.Equal(ParseMessage.TokenRead, processor.Parse());
 				Assert.Equal(typeof(TextToken), processor.CurrentToken.GetType());

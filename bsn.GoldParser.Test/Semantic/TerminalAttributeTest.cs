@@ -39,7 +39,7 @@ namespace bsn.GoldParser.Semantic {
 		private readonly CompiledGrammar grammar;
 
 		public TerminalAttributeTest() {
-			grammar = CgtCompiledGrammarTest.LoadCgtTestGrammar();
+			grammar = EgtCompiledGrammarTest.LoadEgtTestGrammar();
 		}
 
 		[Fact]

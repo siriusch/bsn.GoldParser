@@ -37,7 +37,7 @@ namespace bsn.GoldParser.Grammar {
 		private readonly CompiledGrammar grammar;
 
 		public GrammarObjectSetTest() {
-			grammar = CgtCompiledGrammarTest.LoadCgtTestGrammar();
+			grammar = EgtCompiledGrammarTest.LoadEgtTestGrammar();
 		}
 
 		[Fact]

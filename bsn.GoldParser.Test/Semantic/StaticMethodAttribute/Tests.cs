@@ -42,7 +42,7 @@ namespace bsn.GoldParser.Semantic.StaticMethodAttribute {
 		private readonly CompiledGrammar grammar;
 
 		public Tests() {
-			grammar = CgtCompiledGrammarTest.LoadCgtTestGrammar();
+			grammar = EgtCompiledGrammarTest.LoadEgtTestGrammar();
 		}
 
 		[Fact]

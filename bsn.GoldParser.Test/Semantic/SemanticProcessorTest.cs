@@ -40,7 +40,7 @@ namespace bsn.GoldParser.Semantic {
 		private readonly SemanticTypeActions<TestToken> actions;
 
 		public SemanticProcessorTest() {
-			actions = new SemanticTypeActions<TestToken>(CgtCompiledGrammarTest.LoadCgtTestGrammar());
+			actions = new SemanticTypeActions<TestToken>(EgtCompiledGrammarTest.LoadEgtTestGrammar());
 			actions.Initialize(false);
 		}
 

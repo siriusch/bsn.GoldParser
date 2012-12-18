@@ -34,9 +34,11 @@ namespace bsn.GoldParser.Semantic {
 	[Terminal("(EOF)")]
 	[Terminal("(Error)")]
 	[Terminal("(Whitespace)")]
-	[Terminal("(Comment End)")]
-	[Terminal("(Comment Line)")]
-	[Terminal("(Comment Start)")]
+	[Terminal("(Comment)")]
+	[Terminal("(NewLine)")]
+	[Terminal("(--)")]
+	[Terminal("(/*)")]
+	[Terminal("(*/)")]
 	[Terminal("String")]
 	public class TestSpecial: TestToken {
 		private readonly string text;
