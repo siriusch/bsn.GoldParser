@@ -56,6 +56,10 @@ namespace bsn.GoldParser.Grammar {
 			}
 		}
 
+		public bool Contains(T obj) {
+			return this[obj];
+		}
+
 		/// <summary>
 		/// Sets the specified object.
 		/// </summary>

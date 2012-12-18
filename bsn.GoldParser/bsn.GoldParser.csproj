@@ -93,6 +93,8 @@
     <Compile Include="Grammar\Group.cs" />
     <Compile Include="Grammar\GroupAdvanceMode.cs" />
     <Compile Include="Grammar\GroupEndingMode.cs" />
+    <Compile Include="Grammar\IGroup.cs" />
+    <Compile Include="Parser\DummyGroup.cs" />
     <Compile Include="Parser\IToken.cs" />
     <Compile Include="Parser\ITokenizer.cs" />
     <Compile Include="Parser\LalrStack.cs" />

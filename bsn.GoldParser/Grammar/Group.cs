@@ -34,8 +34,9 @@ namespace bsn.GoldParser.Grammar {
 	/// <summary>
 	/// A group in the grammar, such as a comment block or a block of another programming language.
 	/// </summary>
-	public class Group: GrammarObject<Group> {
+	public class Group: GrammarObject<Group>, IGroup {
 		private readonly GroupAdvanceMode advanceMode;
+		private readonly GrammarObjectSet<DfaState> allowedDfaStates = new GrammarObjectSet<DfaState>();
 		private readonly GroupEndingMode endingMode;
 		private readonly string name;
 		private readonly GrammarObjectSet<Group> nesting;
@@ -48,6 +49,74 @@ namespace bsn.GoldParser.Grammar {
 			this.advanceMode = advanceMode;
 			this.endingMode = endingMode;
 			nesting = new GrammarObjectSet<Group>();
+		}
+
+		/// <summary>
+		/// Gets the name.
+		/// </summary>
+		/// <value>
+		/// The name.
+		/// </value>
+		public string Name {
+			get {
+				return name;
+			}
+		}
+
+		/// <summary>
+		/// Determines which groups may be (directly) nested inside this group.
+		/// </summary>
+		/// <value>
+		/// The nesting groups.
+		/// </value>
+		public IEnumerable<Group> NestingGroups {
+			get {
+				return nesting;
+			}
+		}
+
+		/// <summary>
+		/// Gets the start symbol.
+		/// </summary>
+		/// <value>
+		/// The start symbol.
+		/// </value>
+		public Symbol StartSymbol {
+			get {
+				return start;
+			}
+		}
+
+		internal void Initialize(Symbol container, Symbol start, Symbol end, Group[] nesting) {
+			if (container == null) {
+				throw new ArgumentNullException("container");
+			}
+			if (start == null) {
+				throw new ArgumentNullException("start");
+			}
+			if (end == null) {
+				throw new ArgumentNullException("end");
+			}
+			if (nesting == null) {
+				throw new ArgumentNullException("nesting");
+			}
+			if (this.container != null) {
+				throw new InvalidOperationException("This group has already been initialized");
+			}
+			GrammarObjectSet<Symbol> filter = new GrammarObjectSet<Symbol>();
+			this.container = container;
+			this.start = start;
+			this.end = end;
+			filter.Set(EndSymbol);
+			foreach (Group nested in nesting) {
+				this.nesting.Set(nested);
+				filter.Set(nested.StartSymbol);
+			}
+			if (advanceMode == GroupAdvanceMode.Character) {
+				foreach (DfaState state in Owner.GetDfaStatesOfSymbols(filter.Contains)) {
+					allowedDfaStates.Set(state);
+				}
+			}
 		}
 
 		/// <summary>
@@ -99,39 +168,10 @@ namespace bsn.GoldParser.Grammar {
 		}
 
 		/// <summary>
-		/// Gets the name.
+		/// Determines whether the specified DFA state is used within this group's symbols or not.
 		/// </summary>
-		/// <value>
-		/// The name.
-		/// </value>
-		public string Name {
-			get {
-				return name;
-			}
-		}
-
-		/// <summary>
-		/// Determines which groups may be (directly) nested inside this group.
-		/// </summary>
-		/// <value>
-		/// The nesting groups.
-		/// </value>
-		public IEnumerable<Group> NestingGroups {
-			get {
-				return nesting;
-			}
-		}
-
-		/// <summary>
-		/// Gets the start symbol.
-		/// </summary>
-		/// <value>
-		/// The start symbol.
-		/// </value>
-		public Symbol StartSymbol {
-			get {
-				return start;
-			}
+		public bool IsAllowedDfaState(DfaState state) {
+			return (advanceMode == GroupAdvanceMode.Token) || allowedDfaStates.Contains(state);
 		}
 
 		/// <summary>
@@ -143,30 +183,6 @@ namespace bsn.GoldParser.Grammar {
 		/// </returns>
 		public bool IsNestingAllowed(Group group) {
 			return nesting[group];
-		}
-
-		internal void Initialize(Symbol container, Symbol start, Symbol end, Group[] nesting) {
-			if (container == null) {
-				throw new ArgumentNullException("container");
-			}
-			if (start == null) {
-				throw new ArgumentNullException("start");
-			}
-			if (end == null) {
-				throw new ArgumentNullException("end");
-			}
-			if (nesting == null) {
-				throw new ArgumentNullException("nesting");
-			}
-			if (this.container != null) {
-				throw new InvalidOperationException("This group has already been initialized");
-			}
-			this.container = container;
-			this.start = start;
-			this.end = end;
-			foreach (Group nested in nesting) {
-				this.nesting.Set(nested);
-			}
 		}
 	}
 }

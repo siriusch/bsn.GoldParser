@@ -35,15 +35,45 @@ using Xunit;
 using bsn.GoldParser.Grammar;
 
 namespace bsn.GoldParser.Parser {
-	public class TokenizerTest {
+	public class CgtTokenizerTest {
 		internal static TestStringReader GetReader() {
 			return new TestStringReader("0*(3-5)/-9 -- line comment\r\n+1.0 /* block\r\ncomment */ *.0e2");
 		}
 
 		private readonly CompiledGrammar grammar;
 
-		public TokenizerTest() {
+		public CgtTokenizerTest() {
 			grammar = CgtCompiledGrammarTest.LoadCgtTestGrammar();
+		}
+
+		[Fact]
+		public void LineComment() {
+			using (TestStringReader reader = new TestStringReader("-- /* don't /*** 'do ***/ this */ 0\r\n0")) {
+				Tokenizer tokenizer = new Tokenizer(reader, grammar);
+				Token token;
+				Assert.Equal(ParseMessage.CommentLineRead, tokenizer.NextToken(out token));
+				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
+				Assert.Equal(SymbolKind.Noise, token.Symbol.Kind);
+				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
+				Assert.Equal(SymbolKind.Terminal, token.Symbol.Kind);
+				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
+				Assert.Equal(SymbolKind.End, token.Symbol.Kind);
+			}
+		}
+
+		[Fact]
+		public void LineCommentEof() {
+			using (TestStringReader reader = new TestStringReader("0 -- /* don't /*** 'do ***/ this */ 0")) {
+				Tokenizer tokenizer = new Tokenizer(reader, grammar);
+				Token token;
+				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
+				Assert.Equal(SymbolKind.Terminal, token.Symbol.Kind);
+				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
+				Assert.Equal(SymbolKind.Noise, token.Symbol.Kind);
+				Assert.Equal(ParseMessage.CommentLineRead, tokenizer.NextToken(out token));
+				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
+				Assert.Equal(SymbolKind.End, token.Symbol.Kind);
+			}
 		}
 
 		[Fact]
@@ -51,9 +81,9 @@ namespace bsn.GoldParser.Parser {
 			using (TestStringReader reader = new TestStringReader("/* don't /*** 'do ***/ this */ 0")) {
 				Tokenizer tokenizer = new Tokenizer(reader, grammar);
 				Token token;
-				Assert.Equal(ParseMessage.CommentBlockRead, tokenizer.NextToken(out token));
+				Assert.Equal(ParseMessage.BlockRead, tokenizer.NextToken(out token));
 				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
-				Assert.Equal(SymbolKind.WhiteSpace, token.Symbol.Kind);
+				Assert.Equal(SymbolKind.Noise, token.Symbol.Kind);
 				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
 				Assert.Equal(SymbolKind.Terminal, token.Symbol.Kind);
 				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
@@ -66,9 +96,9 @@ namespace bsn.GoldParser.Parser {
 			using (TestStringReader reader = new TestStringReader("/* don't */ 'do this'")) {
 				Tokenizer tokenizer = new Tokenizer(reader, grammar);
 				Token token;
-				Assert.Equal(ParseMessage.CommentBlockRead, tokenizer.NextToken(out token));
+				Assert.Equal(ParseMessage.BlockRead, tokenizer.NextToken(out token));
 				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
-				Assert.Equal(SymbolKind.WhiteSpace, token.Symbol.Kind);
+				Assert.Equal(SymbolKind.Noise, token.Symbol.Kind);
 				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
 				Assert.Equal(SymbolKind.Terminal, token.Symbol.Kind);
 				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
@@ -159,12 +189,12 @@ namespace bsn.GoldParser.Parser {
 				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
 				Assert.Equal(" ", token.Text);
 				Assert.Equal(10, token.Position.Index);
-				Assert.Equal(SymbolKind.WhiteSpace, token.Symbol.Kind);
+				Assert.Equal(SymbolKind.Noise, token.Symbol.Kind);
 				Assert.Equal(ParseMessage.CommentLineRead, tokenizer.NextToken(out token));
 				Assert.Equal("-- line comment", token.Text);
 				Assert.Equal(11, token.Position.Index);
 				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
-				Assert.Equal(SymbolKind.WhiteSpace, token.Symbol.Kind);
+				Assert.Equal(SymbolKind.Noise, token.Symbol.Kind);
 				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
 				Assert.Equal("+", token.Text);
 				Assert.Equal(28, token.Position.Index);
@@ -174,10 +204,10 @@ namespace bsn.GoldParser.Parser {
 				Assert.Equal(29, token.Position.Index);
 				Assert.Equal("Float", token.Symbol.Name);
 				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
-				Assert.Equal(SymbolKind.WhiteSpace, token.Symbol.Kind);
-				Assert.Equal(ParseMessage.CommentBlockRead, tokenizer.NextToken(out token));
+				Assert.Equal(SymbolKind.Noise, token.Symbol.Kind);
+				Assert.Equal(ParseMessage.BlockRead, tokenizer.NextToken(out token));
 				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
-				Assert.Equal(SymbolKind.WhiteSpace, token.Symbol.Kind);
+				Assert.Equal(SymbolKind.Noise, token.Symbol.Kind);
 				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
 				Assert.Equal("*", token.Text);
 				Assert.Equal(54, token.Position.Index);
@@ -220,7 +250,9 @@ namespace bsn.GoldParser.Parser {
 			using (TestStringReader reader = GetReader()) {
 				Assert.Throws<ArgumentNullException>(() => {
 					// ReSharper disable AccessToDisposedClosure
+					// ReSharper disable ObjectCreationAsStatement
 					new Tokenizer(reader, null);
+					// ReSharper restore ObjectCreationAsStatement
 					// ReSharper restore AccessToDisposedClosure
 				});
 			}
@@ -229,7 +261,9 @@ namespace bsn.GoldParser.Parser {
 		[Fact]
 		public void ConstructWithoutReader() {
 			Assert.Throws<ArgumentNullException>(() => {
+				// ReSharper disable ObjectCreationAsStatement
 				new Tokenizer(null, grammar);
+				// ReSharper restore ObjectCreationAsStatement
 			});
 		}
 
@@ -241,7 +275,7 @@ namespace bsn.GoldParser.Parser {
 				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
 				Assert.Equal(SymbolKind.Terminal, token.Symbol.Kind);
 				Assert.Equal(ParseMessage.TokenRead, tokenizer.NextToken(out token));
-				Assert.Equal(SymbolKind.WhiteSpace, token.Symbol.Kind);
+				Assert.Equal(SymbolKind.Noise, token.Symbol.Kind);
 				Assert.Equal(ParseMessage.LexicalError, tokenizer.NextToken(out token));
 			}
 		}

@@ -82,6 +82,8 @@ namespace bsn.GoldParser.Grammar {
 		/// comment, or in other words, a block comment that lacks the
 		/// delimiter.
 		/// </summary>
+		BlockError = 7,
+		[Obsolete("Renamed to GroupError for EGT files")]
 		CommentError = 7,
 
 		/// <summary>
@@ -95,6 +97,8 @@ namespace bsn.GoldParser.Grammar {
 		/// property is set to the comment text. The text includes starting and ending
 		/// block comment characters.
 		/// </summary>
+		BlockRead = 9,
+		[Obsolete("Renamed to BlockRead for EGT files")]
 		CommentBlockRead = 9,
 
 		/// <summary>
@@ -103,6 +107,7 @@ namespace bsn.GoldParser.Grammar {
 		/// property is set to the comment text. The text includes starting 
 		/// line comment characters.
 		/// </summary>
-		CommentLineRead = 10,
+		[Obsolete("EGT files always return BlockRead instead of CommentLineRead")]
+		CommentLineRead = 10
 	}
 }

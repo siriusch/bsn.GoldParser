@@ -26,8 +26,9 @@
 // 
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-// 
+
 using System;
+using System.Diagnostics;
 using System.IO;
 
 using bsn.GoldParser.Grammar;
@@ -42,8 +43,7 @@ namespace bsn.GoldParser.Parser {
 	public abstract class Tokenizer<T>: ITokenizer<T> where T: class, IToken {
 		private enum ParseMode {
 			SingleSymbol,
-			MergeLexicalErrors,
-			BlockComment
+			MergeLexicalErrors
 		}
 
 		private readonly TextBuffer buffer; // Buffer to keep current characters.
@@ -91,24 +91,13 @@ namespace bsn.GoldParser.Parser {
 				return buffer.Column;
 			}
 		}
+
 		/// <summary>
 		/// Gets current line number. It is 1-based.
 		/// </summary>
 		public int LineNumber {
 			get {
 				return buffer.Line;
-			}
-		}
-
-		/// <summary>
-		/// Gets the text buffer.
-		/// </summary>
-		/// <value>
-		/// The text buffer.
-		/// </value>
-		protected TextBuffer Buffer {
-			get {
-				return buffer;
 			}
 		}
 
@@ -134,9 +123,21 @@ namespace bsn.GoldParser.Parser {
 			}
 		}
 
+		/// <summary>
+		/// Gets the text buffer.
+		/// </summary>
+		/// <value>
+		/// The text buffer.
+		/// </value>
+		protected TextBuffer Buffer {
+			get {
+				return buffer;
+			}
+		}
+
 		protected abstract T CreateToken(Symbol tokenSymbol, LineInfo tokenPosition, string text);
 
-		private ParseMessage NextSymbol(ParseMode mode, out Symbol tokenSymbol, ref int length) {
+		private ParseMessage NextSymbol(IGroup parent, ParseMode mode, out Symbol tokenSymbol, ref int length) {
 			DfaState state = grammar.DfaInitialState;
 			char ch;
 			tokenSymbol = null;
@@ -155,7 +156,7 @@ namespace bsn.GoldParser.Parser {
 						//Tokenizer cannot recognize symbol
 						offset = ++length;
 						if (mode == ParseMode.MergeLexicalErrors) {
-							while (NextSymbol(ParseMode.SingleSymbol, out tokenSymbol, ref offset) == ParseMessage.LexicalError) {
+							while (NextSymbol(parent, ParseMode.SingleSymbol, out tokenSymbol, ref offset) == ParseMessage.LexicalError) {
 								length = offset;
 							}
 						}
@@ -163,16 +164,16 @@ namespace bsn.GoldParser.Parser {
 					}
 					break;
 				}
-				if ((mode == ParseMode.BlockComment) && (!grammar.BlockCommentStates.Contains(state))) {
-					state = grammar.DfaInitialState;
-				} else {
+				if (parent.IsAllowedDfaState(state)) {
 					// This code checks whether the target state accepts a token. If so, it sets the
-					// appropiate variables so when the algorithm in done, it can return the proper
+					// appropriate variables so when the algorithm in done, it can return the proper
 					// token and number of characters.
 					if (state.AcceptSymbol != null) {
 						tokenSymbol = state.AcceptSymbol;
 						length = offset;
 					}
+				} else {
+					break;
 				}
 			}
 			if (tokenSymbol == null) {
@@ -184,20 +185,36 @@ namespace bsn.GoldParser.Parser {
 				}
 			}
 			switch (tokenSymbol.Kind) {
+#pragma warning disable 612,618
 			case SymbolKind.CommentLine:
+				Debug.Assert(grammar.FileVersion == CgtVersion.V1_0);
 				while (buffer.TryLookahead(length, out ch) && (ch != '\r') && (ch != '\n')) {
 					length++;
 				}
 				return ParseMessage.CommentLineRead;
-			case SymbolKind.CommentStart:
+#pragma warning restore 612,618
+			case SymbolKind.BlockStart:
+				Group group = grammar.GetGroupByStartSymbol(tokenSymbol);
+				if (!parent.IsNestingAllowed(group)) {
+					return ParseMessage.LexicalError; // nesting is not allowed -> error
+				}
 				for (;;) {
 					Symbol blockTokenSymbol;
-					NextSymbol(ParseMode.BlockComment, out blockTokenSymbol, ref length);
-					switch (blockTokenSymbol.Kind) {
-					case SymbolKind.End:
-						return ParseMessage.CommentError;
-					case SymbolKind.CommentEnd:
-						return ParseMessage.CommentBlockRead;
+					int oldLength = length;
+					NextSymbol(group, ParseMode.SingleSymbol, out blockTokenSymbol, ref length);
+					if (blockTokenSymbol.Kind == SymbolKind.End) {
+						if (@group.EndingMode == GroupEndingMode.Open) {
+							tokenSymbol = @group.ContainerSymbol; // special case: a block that doesn't consume its end (such as a line comment), if we reach EOF we take this as a valid end symbol
+							return ParseMessage.BlockRead;
+						}
+						return ParseMessage.BlockError;
+					}
+					if (blockTokenSymbol == @group.EndSymbol) {
+						if (@group.EndingMode == GroupEndingMode.Open) {
+							length = oldLength;
+						}
+						tokenSymbol = @group.ContainerSymbol;
+						return ParseMessage.BlockRead;
 					}
 				}
 			case SymbolKind.Error:
@@ -223,7 +240,7 @@ namespace bsn.GoldParser.Parser {
 		public virtual ParseMessage NextToken(out T token) {
 			Symbol tokenSymbol;
 			int offset = 0;
-			ParseMessage result = NextSymbol(MergeLexicalErrors ? ParseMode.MergeLexicalErrors : ParseMode.SingleSymbol, out tokenSymbol, ref offset);
+			ParseMessage result = NextSymbol(DummyGroup.Default, MergeLexicalErrors ? ParseMode.MergeLexicalErrors : ParseMode.SingleSymbol, out tokenSymbol, ref offset);
 			LineInfo position;
 			string text = buffer.Read(offset, out position);
 			token = CreateToken(tokenSymbol, position, text);

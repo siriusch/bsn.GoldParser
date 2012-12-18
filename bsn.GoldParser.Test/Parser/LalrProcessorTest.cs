@@ -26,7 +26,6 @@
 // 
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-// 
 
 using System;
 
@@ -51,7 +50,7 @@ namespace bsn.GoldParser.Parser {
 
 		[Fact]
 		public void ParseAll() {
-			using (TestStringReader reader = TokenizerTest.GetReader()) {
+			using (TestStringReader reader = CgtTokenizerTest.GetReader()) {
 				Tokenizer tokenizer = new Tokenizer(reader, grammar);
 				LalrProcessor processor = new LalrProcessor(tokenizer, true);
 				Assert.Equal(ParseMessage.Accept, processor.ParseAll());
@@ -62,7 +61,7 @@ namespace bsn.GoldParser.Parser {
 
 		[Fact]
 		public void ParseTreeWithTrim() {
-			using (TestStringReader reader = TokenizerTest.GetReader()) {
+			using (TestStringReader reader = CgtTokenizerTest.GetReader()) {
 				Tokenizer tokenizer = new Tokenizer(reader, grammar);
 				LalrProcessor processor = new LalrProcessor(tokenizer, true);
 				Assert.Equal(true, processor.Trim);
@@ -140,7 +139,7 @@ namespace bsn.GoldParser.Parser {
 
 		[Fact]
 		public void ParseTreeWithoutTrim() {
-			using (TestStringReader reader = TokenizerTest.GetReader()) {
+			using (TestStringReader reader = CgtTokenizerTest.GetReader()) {
 				Tokenizer tokenizer = new Tokenizer(reader, grammar);
 				LalrProcessor processor = new LalrProcessor(tokenizer);
 				Assert.Equal(false, processor.Trim);
