@@ -41,6 +41,7 @@ namespace bsn.GoldParser.Parser {
 	/// <remarks>This class can be used for further spezialization with custom tokenizers.</remarks>
 	public abstract class LalrProcessor<TToken, TTokenizer>: IParser<TToken> where TToken: class, IToken
 			where TTokenizer: class, ITokenizer<TToken> {
+		private readonly Queue<TToken> tokenInject = new Queue<TToken>(); // Tokens to inject
 		private readonly LalrStack<TToken> tokenStack; // Stack of LR states used for LR parsing.
 		private readonly TTokenizer tokenizer;
 		private LalrState currentState;
@@ -106,9 +107,15 @@ namespace bsn.GoldParser.Parser {
 				if (currentToken == null) {
 					//We must read a currentToken
 					TToken textInputToken;
-					ParseMessage message = tokenizer.NextToken(out textInputToken);
-					if (textInputToken == null) {
-						return ParseMessage.InternalError;
+					ParseMessage message;
+					if (tokenInject.Count > 0) {
+						textInputToken = tokenInject.Dequeue();
+						message = ParseMessage.TokenRead;
+					} else {
+						message = tokenizer.NextToken(out textInputToken);
+						if (textInputToken == null) {
+							return ParseMessage.InternalError;
+						}
 					}
 					//					Debug.WriteLine(string.Format("State: {0} Line: {1}, Column: {2}, Parse Value: {3}, Token Type: {4}", currentState.Index, inputToken.Line, inputToken.LinePosition, inputToken.Text, inputToken.symbol.Name), "Token Read");
 					if (textInputToken.Symbol.Kind != SymbolKind.End) {
@@ -166,6 +173,13 @@ namespace bsn.GoldParser.Parser {
 		protected abstract bool CanTrim(Rule rule);
 
 		protected abstract TToken CreateReduction(Rule rule, IList<TToken> children);
+
+		protected void Inject(TToken token) {
+			if (token == null) {
+				throw new ArgumentNullException("token");
+			}
+			tokenInject.Enqueue(token);
+		}
 
 		protected virtual bool RetrySyntaxError(ref TToken currentToken) {
 			return false;
