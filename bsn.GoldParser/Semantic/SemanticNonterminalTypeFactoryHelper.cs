@@ -26,7 +26,6 @@
 // 
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-// 
 
 using System;
 using System.Collections.Generic;
@@ -36,10 +35,12 @@ using System.Reflection.Emit;
 
 namespace bsn.GoldParser.Semantic {
 	internal static class SemanticNonterminalTypeFactoryHelper<TBase> where TBase: SemanticToken {
-		public delegate T Activator<T>(IList<TBase> tokens);
+		public delegate T Activator<out T>(IList<TBase> tokens);
 
+		// ReSharper disable StaticFieldInGenericType
 		private static readonly Dictionary<MethodBase, DynamicMethod> dynamicMethods = new Dictionary<MethodBase, DynamicMethod>();
 		private static readonly MethodInfo iListGetItem = GetIListGetItemMethod();
+		// ReSharper restore StaticFieldInGenericType
 
 		public static Activator<T> CreateActivator<T>(SemanticNonterminalTypeFactory<TBase, T> target, MethodBase methodBase, int[] parameterMapping) where T: TBase {
 			if (target == null) {
@@ -56,23 +57,9 @@ namespace bsn.GoldParser.Semantic {
 			lock (dynamicMethods) {
 				DynamicMethod result;
 				if (!dynamicMethods.TryGetValue(methodBase, out result)) {
-					ConstructorInfo constructor = methodBase as ConstructorInfo;
-					MethodInfo method = methodBase as MethodInfo;
-					Type returnType;
-					if (constructor != null) {
-						returnType = constructor.DeclaringType;
-						Debug.Assert(returnType != null);
-					} else if (method != null) {
-						if (!method.IsStatic) {
-							throw new InvalidOperationException("Factories can only be created for static methods");
-						}
-						returnType = method.ReturnType;
-						if (!typeof(TBase).IsAssignableFrom(returnType)) {
-							throw new InvalidOperationException("The static method doesn't return the required type");
-						}
-					} else {
-						throw new ArgumentException("Expected methodBase to be one of: ConstructorInfo, MethodInfo, instead is: "+methodBase.GetType());
-					}
+					ConstructorInfo constructor;
+					MethodInfo method;
+					Type returnType = SemanticTypeFactoryHelper.GetReturnTypeOfMethodBase<TBase>(methodBase, out constructor, out method);
 					result = new DynamicMethod(string.Format("SemanticNonterminalTypeFactory<{0}>.Activator", returnType.FullName), returnType, new[] {typeof(int[]), typeof(IList<TBase>)}, true);
 					ILGenerator il = result.GetILGenerator();
 					Dictionary<int, ParameterInfo> parameters = new Dictionary<int, ParameterInfo>();

@@ -29,6 +29,8 @@
 
 using System;
 
+using bsn.GoldParser.Grammar;
+
 namespace bsn.GoldParser.Semantic {
 	/// <summary>
 	/// <para>Specifies the binding of a specific rule to a constructor (therefore implying the type to be constructed).</para>
@@ -49,7 +51,7 @@ namespace bsn.GoldParser.Semantic {
 	/// <seealso cref="TerminalAttribute"/>
 	/// <seealso cref="RuleTrimAttribute"/>
 	[AttributeUsage(AttributeTargets.Constructor|AttributeTargets.Method, AllowMultiple = true, Inherited = false)]
-	public sealed class RuleAttribute: RuleAttributeBase, IEquatable<RuleAttribute> {
+	public sealed class RuleAttribute: RuleAttributeBase, IGrammarBindableAttribute<Rule>, IEquatable<RuleAttribute> {
 		private readonly Type[] genericTypeParameters;
 		private bool allowTruncationForConstructor;
 		private int[] constructorParameterMapping;
@@ -187,7 +189,7 @@ namespace bsn.GoldParser.Semantic {
 		}
 
 		public override bool Equals(object obj) {
-			return base.Equals(obj as RuleAttribute);
+			return Equals(obj as RuleAttribute);
 		}
 
 		public override int GetHashCode() {

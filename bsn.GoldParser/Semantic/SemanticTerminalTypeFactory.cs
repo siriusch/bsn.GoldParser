@@ -38,20 +38,57 @@ namespace bsn.GoldParser.Semantic {
 	/// <typeparam name="TBase">The base type of the semantic token.</typeparam>
 	/// <typeparam name="TOutput">The <see cref="SemanticToken"/> descendant instantiated by this factory.</typeparam>
 	public class SemanticTerminalTypeFactory<TBase, TOutput>: SemanticTerminalFactory<TBase, TOutput> where TBase: SemanticToken where TOutput: TBase {
+		private static bool IsCallCompatible(ParameterInfo[] parameters, int offset, Type[] types) {
+			if ((parameters.Length-offset) != types.Length) {
+				// mismatch of count
+				return false;
+			}
+			for (int i = 0; i < types.Length; i++) {
+				Type parameterType = parameters[i+offset].ParameterType;
+				if (types[i] == null) {
+					if (parameterType.IsValueType && (Nullable.GetUnderlyingType(parameterType) == null)) {
+						return false;
+					}
+				} else {
+					if (!parameterType.IsAssignableFrom(types[i])) {
+						return false;
+					}
+				}
+			}
+			return true;
+		}
+
+		private static ConstructorInfo FindMatchingConstructor(object[] additionalArguments) {
+			Type[] additionalTypes = Array.ConvertAll(additionalArguments, o => o == null ? null : o.GetType());
+			ConstructorInfo[] constructors = typeof(TOutput).GetConstructors();
+			foreach (ConstructorInfo constructor in constructors) {
+				ParameterInfo[] parameters = constructor.GetParameters();
+				if ((parameters.Length > 0) && (parameters[0].ParameterType == typeof(string)) && IsCallCompatible(parameters, 1, additionalTypes)) {
+					return constructor;
+				}
+			}
+			foreach (ConstructorInfo constructor in constructors) {
+				ParameterInfo[] parameters = constructor.GetParameters();
+				if (IsCallCompatible(parameters, 0, additionalTypes)) {
+					return constructor;
+				}
+			}
+			throw new InvalidOperationException("No matching constructor found");
+		}
+
 		private readonly SemanticTerminalTypeFactoryHelper<TBase>.Activator<TOutput> activator;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="SemanticTerminalTypeFactory&lt;TBase, TOutput&gt;"/> class. This is mainly for internal use.
 		/// </summary>
-		public SemanticTerminalTypeFactory() {
-			ConstructorInfo constructor = typeof(TOutput).GetConstructor(new[] {typeof(string)});
-			if (constructor == null) {
-				constructor = typeof(TOutput).GetConstructor(Type.EmptyTypes);
-				if (constructor == null) {
-					throw new InvalidOperationException("No matching constructor found");
-				}
+		public SemanticTerminalTypeFactory(MethodBase methodBase, object[] additionalArguments) {
+			if (additionalArguments == null) {
+				additionalArguments = new object[0];
 			}
-			activator = SemanticTerminalTypeFactoryHelper<TBase>.CreateActivator(this, constructor);
+			if (methodBase == null) {
+				methodBase = FindMatchingConstructor(additionalArguments);
+			}
+			activator = SemanticTerminalTypeFactoryHelper<TBase>.CreateActivator(this, methodBase, additionalArguments);
 			Debug.Assert(activator != null);
 		}
 

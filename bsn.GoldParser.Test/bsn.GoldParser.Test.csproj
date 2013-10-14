@@ -13,8 +13,7 @@
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <KeyContainerName>bsn</KeyContainerName>
-    <FileUpgradeFlags>
-    </FileUpgradeFlags>
+    <FileUpgradeFlags />
     <OldToolsVersion>3.5</OldToolsVersion>
     <UpgradeBackupLocation />
   </PropertyGroup>
@@ -40,46 +39,69 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
-    <Reference Include="System.Xml.Linq">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
+    <Reference Include="System.Data" />
     <Reference Include="System.Data.DataSetExtensions">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
-    <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
     <Reference Include="xunit">
       <HintPath>..\packages\xunit.1.9.1\lib\net20\xunit.dll</HintPath>
     </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\bsn.GoldParser\bsn.GoldParser.csproj">
+      <Project>{1A1A5AE9-7981-471C-9CC7-F7465E675A32}</Project>
+      <Name>bsn.GoldParser</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Grammar\TestGrammar.grm" />
+    <None Include="packages.config" />
+    <None Include="Semantic\TestUnicode.grm" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Xml\" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Grammar\TestGrammar.cgt" />
+    <EmbeddedResource Include="Grammar\TestGrammar.egt" />
+    <EmbeddedResource Include="Semantic\TestUnicode.egt" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Grammar\CgtCompiledGrammarTest.cs" />
     <Compile Include="Grammar\CompiledGrammarTestBase.cs" />
     <Compile Include="Grammar\EgtCompiledGrammarTest.cs" />
     <Compile Include="Grammar\GrammarObjectSetTest.cs" />
+    <Compile Include="Parser\CgtTokenizerTest.cs" />
     <Compile Include="Parser\EgtTokenizerTest.cs" />
+    <Compile Include="Parser\LalrProcessorTest.cs" />
     <Compile Include="Parser\TestStringReader.cs" />
     <Compile Include="Parser\TextBufferTest.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Parser\LalrProcessorTest.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Semantic\AssemblyAttributes.cs" />
     <Compile Include="Semantic\RuleAttributeTest.cs" />
     <Compile Include="Semantic\RuleDeclarationParserTest.cs" />
+    <Compile Include="Semantic\RuleTrimAttributeTest.cs" />
     <Compile Include="Semantic\SemanticProcessorTest.cs" />
     <Compile Include="Semantic\SemanticTypeActionsTest.cs" />
     <Compile Include="Semantic\StaticMethodAttribute\DynamicFactory.cs" />
     <Compile Include="Semantic\StaticMethodAttribute\DynamicMockTokenBase.cs" />
     <Compile Include="Semantic\StaticMethodAttribute\GenericStaticFactory.cs" />
     <Compile Include="Semantic\StaticMethodAttribute\MockGenericTokenBase.cs" />
-    <Compile Include="Semantic\StaticMethodAttribute\Tests.cs" />
-    <Compile Include="Semantic\StaticMethodAttribute\StaticFactory.cs" />
-    <Compile Include="Semantic\StaticMethodAttribute\MockTokenDerived.cs" />
     <Compile Include="Semantic\StaticMethodAttribute\MockTokenBase.cs" />
-    <Compile Include="Semantic\StrictCtorParameterMatching\MockTokenBaseExplicitNoChecks.cs" />
-    <Compile Include="Semantic\StrictCtorParameterMatching\MockTokenBaseExplicitChecks.cs" />
-    <Compile Include="Semantic\StrictCtorParameterMatching\ParameterMatching.cs" />
+    <Compile Include="Semantic\StaticMethodAttribute\MockTokenDerived.cs" />
+    <Compile Include="Semantic\StaticMethodAttribute\StaticFactory.cs" />
+    <Compile Include="Semantic\StaticMethodAttribute\Tests.cs" />
     <Compile Include="Semantic\StrictCtorParameterMatching\MockTokenBase.cs" />
+    <Compile Include="Semantic\StrictCtorParameterMatching\MockTokenBaseExplicitChecks.cs" />
+    <Compile Include="Semantic\StrictCtorParameterMatching\MockTokenBaseExplicitNoChecks.cs" />
+    <Compile Include="Semantic\StrictCtorParameterMatching\ParameterMatching.cs" />
+    <Compile Include="Semantic\SymbolTypeMapTest.cs" />
     <Compile Include="Semantic\TerminalAttributeTest.cs" />
     <Compile Include="Semantic\TestAdd.cs" />
     <Compile Include="Semantic\TestConstant.cs" />
@@ -89,34 +111,11 @@
     <Compile Include="Semantic\TestMultiply.cs" />
     <Compile Include="Semantic\TestNegate.cs" />
     <Compile Include="Semantic\TestOperation.cs" />
+    <Compile Include="Semantic\TestSpecial.cs" />
     <Compile Include="Semantic\TestSubtract.cs" />
     <Compile Include="Semantic\TestToken.cs" />
-    <Compile Include="Semantic\TestSpecial.cs" />
-    <Compile Include="Semantic\TestValue.cs" />
-    <Compile Include="Semantic\RuleTrimAttributeTest.cs" />
-    <Compile Include="Semantic\SymbolTypeMapTest.cs" />
-    <Compile Include="Parser\CgtTokenizerTest.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Semantic\TestUnicode.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\bsn.GoldParser\bsn.GoldParser.csproj">
-      <Project>{1A1A5AE9-7981-471C-9CC7-F7465E675A32}</Project>
-      <Name>bsn.GoldParser</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Grammar\TestGrammar.cgt" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Grammar\TestGrammar.egt" />
-    <None Include="Grammar\TestGrammar.grm" />
-    <None Include="packages.config" />
-    <EmbeddedResource Include="Semantic\TestUnicode.egt" />
-    <None Include="Semantic\TestUnicode.grm" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Xml\" />
+    <Compile Include="Semantic\TestValue.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

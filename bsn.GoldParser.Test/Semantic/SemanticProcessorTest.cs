@@ -70,6 +70,7 @@ namespace bsn.GoldParser.Semantic {
 				SemanticProcessor<TestToken> processor = new SemanticProcessor<TestToken>(reader, actions);
 				Assert.Equal(ParseMessage.Accept, processor.ParseAll());
 				Assert.IsType<TestEmpty>(processor.CurrentToken);
+				Assert.False((processor.CurrentToken is TestSpecial) && ((TestSpecial)processor.CurrentToken).IsString);
 			}
 		}
 
@@ -81,6 +82,34 @@ namespace bsn.GoldParser.Semantic {
 				Assert.IsAssignableFrom<TestValue>(processor.CurrentToken);
 				TestValue value = (TestValue)processor.CurrentToken;
 				Assert.Equal(100, value.Compute());
+			}
+		}
+
+		[Fact]
+		public void ParseString() {
+			using (TestStringReader reader = new TestStringReader("'test'")) {
+				SemanticProcessor<TestToken> processor = new SemanticProcessor<TestToken>(reader, actions);
+				Assert.Equal(ParseMessage.Accept, processor.ParseAll());
+				Assert.IsType<TestSpecial>(processor.CurrentToken);
+				Assert.True((processor.CurrentToken is TestSpecial) && ((TestSpecial)processor.CurrentToken).IsString);
+			}
+		}
+
+		[Fact]
+		public void ParseComment() {
+			using (TestStringReader reader = new TestStringReader("/* test */")) {
+				SemanticProcessor<TestToken> processor = new SemanticProcessor<TestToken>(reader, actions);
+				Assert.Equal(ParseMessage.Accept, processor.ParseAll());
+				Assert.IsType<TestEmpty>(processor.CurrentToken);
+			}
+		}
+
+		[Fact]
+		public void ParseNewlines() {
+			using (TestStringReader reader = new TestStringReader("\n\n\r\n\r")) {
+				SemanticProcessor<TestToken> processor = new SemanticProcessor<TestToken>(reader, actions);
+				Assert.Equal(ParseMessage.Accept, processor.ParseAll());
+				Assert.IsType<TestEmpty>(processor.CurrentToken);
 			}
 		}
 	}

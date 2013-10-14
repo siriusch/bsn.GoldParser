@@ -1,7 +1,7 @@
-﻿// bsn GoldParser .NET Engine
+// bsn GoldParser .NET Engine
 // --------------------------
 // 
-// Copyright 2009, 2010 by Arsène von Wyss - avw@gmx.ch
+// Copyright 2009, 2010 by Ars�ne von Wyss - avw@gmx.ch
 // 
 // Development has been supported by Sirius Technologies AG, Basel
 // 
@@ -26,41 +26,23 @@
 // 
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-// 
 
 using System;
 
+using bsn.GoldParser.Grammar;
+
 namespace bsn.GoldParser.Semantic {
-	[Terminal("(EOF)")]
-	[Terminal("(Whitespace)")]
-	[Terminal("(NewLine)", Arguments = new object[] {"\r\n"})]
-	[Terminal("(--)")]
-	[Terminal("(/*)")]
-	[Terminal("(*/)")]
-	[Terminal("String", Arguments = new object[] {true})]
-	public class TestSpecial: TestToken {
-		private readonly bool isString;
-		private readonly string text;
+	internal interface IGrammarBindableAttribute<out T> : IGrammarBindableAttribute where T : GrammarObject<T> {
+		T Bind(CompiledGrammar grammar);
+	}
 
-		[Terminal("(Error)")]
-		public TestSpecial(string text) : this(text, false) { }
-
-		[Terminal("(Comment)")]
-		public TestSpecial(string text, bool? isString) {
-			this.text = text;
-			this.isString = isString.GetValueOrDefault();
+	internal interface IGrammarBindableAttribute {
+		Type[] GenericTypeParameters {
+			get;
 		}
 
-		public bool IsString {
-			get {
-				return isString;
-			}
-		}
-
-		public string Text {
-			get {
-				return text;
-			}
+		bool IsGeneric {
+			get;
 		}
 	}
 }

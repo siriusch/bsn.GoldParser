@@ -26,7 +26,7 @@
 // 
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-// 
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -35,40 +35,93 @@ using System.Reflection.Emit;
 
 namespace bsn.GoldParser.Semantic {
 	internal static class SemanticTerminalTypeFactoryHelper<TBase> where TBase: SemanticToken {
-		public delegate T Activator<T>(string text) where T: TBase;
+		public delegate T Activator<out T>(string text) where T: TBase;
 
-		private static readonly Dictionary<ConstructorInfo, DynamicMethod> dynamicMethods = new Dictionary<ConstructorInfo, DynamicMethod>();
+		private struct MethodKey: IEquatable<MethodKey> {
+			private readonly int additionalArguments;
+			private readonly MethodBase method;
 
-		private static DynamicMethod GetDynamicMethod(ConstructorInfo constructor) {
-			Debug.Assert(constructor != null);
-			lock (dynamicMethods) {
-				DynamicMethod result;
-				if (!dynamicMethods.TryGetValue(constructor, out result)) {
-					Type ownerType = typeof(SemanticTerminalFactory<,>).MakeGenericType(typeof(TBase), constructor.DeclaringType);
-					result = new DynamicMethod(string.Format("SemanticTerminalTypeFactory<{0}>.Activator", constructor.DeclaringType.FullName), constructor.DeclaringType, new[] {ownerType, typeof(string)}, ownerType, true);
-					ILGenerator il = result.GetILGenerator();
-					foreach (ParameterInfo parameterInfo in constructor.GetParameters()) {
-						if ((parameterInfo.Position > 0) || (parameterInfo.ParameterType != typeof(string))) {
-							throw new ArgumentException("The constructor may have at most exactly one string parameter");
-						}
-						il.Emit(OpCodes.Ldarg_1);
-					}
-					il.Emit(OpCodes.Newobj, constructor);
-					il.Emit(OpCodes.Ret);
-					dynamicMethods.Add(constructor, result);
+			public MethodKey(MethodBase method, int additionalArguments) {
+				this.method = method;
+				this.additionalArguments = additionalArguments;
+			}
+
+			public override bool Equals(object obj) {
+				if (ReferenceEquals(null, obj)) {
+					return false;
 				}
-				return result;
+				return obj is MethodKey && Equals((MethodKey)obj);
+			}
+
+			public override int GetHashCode() {
+				unchecked {
+					return (method.GetHashCode()*397)^additionalArguments.GetHashCode();
+				}
+			}
+
+			public bool Equals(MethodKey other) {
+				return method.Equals(other.method) && additionalArguments.Equals(other.additionalArguments);
 			}
 		}
 
-		public static Activator<T> CreateActivator<T>(SemanticTerminalTypeFactory<TBase, T> target, ConstructorInfo constructor) where T: TBase {
+		private static readonly Dictionary<MethodKey, DynamicMethod> dynamicMethods = new Dictionary<MethodKey, DynamicMethod>();
+
+		public static Activator<T> CreateActivator<T>(SemanticTerminalTypeFactory<TBase, T> target, MethodBase method, object[] additionalArguments) where T: TBase {
 			if (target == null) {
 				throw new ArgumentNullException("target");
 			}
-			if (constructor == null) {
-				throw new ArgumentNullException("constructor");
+			if (method == null) {
+				throw new ArgumentNullException("method");
 			}
-			return (Activator<T>)GetDynamicMethod(constructor).CreateDelegate(typeof(Activator<T>), target);
+			return (Activator<T>)GetDynamicMethod(method, additionalArguments.Length).CreateDelegate(typeof(Activator<T>), additionalArguments);
+		}
+
+		private static DynamicMethod GetDynamicMethod(MethodBase methodBase, int additionalArguments) {
+			Debug.Assert(methodBase != null);
+			lock (dynamicMethods) {
+				DynamicMethod result;
+				MethodKey key = new MethodKey(methodBase, additionalArguments);
+				if (!dynamicMethods.TryGetValue(key, out result)) {
+					ConstructorInfo constructor;
+					MethodInfo method;
+					Type returnType = SemanticTypeFactoryHelper.GetReturnTypeOfMethodBase<TBase>(methodBase, out constructor, out method);
+					result = new DynamicMethod(string.Format("SemanticTerminalTypeFactory<{0}>.Activator", returnType.FullName), returnType, new[] {typeof(object[]), typeof(string)}, true);
+					ILGenerator il = result.GetILGenerator();
+					ParameterInfo[] parameters = methodBase.GetParameters();
+					if (parameters.Length > 0) {
+						Array.Sort(parameters, (x, y) => x.Position-y.Position);
+						int parameter = 0;
+						if ((parameters[parameter].ParameterType == typeof(string)) && (parameters.Length > additionalArguments)) {
+							il.Emit(OpCodes.Ldarg_1);
+							parameter = 1;
+						}
+						int additionalArgument = 0;
+						while (parameter < parameters.Length) {
+							Type parameterType = parameters[parameter++].ParameterType;
+							if (additionalArgument < additionalArguments) {
+								il.Emit(OpCodes.Ldarg_0); // load the object[]
+								il.Emit(OpCodes.Ldc_I4, additionalArgument++); // load the parameter index
+								il.Emit(OpCodes.Ldelem_Ref); // get the additional parameter
+							} else {
+								if ((!parameterType.IsValueType) || (Nullable.GetUnderlyingType(parameterType) != null)) {
+									il.Emit(OpCodes.Ldnull);
+								} else {
+									throw new InvalidOperationException("An additional, non-nullable argument is required");
+								}
+							}
+							il.Emit(OpCodes.Unbox_Any, parameterType); // make the verifier happy by casting/unboxing the reference
+						}
+					}
+					if (constructor != null) {
+						il.Emit(OpCodes.Newobj, constructor); // invoke constructor
+					} else {
+						il.Emit(OpCodes.Call, method); // invoke static method
+					}
+					il.Emit(OpCodes.Ret);
+					dynamicMethods.Add(key, result);
+				}
+				return result;
+			}
 		}
 	}
 }

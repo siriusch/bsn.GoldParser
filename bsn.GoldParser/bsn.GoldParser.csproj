@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <ProjectType>Local</ProjectType>
     <ProductVersion>9.0.30729</ProductVersion>
@@ -7,13 +7,10 @@
     <ProjectGuid>{1A1A5AE9-7981-471C-9CC7-F7465E675A32}</ProjectGuid>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ApplicationIcon>
-    </ApplicationIcon>
-    <AssemblyKeyContainerName>
-    </AssemblyKeyContainerName>
+    <ApplicationIcon />
+    <AssemblyKeyContainerName />
     <AssemblyName>bsn.GoldParser</AssemblyName>
-    <AssemblyOriginatorKeyFile>
-    </AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile />
     <DefaultClientScript>JScript</DefaultClientScript>
     <DefaultHTMLPageLayout>Grid</DefaultHTMLPageLayout>
     <DefaultTargetSchema>IE50</DefaultTargetSchema>
@@ -21,14 +18,11 @@
     <OutputType>Library</OutputType>
     <RootNamespace>bsn.GoldParser</RootNamespace>
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
-    <StartupObject>
-    </StartupObject>
+    <StartupObject />
     <KeyContainerName>bsn</KeyContainerName>
-    <FileUpgradeFlags>
-    </FileUpgradeFlags>
+    <FileUpgradeFlags />
     <OldToolsVersion>3.5</OldToolsVersion>
-    <UpgradeBackupLocation>
-    </UpgradeBackupLocation>
+    <UpgradeBackupLocation />
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -36,16 +30,13 @@
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
     <BaseAddress>285212672</BaseAddress>
     <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
-    <ConfigurationOverrideFile>
-    </ConfigurationOverrideFile>
+    <ConfigurationOverrideFile />
     <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DocumentationFile>
-    </DocumentationFile>
+    <DocumentationFile />
     <DebugSymbols>true</DebugSymbols>
     <FileAlignment>4096</FileAlignment>
     <NoStdLib>false</NoStdLib>
-    <NoWarn>
-    </NoWarn>
+    <NoWarn />
     <Optimize>false</Optimize>
     <RegisterForComInterop>false</RegisterForComInterop>
     <RemoveIntegerChecks>false</RemoveIntegerChecks>
@@ -59,15 +50,13 @@
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
     <BaseAddress>285212672</BaseAddress>
     <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
-    <ConfigurationOverrideFile>
-    </ConfigurationOverrideFile>
+    <ConfigurationOverrideFile />
     <DefineConstants>TRACE</DefineConstants>
     <DocumentationFile>bin\Release\bsn.GoldParser.XML</DocumentationFile>
     <DebugSymbols>true</DebugSymbols>
     <FileAlignment>4096</FileAlignment>
     <NoStdLib>false</NoStdLib>
-    <NoWarn>
-    </NoWarn>
+    <NoWarn />
     <Optimize>true</Optimize>
     <RegisterForComInterop>false</RegisterForComInterop>
     <RemoveIntegerChecks>false</RemoveIntegerChecks>
@@ -84,41 +73,35 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Grammar\GoldParser.txt" />
+    <None Include="Semantic\GoldRuleDeclaration.grm" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Semantic\GoldRuleDeclaration.egt" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="Grammar\CgtEntryType.cs" />
     <Compile Include="Grammar\CgtReader.cs" />
     <Compile Include="Grammar\CgtRecordType.cs" />
     <Compile Include="Grammar\CgtVersion.cs" />
     <Compile Include="Grammar\CgtWriter.cs" />
-    <Compile Include="Grammar\DfaCharset.cs" />
-    <Compile Include="Grammar\Group.cs" />
-    <Compile Include="Grammar\GroupAdvanceMode.cs" />
-    <Compile Include="Grammar\GroupEndingMode.cs" />
-    <Compile Include="Grammar\IGroup.cs" />
-    <Compile Include="Parser\DummyGroup.cs" />
-    <Compile Include="Parser\IToken.cs" />
-    <Compile Include="Parser\ITokenizer.cs" />
-    <Compile Include="Parser\LalrStack.cs" />
-    <Compile Include="Parser\TextBuffer.cs" />
-    <Compile Include="Semantic\RuleAttribute.cs" />
-    <Compile Include="Semantic\RuleAttributeBase.cs" />
-    <Compile Include="Semantic\RuleDeclarationParser.cs" />
-    <Compile Include="Semantic\RuleTrimAttribute.cs" />
-    <Compile Include="Semantic\SemanticActions.cs" />
-    <Compile Include="Semantic\SemanticNonterminalTypeFactory.cs" />
-    <Compile Include="Semantic\SemanticNonterminalTypeFactoryHelper.cs" />
-    <Compile Include="Semantic\SemanticProcessor.cs" />
-    <Compile Include="Parser\Tokenizer.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs">
+    <Compile Include="Grammar\CompiledGrammar.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Grammar\DfaCharset.cs" />
     <Compile Include="Grammar\DfaState.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Grammar\GrammarObject.cs" />
-    <Compile Include="Grammar\CompiledGrammar.cs">
+    <Compile Include="Grammar\GrammarObjectSet.cs" />
+    <Compile Include="Grammar\Group.cs" />
+    <Compile Include="Grammar\GroupAdvanceMode.cs" />
+    <Compile Include="Grammar\GroupEndingMode.cs" />
+    <Compile Include="Grammar\IGroup.cs" />
+    <Compile Include="Grammar\IParser.cs" />
+    <Compile Include="Grammar\LalrAction.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Grammar\IParser.cs" />
     <Compile Include="Grammar\LalrActionAccept.cs" />
     <Compile Include="Grammar\LalrActionGoto.cs" />
     <Compile Include="Grammar\LalrActionReduce.cs" />
@@ -126,21 +109,13 @@
     <Compile Include="Grammar\LalrActionType.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Grammar\LalrActionWithLalrState.cs" />
     <Compile Include="Grammar\LalrState.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Grammar\LalrAction.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Grammar\LalrActionWithLalrState.cs" />
     <Compile Include="Grammar\ParseMessage.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Parser\LalrProcessor.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Parser\LineInfo.cs" />
-    <Compile Include="Parser\Reduction.cs" />
     <Compile Include="Grammar\Rule.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -150,32 +125,50 @@
     <Compile Include="Grammar\SymbolKind.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Parser\DummyGroup.cs" />
+    <Compile Include="Parser\IToken.cs" />
+    <Compile Include="Parser\ITokenizer.cs" />
+    <Compile Include="Parser\LalrProcessor.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Parser\LalrStack.cs" />
+    <Compile Include="Parser\LineInfo.cs" />
+    <Compile Include="Parser\Reduction.cs" />
+    <Compile Include="Parser\TextBuffer.cs" />
     <Compile Include="Parser\TextToken.cs" />
     <Compile Include="Parser\Token.cs" />
+    <Compile Include="Parser\Tokenizer.cs" />
     <Compile Include="Parser\TokenParseResult.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Semantic\IGrammarBindableAttribute.cs" />
+    <Compile Include="Semantic\RuleAttribute.cs" />
+    <Compile Include="Semantic\RuleAttributeBase.cs" />
+    <Compile Include="Semantic\RuleDeclarationParser.cs" />
+    <Compile Include="Semantic\RuleTrimAttribute.cs" />
+    <Compile Include="Semantic\SemanticActions.cs" />
+    <Compile Include="Semantic\SemanticNonterminalFactory.cs" />
+    <Compile Include="Semantic\SemanticNonterminalTypeFactory.cs" />
+    <Compile Include="Semantic\SemanticNonterminalTypeFactoryHelper.cs" />
+    <Compile Include="Semantic\SemanticProcessor.cs" />
+    <Compile Include="Semantic\SemanticTerminalFactory.cs" />
     <Compile Include="Semantic\SemanticTerminalTypeFactory.cs" />
     <Compile Include="Semantic\SemanticTerminalTypeFactoryHelper.cs" />
     <Compile Include="Semantic\SemanticToken.cs" />
-    <Compile Include="Semantic\SemanticTerminalFactory.cs" />
-    <Compile Include="Semantic\SemanticNonterminalFactory.cs" />
     <Compile Include="Semantic\SemanticTokenFactory.cs" />
     <Compile Include="Semantic\SemanticTrimFactory.cs" />
     <Compile Include="Semantic\SemanticTypeActions.cs" />
-    <Compile Include="Grammar\GrammarObjectSet.cs" />
-    <Compile Include="Semantic\TerminalAttribute.cs" />
+    <Compile Include="Semantic\SemanticTypeFactoryHelper.cs" />
     <Compile Include="Semantic\SymbolTypeMap.cs" />
+    <Compile Include="Semantic\TerminalAttribute.cs" />
     <Compile Include="Xml\GrammarXmlProcessor.cs" />
     <Compile Include="Xml\ProcessResult.cs" />
     <Compile Include="Xml\TokenXmlReader.cs" />
-    <None Include="Grammar\GoldParser.txt" />
-    <EmbeddedResource Include="Semantic\GoldRuleDeclaration.egt" />
-    <None Include="Semantic\GoldRuleDeclaration.grm" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PreBuildEvent>
-    </PreBuildEvent>
-    <PostBuildEvent>
-    </PostBuildEvent>
+    <PreBuildEvent />
+    <PostBuildEvent />
   </PropertyGroup>
 </Project>

@@ -28,47 +28,30 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System;
-
-using bsn.GoldParser.Grammar;
-using bsn.GoldParser.Parser;
+using System.Diagnostics;
+using System.Reflection;
 
 namespace bsn.GoldParser.Semantic {
-	public abstract class RuleAttributeBase: Attribute {
-		private readonly Reduction parsedRule;
-
-		// This gets rid of the CLS compliance warning without introducing a security problem by inherited attributes
-		protected RuleAttributeBase() {
-			throw new NotSupportedException("This class is not intended to be inherited");
-		}
-
-		internal RuleAttributeBase(string rule) {
-			if (string.IsNullOrEmpty(rule)) {
-				throw new ArgumentNullException("rule");
+	internal static class SemanticTypeFactoryHelper {
+		internal static Type GetReturnTypeOfMethodBase<TBase>(MethodBase methodBase, out ConstructorInfo constructor, out MethodInfo method) where TBase: SemanticToken {
+			constructor = methodBase as ConstructorInfo;
+			method = methodBase as MethodInfo;
+			Type returnType;
+			if (constructor != null) {
+				returnType = constructor.DeclaringType;
+				Debug.Assert(returnType != null);
+			} else if (method != null) {
+				if (!method.IsStatic) {
+					throw new InvalidOperationException("Factories can only be created for static methods");
+				}
+				returnType = method.ReturnType;
+				if (!typeof(TBase).IsAssignableFrom(returnType)) {
+					throw new InvalidOperationException("The static method doesn't return the required type");
+				}
+			} else {
+				throw new ArgumentException("Expected methodBase to be one of: ConstructorInfo, MethodInfo, instead is: "+methodBase.GetType());
 			}
-			if (!RuleDeclarationParser.TryParse(rule, out parsedRule)) {
-				throw new ArgumentException(string.Format("The rule {0} contains a syntax error", rule), "rule");
-			}
-		}
-
-		public string Rule {
-			get {
-				return parsedRule.ToString();
-			}
-		}
-
-		internal Reduction ParsedRule {
-			get {
-				return parsedRule;
-			}
-		}
-
-		public Rule Bind(CompiledGrammar grammar) {
-			if (grammar == null) {
-				throw new ArgumentNullException("grammar");
-			}
-			Rule rule;
-			RuleDeclarationParser.TryBindGrammar(parsedRule, grammar, out rule);
-			return rule;
+			return returnType;
 		}
 	}
 }

@@ -29,45 +29,45 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Reflection;
 
 using bsn.GoldParser.Grammar;
 
 namespace bsn.GoldParser.Semantic {
 	public class SemanticTypeActions<T>: SemanticActions<T> where T: SemanticToken {
-		private delegate void GetFactoryType<TU>(TU methodBase, RuleAttribute ruleAttribute, Type type, out Type factoryType, out TU factoryConstructor) where TU: MethodBase;
+		private delegate void GetFactoryType<TU, in TA>(TU methodBase, TA attribute, Type type, out Type factoryType, out TU factoryConstructor) where TU: MethodBase where TA: Attribute, IGrammarBindableAttribute;
 
 		private static SemanticNonterminalFactory<T> CreateNonterminalFactory(Type type, MethodBase methodBase, int[] parameterMapping, int handleCount) {
 			return (SemanticNonterminalFactory<T>)Activator.CreateInstance(typeof(SemanticNonterminalTypeFactory<,>).MakeGenericType(typeof(T), type), methodBase, parameterMapping, handleCount, typeof(T));
 		}
 
-		private static SemanticTerminalFactory<T> CreateTerminalFactory(Type type) {
-			return (SemanticTerminalFactory<T>)Activator.CreateInstance(typeof(SemanticTerminalTypeFactory<,>).MakeGenericType(typeof(T), type));
+		private static SemanticTerminalFactory<T> CreateTerminalFactory(Type type, MethodBase methodBase, object[] additionalArguments) {
+			return (SemanticTerminalFactory<T>)Activator.CreateInstance(typeof(SemanticTerminalTypeFactory<,>).MakeGenericType(typeof(T), type), methodBase, additionalArguments);
 		}
 
-		private static void GetConstructorFactoryType(ConstructorInfo constructor, RuleAttribute ruleAttribute, Type type, out Type factoryType, out ConstructorInfo factoryConstructor) {
-			if (ruleAttribute.IsGeneric) {
-				factoryType = type.MakeGenericType(ruleAttribute.GenericTypeParameters);
-				foreach (ConstructorInfo genericConstructor in factoryType.GetConstructors()) {
-					foreach (RuleAttribute genericRuleAttribute in genericConstructor.GetCustomAttributes(typeof(RuleAttribute), true)) {
-						if (ruleAttribute.Equals(genericRuleAttribute)) {
-							factoryConstructor = genericConstructor;
-							return;
+		private static void GetConstructorFactoryType(ConstructorInfo constructor, IGrammarBindableAttribute attribute, Type type, out Type factoryType, out ConstructorInfo factoryConstructor) {
+			if (attribute.IsGeneric) {
+				factoryType = type.MakeGenericType(attribute.GenericTypeParameters);
+				if (constructor != null) {
+					foreach (ConstructorInfo genericConstructor in factoryType.GetConstructors()) {
+						foreach (Attribute genericRuleAttribute in genericConstructor.GetCustomAttributes(attribute.GetType(), true)) {
+							if (attribute.Equals(genericRuleAttribute)) {
+								factoryConstructor = genericConstructor;
+								return;
+							}
 						}
 					}
+					throw new InvalidOperationException("The matching generic constructor was not found");
 				}
-				factoryConstructor = null;
-				Debug.Assert(false);
 			} else {
 				factoryType = type;
-				factoryConstructor = constructor;
 			}
+			factoryConstructor = constructor;
 		}
 
-		private static void GetMethodFactoryType(MethodInfo methodInfo, RuleAttribute ruleAttribute, Type type, out Type factoryType, out MethodInfo factoryMethod) {
-			if (ruleAttribute.IsGeneric) {
-				factoryMethod = methodInfo.MakeGenericMethod(ruleAttribute.GenericTypeParameters);
+		private static void GetMethodFactoryType(MethodInfo methodInfo, IGrammarBindableAttribute attribute, Type type, out Type factoryType, out MethodInfo factoryMethod) {
+			if (attribute.IsGeneric) {
+				factoryMethod = methodInfo.MakeGenericMethod(attribute.GenericTypeParameters);
 				factoryType = factoryMethod.ReturnType;
 			} else {
 				factoryType = methodInfo.ReturnType;
@@ -127,40 +127,31 @@ namespace bsn.GoldParser.Semantic {
 		protected override void InitializeInternal(ICollection<string> errors, bool trace, bool strongParameterCheck) {
 			foreach (Type type in typeof(T).Assembly.GetTypes()) {
 				if (typeof(T).IsAssignableFrom(type) && type.IsClass && (!type.IsAbstract)) {
-					SemanticTerminalFactory<T> terminalFactory = null;
 					foreach (TerminalAttribute terminalAttribute in type.GetCustomAttributes(typeof(TerminalAttribute), true)) {
-						Symbol symbol = terminalAttribute.Bind(Grammar);
-						if (symbol == null) {
-							errors.Add(string.Format("Terminal {0} not found in grammar", terminalAttribute.SymbolName));
-						} else {
-							try {
-								Type factoryType = (terminalAttribute.IsGeneric) ? type.MakeGenericType(terminalAttribute.GenericTypes) : type;
-								if (terminalFactory == null) {
-									terminalFactory = CreateTerminalFactory(factoryType);
-								}
-								RegisterTerminalFactory(symbol, terminalFactory);
-								if (factoryType != type) {
-									terminalFactory = null; // don't keep generic factories
-								}
-							} catch (TargetInvocationException ex) {
-								errors.Add(string.Format("Terminal {0} factory problem: {1}", symbol, ex.InnerException.Message));
-							} catch (Exception ex) {
-								errors.Add(string.Format("Terminal {0} factory problem: {1}", symbol, ex.Message));
-							}
-						}
+						ProcessTerminalAttribute<ConstructorInfo>(errors, terminalAttribute, type, null, GetConstructorFactoryType);
 					}
 					foreach (ConstructorInfo constructor in type.GetConstructors()) {
 						foreach (RuleAttribute ruleAttribute in constructor.GetCustomAttributes(typeof(RuleAttribute), true)) {
-							ProcessAttribute(errors, strongParameterCheck, ruleAttribute, type, constructor, GetConstructorFactoryType);
+							ProcessRuleAttribute(errors, strongParameterCheck, ruleAttribute, type, constructor, GetConstructorFactoryType);
+						}
+						foreach (TerminalAttribute terminalAttribute in constructor.GetCustomAttributes(typeof(TerminalAttribute), true)) {
+							ProcessTerminalAttribute(errors, terminalAttribute, type, constructor, GetConstructorFactoryType);
 						}
 					}
 				}
 				//examine the static methods
 				foreach (MethodInfo methodInfo in type.GetMethods()) {
 					if (typeof(T).IsAssignableFrom(methodInfo.ReturnType)) {
+						foreach (TerminalAttribute terminalAttribute in methodInfo.GetCustomAttributes(typeof(TerminalAttribute), true)) {
+							if (methodInfo.IsStatic) {
+								ProcessTerminalAttribute(errors, terminalAttribute, type, methodInfo, GetMethodFactoryType);
+							} else {
+								errors.Add(string.Format("Terminal {0} is assigned to a non-static method, which is not allowed.", terminalAttribute.SymbolName));
+							}
+						}
 						foreach (RuleAttribute ruleAttribute in methodInfo.GetCustomAttributes(typeof(RuleAttribute), true)) {
 							if (methodInfo.IsStatic) {
-								ProcessAttribute(errors, strongParameterCheck, ruleAttribute, type, methodInfo, GetMethodFactoryType);
+								ProcessRuleAttribute(errors, strongParameterCheck, ruleAttribute, type, methodInfo, GetMethodFactoryType);
 							} else {
 								errors.Add(string.Format("Rule {0} is assigned to a non-static method, which is not allowed.", ruleAttribute.Rule));
 							}
@@ -201,7 +192,7 @@ namespace bsn.GoldParser.Semantic {
 			}
 		}
 
-		private void ProcessAttribute<TU>(ICollection<string> errors, bool strongParameterCheck, RuleAttribute ruleAttribute, Type type, TU methodBase, GetFactoryType<TU> getFactoryType) where TU: MethodBase {
+		private void ProcessRuleAttribute<TU>(ICollection<string> errors, bool strongParameterCheck, RuleAttribute ruleAttribute, Type type, TU methodBase, GetFactoryType<TU, RuleAttribute> getFactoryType) where TU: MethodBase {
 			Rule rule = ruleAttribute.Bind(Grammar);
 			if (rule == null) {
 				errors.Add(string.Format("Rule {0} not found in grammar", ruleAttribute.Rule));
@@ -217,6 +208,25 @@ namespace bsn.GoldParser.Semantic {
 					errors.Add(string.Format("Rule {0} factory problem: {1}", rule, ex.InnerException.Message));
 				} catch (Exception ex) {
 					errors.Add(string.Format("Rule {0} factory problem: {1}", rule, ex.Message));
+				}
+			}
+		}
+
+		private void ProcessTerminalAttribute<TU>(ICollection<string> errors, TerminalAttribute terminalAttribute, Type type, TU methodBase, GetFactoryType<TU, TerminalAttribute> getFactoryType) where TU: MethodBase {
+			Symbol symbol = terminalAttribute.Bind(Grammar);
+			if (symbol == null) {
+				errors.Add(string.Format("Terminal {0} not found in grammar", terminalAttribute.SymbolName));
+			} else {
+				try {
+					Type factoryType;
+					TU factoryConstructor;
+					getFactoryType(methodBase, terminalAttribute, type, out factoryType, out factoryConstructor);
+					SemanticTerminalFactory<T> terminalFactory = CreateTerminalFactory(factoryType, methodBase, terminalAttribute.Arguments);
+					RegisterTerminalFactory(symbol, terminalFactory);
+				} catch (TargetInvocationException ex) {
+					errors.Add(string.Format("Terminal {0} factory problem: {1}", symbol, ex.InnerException.Message));
+				} catch (Exception ex) {
+					errors.Add(string.Format("Terminal {0} factory problem: {1}", symbol, ex.Message));
 				}
 			}
 		}
