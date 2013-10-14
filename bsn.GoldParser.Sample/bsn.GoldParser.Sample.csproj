@@ -12,8 +12,7 @@
     <AssemblyName>bsn.GoldParser.Sample</AssemblyName>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <FileUpgradeFlags>
-    </FileUpgradeFlags>
+    <FileUpgradeFlags />
     <OldToolsVersion>3.5</OldToolsVersion>
     <UpgradeBackupLocation />
   </PropertyGroup>
@@ -40,6 +39,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\bsn.GoldParser\bsn.GoldParser.csproj">
+      <Project>{1A1A5AE9-7981-471C-9CC7-F7465E675A32}</Project>
+      <Name>bsn.GoldParser</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="Calculator.grm" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Calculator.cgt" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="CalculatorToken.cs" />
     <Compile Include="Computable.cs" />
     <Compile Include="DivideOperator.cs" />
@@ -52,17 +64,6 @@
     <Compile Include="PlusOperator.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Calculator.cgt" />
-    <None Include="app.config" />
-    <None Include="Calculator.grm" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\bsn.GoldParser\bsn.GoldParser.csproj">
-      <Project>{1A1A5AE9-7981-471C-9CC7-F7465E675A32}</Project>
-      <Name>bsn.GoldParser</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
