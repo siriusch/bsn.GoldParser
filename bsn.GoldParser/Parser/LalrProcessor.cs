@@ -133,6 +133,10 @@ namespace bsn.GoldParser.Parser {
 					ClearCurrentToken();
 					break;
 				case SymbolKind.Error:
+					if (RetryLexicalError(ref inputToken)) {
+						currentToken = inputToken;
+						continue;
+					}
 					return ParseMessage.LexicalError;
 				default:
 					LalrAction action = currentState.GetActionBySymbol(inputToken.Symbol);
@@ -179,6 +183,10 @@ namespace bsn.GoldParser.Parser {
 				throw new ArgumentNullException("token");
 			}
 			tokenInject.Enqueue(token);
+		}
+
+		protected virtual bool RetryLexicalError(ref TToken currentToken) {
+			return false;
 		}
 
 		protected virtual bool RetrySyntaxError(ref TToken currentToken) {
