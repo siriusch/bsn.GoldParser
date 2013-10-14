@@ -26,7 +26,7 @@
 // 
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-// 
+
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -36,38 +36,46 @@ using bsn.GoldParser.Grammar;
 
 namespace bsn.GoldParser.Parser {
 	/// <summary>
-	/// Pull parser which uses Grammar table to parse input stream.
+	/// Pull parser which uses Grammar table to parse input tokens.
 	/// </summary>
-	public abstract class LalrProcessor<T>: IParser<T> where T: class, IToken {
-		private readonly LalrStack<T> tokenStack; // Stack of LR states used for LR parsing.
-		private readonly ITokenizer<T> tokenizer;
+	/// <remarks>This class can be used for further spezialization with custom tokenizers.</remarks>
+	public abstract class LalrProcessor<TToken, TTokenizer>: IParser<TToken> where TToken: class, IToken
+			where TTokenizer: class, ITokenizer<TToken> {
+		private readonly LalrStack<TToken> tokenStack; // Stack of LR states used for LR parsing.
+		private readonly TTokenizer tokenizer;
 		private LalrState currentState;
-		private T currentToken;
+		private TToken currentToken;
 
 		/// <summary>
-		/// Initializes new instance of Parser class.
+		/// Initializes a new instance of the <see cref="LalrProcessor{TTokenizer}" /> class.
 		/// </summary>
 		/// <param name="tokenizer">The tokenizer.</param>
-		/// <param name="trim">if set to <c>true</c> [trim].</param>
-		protected LalrProcessor(ITokenizer<T> tokenizer) {
+		/// <exception cref="System.ArgumentNullException">tokenizer</exception>
+		protected LalrProcessor(TTokenizer tokenizer) {
 			if (tokenizer == null) {
 				throw new ArgumentNullException("tokenizer");
 			}
 			this.tokenizer = tokenizer;
 			currentState = tokenizer.Grammar.InitialLRState;
-			tokenStack = new LalrStack<T>(currentState);
+			tokenStack = new LalrStack<TToken>(currentState);
 		}
 
 		/// <summary>
 		/// Gets the current currentToken.
 		/// </summary>
 		/// <value>The current currentToken.</value>
-		public T CurrentToken {
+		public TToken CurrentToken {
 			get {
 				if (currentToken != null) {
 					return currentToken;
 				}
 				return tokenStack.Peek();
+			}
+		}
+
+		protected TTokenizer Tokenizer {
+			get {
+				return tokenizer;
 			}
 		}
 
@@ -94,10 +102,10 @@ namespace bsn.GoldParser.Parser {
 		/// <returns>Parser current currentState.</returns>
 		public virtual ParseMessage Parse() {
 			while (true) {
-				T inputToken;
+				TToken inputToken;
 				if (currentToken == null) {
 					//We must read a currentToken
-					T textInputToken;
+					TToken textInputToken;
 					ParseMessage message = tokenizer.NextToken(out textInputToken);
 					if (textInputToken == null) {
 						return ParseMessage.InternalError;
@@ -147,10 +155,6 @@ namespace bsn.GoldParser.Parser {
 			}
 		}
 
-		protected virtual bool RetrySyntaxError(ref T currentToken) {
-			return false;
-		}
-
 		public ParseMessage ParseAll() {
 			ParseMessage result;
 			do {
@@ -161,36 +165,47 @@ namespace bsn.GoldParser.Parser {
 
 		protected abstract bool CanTrim(Rule rule);
 
-		protected abstract T CreateReduction(Rule rule, IList<T> children);
+		protected abstract TToken CreateReduction(Rule rule, IList<TToken> children);
 
-		private void ClearCurrentToken() {
-			currentToken = default(T);
+		protected virtual bool RetrySyntaxError(ref TToken currentToken) {
+			return false;
 		}
 
-		bool IParser<T>.CanTrim(Rule rule) {
+		private void ClearCurrentToken() {
+			currentToken = default(TToken);
+		}
+
+		bool IParser<TToken>.CanTrim(Rule rule) {
 			return CanTrim(rule);
 		}
 
-		T IParser<T>.PopToken() {
+		TToken IParser<TToken>.PopToken() {
 			return tokenStack.Pop();
 		}
 
-		void IParser<T>.PushTokenAndState(T token, LalrState state) {
+		void IParser<TToken>.PushTokenAndState(TToken token, LalrState state) {
 			Debug.Assert(state != null);
 			tokenStack.Push(token, state);
 			currentState = state;
 		}
 
-		T IParser<T>.CreateReduction(Rule rule) {
+		TToken IParser<TToken>.CreateReduction(Rule rule) {
 			Debug.Assert(rule != null);
 			return CreateReduction(rule, tokenStack.PopRange(rule.SymbolCount));
 		}
 
-		LalrState IParser<T>.TopState {
+		LalrState IParser<TToken>.TopState {
 			get {
 				return tokenStack.GetTopState();
 			}
 		}
+	}
+
+	/// <summary>
+	/// Pull parser which uses Grammar table to parse input stream.
+	/// </summary>
+	public abstract class LalrProcessor<T>: LalrProcessor<T, ITokenizer<T>> where T: class, IToken {
+		protected LalrProcessor(ITokenizer<T> tokenizer): base(tokenizer) {}
 	}
 
 	///<summary>
