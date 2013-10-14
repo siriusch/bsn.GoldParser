@@ -118,11 +118,15 @@ namespace bsn.GoldParser.Parser {
 						}
 					}
 					//					Debug.WriteLine(string.Format("State: {0} Line: {1}, Column: {2}, Parse Value: {3}, Token Type: {4}", currentState.Index, inputToken.Line, inputToken.LinePosition, inputToken.Text, inputToken.symbol.Name), "Token Read");
-					if (textInputToken.Symbol.Kind != SymbolKind.End) {
+					switch (textInputToken.Symbol.Kind) {
+					case SymbolKind.End:
+					case SymbolKind.Error:
+						inputToken = textInputToken;
+						break;
+					default:
 						currentToken = textInputToken;
 						return message;
 					}
-					inputToken = textInputToken;
 				} else {
 					inputToken = currentToken;
 				}
