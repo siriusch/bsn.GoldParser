@@ -63,9 +63,6 @@
     <None Include="Semantic\TestUnicode.grm" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Xml\" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Grammar\TestGrammar.cgt" />
     <EmbeddedResource Include="Grammar\TestGrammar.egt" />
     <EmbeddedResource Include="Semantic\TestUnicode.egt" />
@@ -116,6 +113,7 @@
     <Compile Include="Semantic\TestToken.cs" />
     <Compile Include="Semantic\TestUnicode.cs" />
     <Compile Include="Semantic\TestValue.cs" />
+    <Compile Include="Xml\TokenXmlReaderTest.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
