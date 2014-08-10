@@ -37,7 +37,7 @@ using bsn.GoldParser.Grammar;
 
 namespace bsn.GoldParser.Parser {
 	/// <summary>
-	/// A reduction token, which contains the child tokens reduced with the <see cref="ParentRule"/>.
+	/// A reduction token, which contains the child tokens reduced with the <see cref="Rule"/>.
 	/// </summary>
 	public class Reduction: Token {
 		private readonly Rule rule;

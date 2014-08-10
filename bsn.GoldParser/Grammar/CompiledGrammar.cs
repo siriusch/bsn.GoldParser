@@ -754,7 +754,7 @@ namespace bsn.GoldParser.Grammar {
 			}
 			while (context.HasMoreData()) {
 				CgtRecordType recordType = context.ReadNextRecord();
-///				Trace.WriteLine(recordType, "Reading record");
+//				Trace.WriteLine(recordType, "Reading record");
 				switch (recordType) {
 				case CgtRecordType.Parameters:
 					ReadHeader(context);

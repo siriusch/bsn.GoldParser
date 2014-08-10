@@ -70,6 +70,7 @@
       <Name>System</Name>
     </Reference>
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
@@ -162,6 +163,9 @@
     <Compile Include="Semantic\SemanticTypeFactoryHelper.cs" />
     <Compile Include="Semantic\SymbolTypeMap.cs" />
     <Compile Include="Semantic\TerminalAttribute.cs" />
+    <Compile Include="Text\ConsoleTextWriter.cs" />
+    <Compile Include="Text\IStyleProvider.cs" />
+    <Compile Include="Text\RichTextWriter.cs" />
     <Compile Include="Xml\GrammarXmlProcessor.cs" />
     <Compile Include="Xml\ProcessResult.cs" />
     <Compile Include="Xml\TokenXmlReader.cs" />

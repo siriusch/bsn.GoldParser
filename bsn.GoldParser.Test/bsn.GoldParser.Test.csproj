@@ -43,6 +43,7 @@
     <Reference Include="System.Data.DataSetExtensions">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -117,6 +118,7 @@
     <Compile Include="Semantic\TestToken.cs" />
     <Compile Include="Semantic\TestUnicode.cs" />
     <Compile Include="Semantic\TestValue.cs" />
+    <Compile Include="Text\ConsoleTextWriterTest.cs" />
     <Compile Include="Xml\TokenXmlReaderTest.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -134,6 +134,7 @@ namespace bsn.GoldParser.Parser {
 			}
 		}
 
+		[CLSCompliant(false)]
 		public bool TryLookahead(ref int offset, out char ch) {
 			if (TryLookahead(offset, out ch)) {
 				offset ++;
@@ -142,6 +143,7 @@ namespace bsn.GoldParser.Parser {
 			return false;
 		}
 
+		[CLSCompliant(false)]
 		public bool TryLookahead(int offset, out char ch) {
 			if (EnsureBuffer(offset)) {
 				ch = buffer[bufferOffset+offset];
