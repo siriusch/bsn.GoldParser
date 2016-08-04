@@ -31,9 +31,9 @@
 
 using System;
 
-using Xunit;
-
 using bsn.GoldParser.Grammar;
+
+using Xunit;
 
 namespace bsn.GoldParser.Semantic.StrictCtorParameterMatching {
 	public class ParameterMatching {
@@ -48,10 +48,10 @@ namespace bsn.GoldParser.Semantic.StrictCtorParameterMatching {
 			SemanticTypeActions<MockTokenBase> actionsA = new SemanticTypeActions<MockTokenBase>(grammar);
 			Assert.Throws<InvalidOperationException>(() => actionsA.Initialize(true, true));
 			SemanticTypeActions<MockTokenBase> actionsB = new SemanticTypeActions<MockTokenBase>(grammar);
-			Assert.DoesNotThrow(() => actionsB.Initialize(true, false));
+			actionsB.Initialize(true, false);
 			//default should be false
 			SemanticTypeActions<MockTokenBase> actionsC = new SemanticTypeActions<MockTokenBase>(grammar);
-			Assert.DoesNotThrow(() => actionsC.Initialize(true));
+			actionsC.Initialize(true);
 		}
 
 		[Fact]
@@ -65,9 +65,9 @@ namespace bsn.GoldParser.Semantic.StrictCtorParameterMatching {
 		[Fact]
 		public void ExplicitNoCheckTest() {
 			SemanticTypeActions<MockTokenBaseExplicitNoChecks> actionsA = new SemanticTypeActions<MockTokenBaseExplicitNoChecks>(grammar);
-			Assert.DoesNotThrow(() => actionsA.Initialize(true, true));
+			actionsA.Initialize(true, true);
 			SemanticTypeActions<MockTokenBaseExplicitNoChecks> actionsB = new SemanticTypeActions<MockTokenBaseExplicitNoChecks>(grammar);
-			Assert.DoesNotThrow(() => actionsB.Initialize(true, false));
+			actionsB.Initialize(true, false);
 		}
 	}
 }

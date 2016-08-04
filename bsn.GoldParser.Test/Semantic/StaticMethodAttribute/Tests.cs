@@ -62,7 +62,7 @@ namespace bsn.GoldParser.Semantic.StaticMethodAttribute {
 		[Fact]
 		public void GenericInitializes() {
 			SemanticTypeActions<MockGenericTokenBase> actions = new SemanticTypeActions<MockGenericTokenBase>(grammar);
-			Assert.DoesNotThrow(actions.Initialize);
+			actions.Initialize();
 		}
 
 		[Fact]
@@ -77,7 +77,7 @@ namespace bsn.GoldParser.Semantic.StaticMethodAttribute {
 		[Fact]
 		public void Initializes() {
 			SemanticTypeActions<MockTokenBase> actions = new SemanticTypeActions<MockTokenBase>(grammar);
-			Assert.DoesNotThrow(actions.Initialize);
+			actions.Initialize();
 		}
 	}
 }
