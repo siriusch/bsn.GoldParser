@@ -14,5 +14,7 @@
 	</metadata>
 	<files>
 		<file src="bin\$Configuration$\bsn.GoldParser.dll" target="lib" />
+		<file src="bin\$Configuration$\bsn.GoldParser.pdb" target="lib" />
+		<file src="bin\$Configuration$\bsn.GoldParser.xml" target="lib" />
 	</files>
 </package>
