@@ -15,7 +15,7 @@ However, it supports all features of GOLD and has the unique ability to directly
 Source
 ------
 
-[https://bsn-goldparser.googlecode.com/hg/](https://github.com/siriusch/bsn.GoldParser)
+[https://github.com/siriusch/bsn.GoldParser](https://github.com/siriusch/bsn.GoldParser)
 
 License
 -------
