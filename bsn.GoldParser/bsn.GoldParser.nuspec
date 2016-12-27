@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package >
+	<metadata>
+		<id>bsn.GoldParser</id>
+		<version>1.0.0</version>
+		<authors>avonwyss</authors>
+		<owners>avonwyss</owners>
+		<licenseUrl>https://www.gnu.org/licenses/lgpl-3.0.en.html</licenseUrl>
+		<projectUrl>https://github.com/siriusch/bsn.GoldParser</projectUrl>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<description>bsn engine for GoldParser</description>
+		<copyright>Copyright 2009-2016 Arsène von Wyss</copyright>
+		<tags>bsn goldparser</tags>
+	</metadata>
+	<files>
+		<file src="bin\$Configuration$\bsn.GoldParser.dll" target="lib" />
+	</files>
+</package>

@@ -74,6 +74,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="bsn.GoldParser.nuspec" />
     <None Include="Grammar\GoldParser.txt" />
     <None Include="Semantic\GoldRuleDeclaration.grm" />
   </ItemGroup>
